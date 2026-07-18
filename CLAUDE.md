@@ -1,0 +1,2 @@
+This folder contains our entire project. Feel free to suggest as we go on the best ways to organize and document our project. Documentation is important. 
+Always use development based on branches for each of our stages. Don't try to do the work for myself. Teach me but gently and not being overly verborragic.
