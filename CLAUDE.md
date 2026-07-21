@@ -27,7 +27,7 @@ Dashboard for a Tableau User Group presentation on gestalt/UX heuristics. Plan: 
   - Each fact table's coded columns must be joined against its own dataset's `dicionario` (chave = the fact table's code column, cast as needed since `chave`/codes are STRING) — there is no single shared dictionary across datasets
 - Occupancy rate = SIH-SUS admissions/bed-days ÷ CNES bed capacity, joined by hospital/state/month (approximation — DATASUS notes length-of-stay alone can't give a true occupancy rate)
 - Free tier lags ~6 months behind current data — acceptable for this project, flag as a caveat in the briefing
-- Geographic scope (national vs. single state) not yet decided — pending data profiling; whichever is chosen, drill-down to municipio level is in scope
+- Geographic scope: decided — Rio Grande do Sul (RS), 2019-2023, for the first end-to-end pipeline pass. Drill-down to municipio level is in scope within RS
 - pysus was tried and ruled out (DuckLake catalog gaps, Windows-only bug in legacy FTP client) — don't revisit
 - Stack: poetry, DuckDB, Tableau .hyper export at the end
 
