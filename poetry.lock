@@ -1390,6 +1390,42 @@ pandas = ">=2.0,<3.0.0"
 tests = ["pytest (==7.3.2)", "tox (==4.6.0)"]
 
 [[package]]
+name = "pantab"
+version = "5.3.0"
+description = "Converts pandas DataFrames into Tableau Hyper Extracts and back"
+optional = false
+python-versions = ">=3.11"
+groups = ["main"]
+files = [
+    {file = "pantab-5.3.0-cp311-cp311-macosx_13_0_arm64.whl", hash = "sha256:7f1e4d0e210b7d9952f586ccccd39b0411a2b582fd73ca6155fafac30ce96692"},
+    {file = "pantab-5.3.0-cp311-cp311-macosx_13_0_x86_64.whl", hash = "sha256:e242a3afe9d76e552a2ac19aa6a41f7fc323451077ed455ef9f37cc462145fd9"},
+    {file = "pantab-5.3.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:339bf97dd4ce158890f06d1b084b0b19e9b8b543887f4e5a3992c90894a35c51"},
+    {file = "pantab-5.3.0-cp311-cp311-win_amd64.whl", hash = "sha256:48e88b5e571d207cd80512b736023c653e4daae6b8934723647f75424d695174"},
+    {file = "pantab-5.3.0-cp312-cp312-macosx_13_0_arm64.whl", hash = "sha256:593e6e9caffe044b520f137657e99299069e7ccce0b2d1ebd197b6840817f69d"},
+    {file = "pantab-5.3.0-cp312-cp312-macosx_13_0_x86_64.whl", hash = "sha256:5e718f258fa17b7947df105e3e600c2cb1fecb9211a10ea4c81a33311b87c695"},
+    {file = "pantab-5.3.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:7ff050f8eff1488142f7eb008444b5dc661e2e7854384d1de298edfad7d48cc0"},
+    {file = "pantab-5.3.0-cp312-cp312-win_amd64.whl", hash = "sha256:79b52b29fb068ea9cc2194f23d7c75fe1496f354794949978e629088cce22bb7"},
+    {file = "pantab-5.3.0-cp313-cp313-macosx_13_0_arm64.whl", hash = "sha256:8e74fcf6642e70ccef871737e75abd994840e3f25414e71c3612d9c52c9402db"},
+    {file = "pantab-5.3.0-cp313-cp313-macosx_13_0_x86_64.whl", hash = "sha256:b72d2fcba3cef3244fa738106da309ed6a6d3d8042d324afc7719661ccf562fd"},
+    {file = "pantab-5.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:acf82185fecd9bca92a528eb7404aa75dde24b149eb5bb71ceadbef5c54dd639"},
+    {file = "pantab-5.3.0-cp313-cp313-win_amd64.whl", hash = "sha256:859d711b1af9743cdc54b4359ee5c798dedab1ba79b9d14dfe27bbb7e9859f4a"},
+    {file = "pantab-5.3.0-cp314-cp314-macosx_13_0_arm64.whl", hash = "sha256:4aae54348cfde26cf23b8da607d611b7926321e9083979a4ef20ddfa3cc012c3"},
+    {file = "pantab-5.3.0-cp314-cp314-macosx_13_0_x86_64.whl", hash = "sha256:ecabc90c5cecd118a2d030cb0ff38f060a56c50318acc874cd97dbebcb1db2c7"},
+    {file = "pantab-5.3.0-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:083922b39681678dc164ef3f366a0f4619688873f021a6cce7cc6594e8ad2741"},
+    {file = "pantab-5.3.0-cp314-cp314-win_amd64.whl", hash = "sha256:2d19478cea93b0a59196a25eff512e9fbd54fbdeb3c30102b8712c2e5cae7d54"},
+    {file = "pantab-5.3.0-cp314-cp314t-macosx_13_0_arm64.whl", hash = "sha256:57ec7c4770a27832c515b26d847ff8f394b607067c9493be2303d94db0caee5f"},
+    {file = "pantab-5.3.0-cp314-cp314t-macosx_13_0_x86_64.whl", hash = "sha256:5a96ae98777e91f6b8cdbcd52910ee05b428315878bf9ad4ec99ff6754c6909b"},
+    {file = "pantab-5.3.0-cp314-cp314t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:921cd1bedcb4fc23bee2f72dbf5eb2beae8e6426a6769794100fb5043080964f"},
+    {file = "pantab-5.3.0-cp314-cp314t-win_amd64.whl", hash = "sha256:c449d337ae42dc04948b0d44cfa9ea4f6001dbe91c42ffb946aa3158f2d17895"},
+]
+
+[package.dependencies]
+pyarrow = ">=14.0.0"
+
+[package.extras]
+dev = ["pytest"]
+
+[[package]]
 name = "propcache"
 version = "0.5.2"
 description = "Accelerated property cache"
@@ -2072,4 +2108,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "122e5978087cf469dfcd50bea0eac771882c7fd77071b0e250394a5fd5a53d81"
+content-hash = "288c4383189b843a906bead38e279b690ae9e192f0d957475e084754f8733436"
