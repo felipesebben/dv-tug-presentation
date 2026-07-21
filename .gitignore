@@ -1,3 +1,5 @@
+/.vscode
+
 # Created by https://www.toptal.com/developers/gitignore/api/python
 # Edit at https://www.toptal.com/developers/gitignore?templates=python
 
@@ -14,11 +16,13 @@ CLAUDE.md
 *.so
 
 # Distribution / packaging
+
 .Python
 build/
 develop-eggs/
 dist/
 downloads/
+data/
 eggs/
 .eggs/
 lib/
