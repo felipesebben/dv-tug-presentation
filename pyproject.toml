@@ -17,3 +17,4 @@ package-mode = false
 [tool.poetry.dependencies]
 basedosdados = "^2.0.3"
 python-dotenv = "^1.2.2"
+duckdb = "^1.5.4"
