@@ -386,6 +386,54 @@ pandas = ">=1.5.3,<4.0.0"
 pyarrow = ">=13.0.0"
 
 [[package]]
+name = "duckdb"
+version = "1.5.4"
+description = "DuckDB in-process database"
+optional = false
+python-versions = ">=3.10.0"
+groups = ["main"]
+files = [
+    {file = "duckdb-1.5.4-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:3ddd9533ce80f9b851bdd6276960a9286166514a9ceca43d5bc2f0d5842c490d"},
+    {file = "duckdb-1.5.4-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:360f2542d09759c3739400f8b787e29b43ba0da665c21756216291458bf6fc59"},
+    {file = "duckdb-1.5.4-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:0cf932055061e544d3fa27cc6c147da25f3f681ee5980157fb55e77d6c2d9c63"},
+    {file = "duckdb-1.5.4-cp310-cp310-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:c2d58d39f5e65419cdc27e3875cba4a729a3bbf6bf4016aefb4a2a65335a1d42"},
+    {file = "duckdb-1.5.4-cp310-cp310-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:a9a10dc40469b9c0e458625d2a8359461a982c6151bb53ff259fea00c4695ad4"},
+    {file = "duckdb-1.5.4-cp310-cp310-win_amd64.whl", hash = "sha256:3565550adbf160ef7a2ee3395470570182f11233983ad818bd7d5f9e349f92b2"},
+    {file = "duckdb-1.5.4-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:3fb41d9cfccb7e44511eeeed263ae98143ca63bdb1ef84631ba637c314efa1b5"},
+    {file = "duckdb-1.5.4-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:8ba7b666bc9c78d6a930ee9f469024149f0c6a23fb7d2c3418aad6774339bec0"},
+    {file = "duckdb-1.5.4-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:9d9e6817fcbc09d2605a2c8c041ac7824d738d917c35a4d427e977647e1d7944"},
+    {file = "duckdb-1.5.4-cp311-cp311-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:02dd9f9a6124069213f13e3a474c208028c472fe1acdae12b38761f954fe4fc6"},
+    {file = "duckdb-1.5.4-cp311-cp311-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:ccc7f2694d02b4763fee61021d45e12f7bc5743993686563957df0cef799fbae"},
+    {file = "duckdb-1.5.4-cp311-cp311-win_amd64.whl", hash = "sha256:4c430e788d99b50854209bf2833ba36a45df75e57f86efb477046cd408bbd077"},
+    {file = "duckdb-1.5.4-cp311-cp311-win_arm64.whl", hash = "sha256:e2dc8340cfb6006025a798c50f40126d6e945a1d2487be94667bb4166556ce7b"},
+    {file = "duckdb-1.5.4-cp312-cp312-macosx_10_13_universal2.whl", hash = "sha256:291a9e7502551170af989ff63139a7a49e99d68edbc5ef5017ac27541fe54c65"},
+    {file = "duckdb-1.5.4-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:83e8c089bbb756ca4471d8b05943b80a106058697cf00615e70423106bb783bc"},
+    {file = "duckdb-1.5.4-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:ff96d2a342b200e1ec6f1f19986c77f4ac16a49b6112f71c5b763989203a9d60"},
+    {file = "duckdb-1.5.4-cp312-cp312-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:8f935ef210ab00bc94bb1e3052697adaa36bb0ce7bdfeda8b0f34e2ff1643870"},
+    {file = "duckdb-1.5.4-cp312-cp312-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:0cda263d8c20addb8d4f95464787cbe0af1144f7ab7e21db3709fb826ee01725"},
+    {file = "duckdb-1.5.4-cp312-cp312-win_amd64.whl", hash = "sha256:266c7c909558ce7377f57d082cee408aadebdd9111be017558ca54e44a031037"},
+    {file = "duckdb-1.5.4-cp312-cp312-win_arm64.whl", hash = "sha256:f14e79a006341f29ee5a2692a24dac5114e77533d579c57ec39124adf0135033"},
+    {file = "duckdb-1.5.4-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:42a612e67d64450b446eb69695290d460713eef46e0f64467ab9dfe96264ee05"},
+    {file = "duckdb-1.5.4-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:3fb6f07d54ecf4d0d3c5179a2361fdddfafa14de4fc42696de4632479b703421"},
+    {file = "duckdb-1.5.4-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:0f32ad7e0286c1c29ab6c73b29118c86101f8eee46aae54f54d0b50916f542f6"},
+    {file = "duckdb-1.5.4-cp313-cp313-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:698ec90bd5d5538bd5f6d212a4b61af443d240703cf45f134738535026556ea5"},
+    {file = "duckdb-1.5.4-cp313-cp313-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:136cea7f886b78caf4035485b4b1e766e8b309e999f9e83a966f81ebb8122844"},
+    {file = "duckdb-1.5.4-cp313-cp313-win_amd64.whl", hash = "sha256:bd6777e8ddd74fb603a6d09766bfcff28638189f8aaa61fc0dffd9e9a4baa8e5"},
+    {file = "duckdb-1.5.4-cp313-cp313-win_arm64.whl", hash = "sha256:73f4878a3012283024a64a1909e440aac12091ef336f671fc142f7e87449ce0c"},
+    {file = "duckdb-1.5.4-cp314-cp314-macosx_10_15_universal2.whl", hash = "sha256:4647968629d0677bbcc2416c7aeda8685eb84e4ca15a6dbd4f82a66cfc91a532"},
+    {file = "duckdb-1.5.4-cp314-cp314-macosx_10_15_x86_64.whl", hash = "sha256:e8fcef301cf68d3951ea1eb8ac4d76cea0a6f6a08f4c78fe4026fc96d217bebc"},
+    {file = "duckdb-1.5.4-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:f6f39cd0dc6948dee17fd130aec55114f97a8ef6e1db519b9774087962bc5c8c"},
+    {file = "duckdb-1.5.4-cp314-cp314-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:262f068158beb5943f2c618f4e54b46db8306b959f90dce956f90a89f613673d"},
+    {file = "duckdb-1.5.4-cp314-cp314-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:4d2307a76d199077b0055b354e90e857479461a0d875437535dd4833172c8b6d"},
+    {file = "duckdb-1.5.4-cp314-cp314-win_amd64.whl", hash = "sha256:6dcbb81a1276bc48deb4d562bce4f8895e4fc6348750a096e30052345c6d6552"},
+    {file = "duckdb-1.5.4-cp314-cp314-win_arm64.whl", hash = "sha256:0f8722346024e5d9f02b58bf7b0491a629f97fdc8a04a10e432940f471ee387a"},
+    {file = "duckdb-1.5.4.tar.gz", hash = "sha256:f9e32f1cdd106793d79d190186bed9e75289d51e68bd9174e47c04bffedeab6f"},
+]
+
+[package.extras]
+all = ["adbc-driver-manager", "fsspec", "ipython", "numpy", "pandas", "pyarrow"]
+
+[[package]]
 name = "fastavro"
 version = "1.12.2"
 description = "Fast read/write of AVRO files"
@@ -1342,6 +1390,42 @@ pandas = ">=2.0,<3.0.0"
 tests = ["pytest (==7.3.2)", "tox (==4.6.0)"]
 
 [[package]]
+name = "pantab"
+version = "5.3.0"
+description = "Converts pandas DataFrames into Tableau Hyper Extracts and back"
+optional = false
+python-versions = ">=3.11"
+groups = ["main"]
+files = [
+    {file = "pantab-5.3.0-cp311-cp311-macosx_13_0_arm64.whl", hash = "sha256:7f1e4d0e210b7d9952f586ccccd39b0411a2b582fd73ca6155fafac30ce96692"},
+    {file = "pantab-5.3.0-cp311-cp311-macosx_13_0_x86_64.whl", hash = "sha256:e242a3afe9d76e552a2ac19aa6a41f7fc323451077ed455ef9f37cc462145fd9"},
+    {file = "pantab-5.3.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:339bf97dd4ce158890f06d1b084b0b19e9b8b543887f4e5a3992c90894a35c51"},
+    {file = "pantab-5.3.0-cp311-cp311-win_amd64.whl", hash = "sha256:48e88b5e571d207cd80512b736023c653e4daae6b8934723647f75424d695174"},
+    {file = "pantab-5.3.0-cp312-cp312-macosx_13_0_arm64.whl", hash = "sha256:593e6e9caffe044b520f137657e99299069e7ccce0b2d1ebd197b6840817f69d"},
+    {file = "pantab-5.3.0-cp312-cp312-macosx_13_0_x86_64.whl", hash = "sha256:5e718f258fa17b7947df105e3e600c2cb1fecb9211a10ea4c81a33311b87c695"},
+    {file = "pantab-5.3.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:7ff050f8eff1488142f7eb008444b5dc661e2e7854384d1de298edfad7d48cc0"},
+    {file = "pantab-5.3.0-cp312-cp312-win_amd64.whl", hash = "sha256:79b52b29fb068ea9cc2194f23d7c75fe1496f354794949978e629088cce22bb7"},
+    {file = "pantab-5.3.0-cp313-cp313-macosx_13_0_arm64.whl", hash = "sha256:8e74fcf6642e70ccef871737e75abd994840e3f25414e71c3612d9c52c9402db"},
+    {file = "pantab-5.3.0-cp313-cp313-macosx_13_0_x86_64.whl", hash = "sha256:b72d2fcba3cef3244fa738106da309ed6a6d3d8042d324afc7719661ccf562fd"},
+    {file = "pantab-5.3.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:acf82185fecd9bca92a528eb7404aa75dde24b149eb5bb71ceadbef5c54dd639"},
+    {file = "pantab-5.3.0-cp313-cp313-win_amd64.whl", hash = "sha256:859d711b1af9743cdc54b4359ee5c798dedab1ba79b9d14dfe27bbb7e9859f4a"},
+    {file = "pantab-5.3.0-cp314-cp314-macosx_13_0_arm64.whl", hash = "sha256:4aae54348cfde26cf23b8da607d611b7926321e9083979a4ef20ddfa3cc012c3"},
+    {file = "pantab-5.3.0-cp314-cp314-macosx_13_0_x86_64.whl", hash = "sha256:ecabc90c5cecd118a2d030cb0ff38f060a56c50318acc874cd97dbebcb1db2c7"},
+    {file = "pantab-5.3.0-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:083922b39681678dc164ef3f366a0f4619688873f021a6cce7cc6594e8ad2741"},
+    {file = "pantab-5.3.0-cp314-cp314-win_amd64.whl", hash = "sha256:2d19478cea93b0a59196a25eff512e9fbd54fbdeb3c30102b8712c2e5cae7d54"},
+    {file = "pantab-5.3.0-cp314-cp314t-macosx_13_0_arm64.whl", hash = "sha256:57ec7c4770a27832c515b26d847ff8f394b607067c9493be2303d94db0caee5f"},
+    {file = "pantab-5.3.0-cp314-cp314t-macosx_13_0_x86_64.whl", hash = "sha256:5a96ae98777e91f6b8cdbcd52910ee05b428315878bf9ad4ec99ff6754c6909b"},
+    {file = "pantab-5.3.0-cp314-cp314t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:921cd1bedcb4fc23bee2f72dbf5eb2beae8e6426a6769794100fb5043080964f"},
+    {file = "pantab-5.3.0-cp314-cp314t-win_amd64.whl", hash = "sha256:c449d337ae42dc04948b0d44cfa9ea4f6001dbe91c42ffb946aa3158f2d17895"},
+]
+
+[package.dependencies]
+pyarrow = ">=14.0.0"
+
+[package.extras]
+dev = ["pytest"]
+
+[[package]]
 name = "propcache"
 version = "0.5.2"
 description = "Accelerated property cache"
@@ -2024,4 +2108,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "491c3b0e7f4c061652a400f885a1d388c1673f0ebb65de2ea21f5e9432bb7ede"
+content-hash = "288c4383189b843a906bead38e279b690ae9e192f0d957475e084754f8733436"
