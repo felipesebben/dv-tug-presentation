@@ -72,6 +72,9 @@ Field lists above are the fields relevant to the join/grain story, not exhaustiv
 `hospitalizacoes` alone carries the full `aihs_reduzidas` column set (109 raw columns)
 plus resolved dictionary/geography fields.
 
+The workbook itself lives in `tableau/` (not committed as `.twbx` — see `tableau/README.md`
+for why the connection is always Extract, never Live, for a local `.hyper` file).
+
 ## Setup
 
 ```bash
@@ -132,6 +135,8 @@ Only step 1 touches BigQuery/billing; steps 2 and 3 run entirely locally via Duc
 - `src/` — reusable pipeline classes (`extract/`, `transform/`, `refine/`)
 - `docs/` — briefing and dashboard specs (versioned) — see `docs/README.md` for a
   manifest of what each file contains
+- `tableau/` — the actual Tableau workbook(s); `.twb` tracked, `.twbx` gitignored —
+  see `tableau/README.md`
 - `data/raw|transformed|refined/` — gitignored, never committed
 - `references/` — third-party licensed material, gitignored, never committed
 - `CLAUDE.md` — full data-profiling notes and working agreement for this project

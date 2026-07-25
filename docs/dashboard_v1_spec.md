@@ -5,7 +5,8 @@ Documento de construção da **primeira versão** do dashboard de ocupação hos
 dois apresentadores de UX no TUG, princípio a princípio.
 
 Entrada: `docs/data_briefing.md` + `data/refined/sih_cnes_rs.hyper`
-Saída: um workbook Tableau (`dashboard_v1.twbx`) com **uma única aba de dashboard**.
+Saída: um workbook Tableau (`tableau/dashboard_v1.twb`, exportado como `.twbx` pra
+compartilhar — ver `tableau/README.md`) com **uma única aba de dashboard**.
 
 Referência dos princípios: *Learn Design Driven Data Visualization* — Aurélien Vautier /
 Dataviz Clarity, CC BY-NC-ND 4.0. O PDF fica em `references/` (fora do versionamento).

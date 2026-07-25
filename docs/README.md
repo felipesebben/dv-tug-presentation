@@ -73,4 +73,4 @@ the file in this repo is the source of truth for that artifact.
   `dashboard_v1_spec.md` section 10.
 - `assets/v1/` — screenshots, load-time measurements, and a screen recording of the
   actual V1 Tableau workbook, captured per `dashboard_v1_spec.md` section 9. Not
-  created until the real `.twbx` exists.
+  created until `tableau/dashboard_v1.twb` exists (see `tableau/README.md`).
