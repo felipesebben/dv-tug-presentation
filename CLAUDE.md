@@ -41,6 +41,10 @@ Dashboard for a Tableau User Group presentation on gestalt/UX heuristics. Plan: 
 - `scripts/` — one-off/exploratory, run manually, no package structure, committed (doubles as a record of how data was investigated)
 - `src/` — reusable pipeline code once stages stabilize (extract/transform/refine)
 - `data/raw|transformed|refined/` — gitignored, never committed
+- `docs/` — briefing + dashboard spec docs, versioned. **`docs/README.md` is a manifest of
+  every file in this folder — update it in the same change whenever a `docs/` file is
+  added, renamed, or has its purpose/scope meaningfully change.**
+- `references/` — third-party licensed material (Aurélien deck, UXers guidance PDF), gitignored, never committed
 - Poetry: package-mode disabled (`[tool.poetry] package-mode = false`) — this is a pipeline project, not a distributable library
 - You can update by yourself README.md documentation and add widgets that can update the status of the project for yourself as we commit our job.
 - Documentation can be also added to functions, classes etc using best practices.

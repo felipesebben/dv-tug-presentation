@@ -1,0 +1,885 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard V1 — wireframe do "antes"</title>
+<style>
+  :root {
+    --paper:#f5f6f8; --surface:#ffffff; --surface-2:#fbfbfc;
+    --ink:#171b21; --muted:#5b6470; --faint:#8a929c;
+    --hairline:#e2e5ea; --hairline-2:#eceef1;
+    --accent:#146b74; --accent-ink:#0f5158; --accent-soft:rgba(20,107,116,.09);
+    --turn:#b0632f; --turn-soft:rgba(176,99,47,.10);
+    --shadow:0 1px 2px rgba(20,27,35,.04), 0 8px 28px rgba(20,27,35,.06);
+    --font-body:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --font-mono:"Cascadia Code",ui-monospace,"Consolas","SF Mono",Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:#0e1116; --surface:#161b22; --surface-2:#12161c;
+      --ink:#e8ebef; --muted:#9aa3ae; --faint:#727b86;
+      --hairline:#262c35; --hairline-2:#1e242c;
+      --accent:#4bb5bd; --accent-ink:#7fd0d6; --accent-soft:rgba(75,181,189,.13);
+      --turn:#d98a52; --turn-soft:rgba(217,138,82,.14);
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#0e1116; --surface:#161b22; --surface-2:#12161c;
+    --ink:#e8ebef; --muted:#9aa3ae; --faint:#727b86;
+    --hairline:#262c35; --hairline-2:#1e242c;
+    --accent:#4bb5bd; --accent-ink:#7fd0d6; --accent-soft:rgba(75,181,189,.13);
+    --turn:#d98a52; --turn-soft:rgba(217,138,82,.14);
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+  }
+  :root[data-theme="light"] {
+    --paper:#f5f6f8; --surface:#ffffff; --surface-2:#fbfbfc;
+    --ink:#171b21; --muted:#5b6470; --faint:#8a929c;
+    --hairline:#e2e5ea; --hairline-2:#eceef1;
+    --accent:#146b74; --accent-ink:#0f5158; --accent-soft:rgba(20,107,116,.09);
+    --turn:#b0632f; --turn-soft:rgba(176,99,47,.10);
+    --shadow:0 1px 2px rgba(20,27,35,.04), 0 8px 28px rgba(20,27,35,.06);
+  }
+  * { box-sizing:border-box; }
+  body {
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--font-body); font-size:15px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- chrome (topbar / intro / drawer) — this is OUR tool UI, not part of the mockup ---------- */
+  .topbar {
+    position:sticky; top:0; z-index:60;
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    padding:10px clamp(14px,3vw,32px);
+    background:color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter:saturate(1.4) blur(10px);
+    border-bottom:1px solid var(--hairline);
+  }
+  .topbar .mark { font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+  .topbar .mark b { color:var(--accent); font-weight:600; }
+  .topbar .spacer { flex:1; }
+  .btn {
+    appearance:none; cursor:pointer; font:inherit; font-size:.8rem;
+    display:inline-flex; align-items:center; gap:7px;
+    padding:7px 13px; border-radius:999px;
+    background:var(--surface); color:var(--muted); border:1px solid var(--hairline);
+  }
+  .btn:hover { color:var(--ink); border-color:var(--accent); }
+  .btn.on { color:#fff; background:var(--turn); border-color:var(--turn); }
+  .intro {
+    max-width:900px; margin:28px auto 0; padding:0 clamp(14px,3vw,32px);
+    color:var(--muted); font-size:.92rem;
+  }
+  .intro b { color:var(--ink); }
+  .intro .pills { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .intro .pill {
+    font-family:var(--font-mono); font-size:.72rem; padding:4px 10px; border-radius:999px;
+    background:var(--surface); border:1px solid var(--hairline); color:var(--muted);
+  }
+  .hint {
+    max-width:900px; margin:16px auto 0; padding:11px 16px; border-radius:9px;
+    background:var(--accent-soft); border:1px solid color-mix(in srgb,var(--accent) 25%, transparent);
+    color:var(--accent-ink); font-size:.86rem; margin-left:auto; margin-right:auto;
+  }
+  .stage-scroll { overflow-x:auto; padding:28px clamp(0px,3vw,32px) 140px; }
+
+  /* the annotation drawer — fixed at bottom, only meaningful in annotated mode */
+  .drawer {
+    position:fixed; left:0; right:0; bottom:0; z-index:70;
+    transform:translateY(100%); transition:transform .18s ease;
+    background:var(--surface); border-top:1px solid var(--hairline); box-shadow:0 -8px 28px rgba(0,0,0,.12);
+  }
+  body.annotated .drawer.show { transform:translateY(0); }
+  .drawer-inner {
+    max-width:1200px; margin:0 auto; padding:14px clamp(14px,3vw,32px);
+    display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:start;
+  }
+  .dletter {
+    width:34px; height:34px; border-radius:8px; display:grid; place-items:center;
+    font-family:var(--font-mono); font-weight:700; color:#fff; background:var(--turn); font-size:1rem;
+  }
+  .dtitle { font-weight:700; font-size:.98rem; margin-bottom:4px; }
+  .dsins { margin:0 0 6px; padding-left:1.1em; font-size:.84rem; color:var(--muted); }
+  .dsins li { margin:2px 0; }
+  .dfix { font-size:.86rem; color:var(--turn); }
+  .dfix b { font-weight:700; }
+
+  /* N — nav chrome: sidebar + topbar together, unfamiliar icon glyphs, no help icon */
+  .navbar { display:flex; background:#20242c; color:#cfd3dc; }
+  .navbar .sidebar {
+    display:flex; flex-direction:column; gap:6px; padding:8px 6px;
+    background:#171a20; border-right:1px solid #333;
+  }
+  .navbar .topbar { display:flex; align-items:center; gap:6px; padding:8px 10px; flex:1; flex-wrap:wrap; }
+  .navbar .ic {
+    width:22px; height:22px; display:grid; place-items:center; border-radius:4px;
+    background:#2c313c; font-size:.75rem; color:#9aa3ae; flex:none;
+  }
+  .navbar .topbar .ic { width:20px; height:20px; }
+
+  /* ---------- the stage: this IS the mockup, styled to look like a real (bad) export ---------- */
+  .stage {
+    width:1200px; margin:0 auto; background:#ffffff; color:#1a1a1a;
+    box-shadow:var(--shadow); border-radius:2px; overflow:hidden;
+  }
+  .zone { position:relative; }
+  body.annotated .zone.tagged { outline:2px dashed var(--turn); outline-offset:-2px; }
+  .badge-letter {
+    display:none; position:absolute; top:6px; left:6px; z-index:5;
+    width:24px; height:24px; border-radius:6px; place-items:center;
+    font-family:var(--font-mono); font-weight:700; font-size:.78rem; color:#fff; background:var(--turn);
+    box-shadow:0 2px 6px rgba(0,0,0,.25); cursor:default;
+  }
+  body.annotated .zone.tagged .badge-letter { display:grid; }
+
+  /* A — banner */
+  .banner {
+    background:linear-gradient(115deg,#2b4c8c 0%,#5a3a94 55%,#7b3fa0 100%);
+    padding:22px 26px 20px; color:#dfe3ee; position:relative;
+  }
+  .banner .logos { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; }
+  .logo { border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-weight:700; color:#fff; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.3); }
+  .logo.l1 { width:54px; height:54px; font-size:.72rem; }
+  .logo.l2 { width:38px; height:38px; font-size:.6rem; margin-top:10px; }
+  .logo.l3 { width:64px; height:34px; font-size:.6rem; align-self:flex-end; margin-left:8px; }
+  .banner h1 {
+    font-family:Papyrus,"Brush Script MT","Segoe Print",cursive; margin:4px 0 2px; text-transform:uppercase;
+    line-height:1.15; letter-spacing:.01em; text-shadow:0 1px 2px rgba(0,0,0,.25); max-width:760px;
+  }
+  .banner h1 .s1 { font-size:1.5rem; }
+  .banner h1 .s2 { font-size:1.9rem; }
+  .banner h1 .s3 { font-size:1.15rem; }
+  .banner .ver { font-family:var(--font-mono); font-size:.68rem; color:#b9c0e0; opacity:.85; }
+
+  /* B — KPI row (filter Ano lives inside the same container — broken "região comum") */
+  .kpirow { display:flex; gap:6px; padding:14px 14px 10px; background:#f3f3f3; align-items:stretch; }
+  .kpi { flex:1; padding:10px 8px; text-align:center; min-width:0; }
+  .kpi .v { font-weight:700; font-variant-numeric:tabular-nums; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .kpi .l { margin-top:4px; font-size:.68rem; color:#444; }
+  .kpi--1 { background:#e8534a; color:#fff; border:3px solid #a5261f; }
+  .kpi--1 .v { font-size:1.7rem; } .kpi--1 .l { text-transform:uppercase; color:#3a0f0c; font-weight:700; }
+  .kpi--2 { background:#f2924a; border:2px dashed #a85a1a; }
+  .kpi--2 .v { font-size:1.25rem; } .kpi--2 .l { font-weight:500; }
+  .kpi--3 { background:#f2d84a; border:1px solid #c7ac10; }
+  .kpi--3 .v { font-size:.86rem; } .kpi--3 .l { text-transform:lowercase; }
+  .kpi--4 { background:#5cb85c; box-shadow:0 4px 10px rgba(0,0,0,.25); }
+  .kpi--4 .v { font-size:1.5rem; color:#0c3d0c; } .kpi--4 .l { text-transform:uppercase; font-weight:700; }
+  .kpi--5 { background:#57c7d4; }
+  .kpi--5 .v { font-size:.76rem; } .kpi--5 .l { font-weight:500; }
+  .kpi--6 { background:#4a7ff2; color:#fff; border:2px dotted #10306e; }
+  .kpi--6 .v { font-size:1.7rem; } .kpi--6 .l { text-transform:lowercase; color:#dbe4ff; }
+  .kpi--7 { background:#9a5cf2; color:#fff; border:1px solid #4d1f96; }
+  .kpi--7 .v { font-size:1.35rem; } .kpi--7 .l { font-weight:500; }
+  .kpi--8 { background:#f25ca0; border:3px dashed #971054; }
+  .kpi--8 .v { font-size:1.1rem; } .kpi--8 .l { text-transform:uppercase; color:#4a0025; font-weight:700; }
+
+  .drop { display:inline-flex; align-items:center; gap:6px; font-size:.78rem; padding:4px 10px; background:#fff; border:1px solid #bbb; border-radius:3px; color:#333; align-self:flex-start; margin-right:4px; }
+
+  /* C — giant table: background matches the page (no card contrast), grid is dark, no sort affordance */
+  .table-wrap { height:300px; overflow:auto; background:#e4e4e4; padding:0; }
+  table.giant { border-collapse:collapse; font-family:var(--font-mono); font-size:.68rem; white-space:nowrap; }
+  table.giant th, table.giant td { border:1px solid #8a8a8a; padding:4px 7px; text-align:right; }
+  table.giant th { position:sticky; top:0; background:#c7c7c7; color:#222; text-align:right; font-weight:700; z-index:1; cursor:default; }
+  table.giant td.rowhead { text-align:left; font-family:var(--font-body); font-weight:600; color:#222; position:sticky; left:0; background:#d6d6d6; }
+  table.giant th.corner { position:sticky; left:0; top:0; z-index:2; background:#bdbdbd; text-align:left; }
+  .table-cap { padding:6px 14px; font-size:.72rem; color:#777; background:#e4e4e4; border-top:1px solid #b8b8b8; }
+
+  /* D — pies */
+  .pies-row { display:flex; gap:0; background:#fff; }
+  .pie-panel { flex:1; padding:16px; border-right:1px solid #eee; min-width:0; }
+  .pie-panel:last-child { border-right:0; }
+  .pie-panel h5 { margin:0 0 10px; font-size:.78rem; color:#555; font-weight:700; }
+  .pie-shell { display:flex; gap:14px; align-items:flex-start; }
+  .pie-disc { width:120px; height:120px; border-radius:50%; flex:none; }
+  .pie-disc.donut { position:relative; }
+  .pie-disc.donut::after { content:""; position:absolute; inset:30px; border-radius:50%; background:#fff; }
+  /* D1 only: fake-3D bevel treatment — the "diversidade de tipos de gráfico" sin (pizza, 3D, bubble on one screen) */
+  .pie-disc.threed {
+    transform:perspective(340px) rotateX(38deg);
+    box-shadow:0 10px 0 -2px #00000055, 0 14px 14px rgba(0,0,0,.35), inset 0 -10px 16px rgba(0,0,0,.35), inset 0 6px 10px rgba(255,255,255,.35);
+  }
+  .pie-legend { list-style:none; margin:0; padding:0; font-size:.62rem; color:#444; max-height:150px; overflow-y:auto; flex:1; min-width:0; }
+  #legendD1 { font-size:10px; } /* [UXers] antes literal: fonte mínima 10px, abaixo do piso de 14px/9pt */
+  .pie-legend li { display:flex; align-items:center; gap:5px; padding:1px 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .pie-legend .sw { width:8px; height:8px; border-radius:2px; flex:none; }
+  .pie-note { margin-top:8px; font-size:.68rem; color:#999; }
+  .donut-labels { font-size:.72rem; margin-top:8px; }
+  .donut-labels div { margin:2px 0; }
+
+  /* E — maps */
+  .maps-row { display:flex; background:#fff; }
+  .map-panel { flex:1; padding:16px; border-right:1px solid #eee; }
+  .map-panel:last-child { border-right:0; }
+  .map-panel h5 { margin:0 0 4px; font-size:.78rem; color:#555; font-weight:700; }
+  .map-panel .sub { font-size:.66rem; color:#999; margin-bottom:8px; }
+  .map-grid { display:grid; grid-template-columns:repeat(24,1fr); gap:1px; background:#fafafa; border:1px solid #eee; padding:4px; }
+  .map-grid .c { aspect-ratio:1; border-radius:1px; }
+  .map-legend { display:flex; gap:2px; margin-top:8px; align-items:center; }
+  .map-legend .sw { width:20px; height:10px; }
+  .map-legend .lbl { font-family:var(--font-mono); font-size:.6rem; color:#888; margin-left:6px; }
+
+  /* F — bars */
+  .bars-row { display:flex; background:#fff; }
+  .bar-panel { flex:1; padding:16px 16px 8px; border-right:1px solid #eee; min-width:0; }
+  .bar-panel:last-child { border-right:0; }
+  .bar-panel h5 { margin:0 0 10px; font-size:.78rem; color:#555; font-weight:700; }
+  .age-chart { display:flex; align-items:flex-end; gap:1px; height:150px; }
+  .age-chart .b { flex:1; min-width:2px; }
+  .age-axis { display:flex; gap:1px; margin-top:3px; }
+  .age-axis span { flex:1; font-size:.5rem; color:#999; text-align:center; transform:rotate(90deg); white-space:nowrap; height:26px; }
+  .muni-chart { display:flex; align-items:flex-end; gap:2px; height:150px; overflow-x:auto; padding-bottom:2px; }
+  .muni-chart .col { display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; min-width:11px; }
+  .muni-chart .b2 { width:8px; }
+  .muni-chart .lbl { writing-mode:vertical-rl; transform:rotate(180deg); font-size:.55rem; color:#666; margin-top:3px; white-space:nowrap; }
+
+  /* G — scatter */
+  .scatter-wrap { background:#fff; padding:10px 16px 14px; }
+  .scatter-wrap h5 { margin:0 0 6px; font-size:.78rem; color:#555; font-weight:700; }
+  canvas#scatter { width:100%; height:180px; display:block; background:#fcfcfc; border:1px solid #eee; }
+
+  .fold {
+    display:flex; align-items:center; gap:12px; padding:10px 24px; color:var(--turn);
+    font-family:var(--font-mono); font-size:.7rem; letter-spacing:.08em; text-transform:uppercase;
+    background:repeating-linear-gradient(45deg, var(--paper), var(--paper) 8px, var(--surface-2) 8px, var(--surface-2) 16px);
+  }
+  .fold::before, .fold::after { content:""; flex:1; height:0; border-top:1px dashed var(--turn); opacity:.7; }
+
+  /* H — hero time series */
+  .hero-buried { background:#fff; padding:16px 16px 8px; }
+  .hero-buried h5 { margin:0 0 6px; font-size:.78rem; color:#555; font-weight:700; }
+  svg#tsSvg { width:100%; height:190px; display:block; }
+
+  /* I — filters */
+  .filters-row { display:flex; flex-wrap:wrap; gap:8px; padding:16px; background:#eee; border-top:1px solid #ddd; }
+  .fchip { font-size:.74rem; padding:5px 11px; background:#fff; border:1px solid #b8b8b8; border-radius:3px; color:#333; cursor:default; }
+  .fchip.lowcontrast { background:#3a3a3a; color:#4a4a4a; border-color:#3a3a3a; } /* [UXers] antes literal: fundo escuro + fonte escura */
+
+  /* J — footer */
+  .footnote { padding:12px 16px; font-size:.72rem; color:#888; background:#f7f7f7; border-top:1px solid #e2e2e2; }
+
+  .credit { max-width:900px; margin:26px auto 0; padding:0 clamp(14px,3vw,32px) 40px; color:var(--faint); font-size:.78rem; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="mark"><b>DV · TUG</b> &nbsp;/&nbsp; Wireframe V1 — mockup navegável</span>
+  <span class="spacer"></span>
+  <button class="btn" id="annotToggle" type="button">🔍 Mostrar diagnóstico</button>
+  <button class="btn" id="themeToggle" type="button" aria-label="Alternar tema">◐ Tema</button>
+</div>
+
+<p class="intro">
+  Este arquivo é o <b>mockup visual</b> do dashboard V1 especificado em
+  <span class="pill" style="font-family:var(--font-mono)">dashboard_v1_spec.md</span> /
+  <span class="pill" style="font-family:var(--font-mono)">.html</span>, já com o refinamento de
+  <span class="pill" style="font-family:var(--font-mono)">uxers_guidance.md</span> aplicado — estrutura
+  N–J (N é a região nova), renderizada como um export plausível em vez de um esquema de caixas. Cada
+  região carrega 1 princípio primário + no máximo 1-2 secundários, etiquetados por bloco (Fundamentos de
+  Design / Experiência do Usuário / Acessibilidade) no diagnóstico abaixo. Os números de cabeçalho (os 8
+  KPIs, a divisão por sexo, as médias anuais de ocupação, os 848.764 internações de Porto Alegre, a cauda
+  etária 97–99) são <b>reais</b>, conferidos contra a base. O preenchimento fino — os valores mês a mês da
+  série e do tabelão, os nomes das ~50 especialidades de cauda longa, os pontos da dispersão — é
+  <b>sintético</b>, gerado só para dar volume visual ao mockup; está sinalizado onde aparece.
+  <span class="pills">
+    <span class="pill">RS · 2019–2023</span>
+    <span class="pill">SIH-SUS × CNES</span>
+    <span class="pill">Layout fixo 1200 px</span>
+  </span>
+</p>
+<p class="hint" id="hintBar">Ative <b>"Mostrar diagnóstico"</b> no topo — cada região A–J ganha um contorno
+  tracejado e um selo; passe o mouse (ou o foco do teclado) sobre uma delas para ver, no rodapé, qual
+  princípio ela viola e qual é a virada na V2.</p>
+
+<div class="stage-scroll">
+  <div class="stage" id="stage">
+
+    <!-- N -->
+    <div class="zone tagged" data-key="N">
+      <span class="badge-letter">N</span>
+      <div class="navbar">
+        <div class="sidebar">
+          <span class="ic">⌬</span><span class="ic">⏣</span><span class="ic">⍟</span><span class="ic">⌗</span>
+          <span class="ic">⏢</span><span class="ic">⌂</span><span class="ic">◈</span><span class="ic">⎔</span>
+          <span class="ic">⌇</span><span class="ic">⌖</span><span class="ic">⏦</span><span class="ic">⌤</span>
+        </div>
+        <div class="topbar">
+          <span class="ic">⏛</span><span class="ic">⌾</span><span class="ic">⍜</span><span class="ic">⌰</span><span class="ic">⏗</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- A -->
+    <div class="zone tagged" data-key="A">
+      <span class="badge-letter">A</span>
+      <div class="banner">
+        <div class="logos">
+          <div class="logo l1">SES</div>
+          <div style="display:flex;gap:6px;">
+            <div class="logo l2">SUS</div>
+            <div class="logo l3">GOV·RS</div>
+          </div>
+        </div>
+        <h1>
+          <span class="s2">PAINEL GERENCIAL</span> <span class="s1">DE MONITORAMENTO</span>
+          <span class="s3">ESTRATÉGICO INTEGRADO</span> <span class="s2">DE OCUPAÇÃO HOSPITALAR</span><br>
+          <span class="s1">— SIH/SUS × CNES — RS — 2019 A 2023</span>
+        </h1>
+        <div class="ver">v1.4_FINAL_rev2_ok</div>
+      </div>
+    </div>
+
+    <!-- B -->
+    <div class="zone tagged" data-key="B">
+      <span class="badge-letter">B</span>
+      <div class="kpirow">
+        <span class="drop">Ano ▾</span>
+        <div class="kpi kpi--1"><div class="v">30,8%</div><div class="l">TAXA</div></div>
+        <div class="kpi kpi--2"><div class="v">3739506</div><div class="l">Internações</div></div>
+        <div class="kpi kpi--3"><div class="v">22616421</div><div class="l">dias de permanência</div></div>
+        <div class="kpi kpi--4"><div class="v">107,9</div><div class="l">LEITOS</div></div>
+        <div class="kpi kpi--5"><div class="v">6545187195,36</div><div class="l">Valor AIH</div></div>
+        <div class="kpi kpi--6"><div class="v">0,0605</div><div class="l">taxa de óbito</div></div>
+        <div class="kpi kpi--7"><div class="v">228</div><div class="l">Municípios</div></div>
+        <div class="kpi kpi--8"><div class="v">287</div><div class="l">HOSPITAIS</div></div>
+      </div>
+    </div>
+
+    <!-- C -->
+    <div class="zone tagged" data-key="C">
+      <span class="badge-letter">C</span>
+      <div class="table-wrap">
+        <table class="giant" id="giantTable"></table>
+      </div>
+      <div class="table-cap">228 municípios × 60 meses × 6 medidas — mostrando um recorte de <span id="tRows">0</span> linhas × <span id="tCols">0</span> colunas de mês (role para o lado e pra baixo); valores sintéticos. Colunas sem controle de ordenação.</div>
+    </div>
+
+    <!-- D -->
+    <div class="zone tagged" data-key="D">
+      <span class="badge-letter">D</span>
+      <div class="pies-row">
+        <div class="pie-panel">
+          <h5>Especialidade de leito (57 categorias + NULL) — estilo 3D</h5>
+          <div class="pie-shell">
+            <div class="pie-disc threed" id="pieD1"></div>
+            <ul class="pie-legend" id="legendD1"></ul>
+          </div>
+          <div class="pie-note">nomes de cauda longa sintéticos — a contagem (58 fatias, ~35 abaixo de 1%) e o NULL (41.796 leitos) são reais. Efeito 3D e legenda 10px: diversidade de tipos + fonte mínima [UXers].</div>
+        </div>
+        <div class="pie-panel">
+          <h5>Sexo</h5>
+          <div class="pie-shell">
+            <div class="pie-disc donut" id="pieD2"></div>
+            <div class="donut-labels" id="labelsD2"></div>
+          </div>
+        </div>
+        <div class="pie-panel">
+          <h5>Raça / cor</h5>
+          <div class="pie-shell">
+            <div class="pie-disc" id="pieD3"></div>
+            <ul class="pie-legend" id="legendD3" style="max-height:none;"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- E -->
+    <div class="zone tagged" data-key="E">
+      <span class="badge-letter">E</span>
+      <div class="maps-row">
+        <div class="map-panel">
+          <h5>Mapa 1 — AVG(taxa_ocupacao)</h5>
+          <div class="sub">mapa esquemático (sem geometria real) — ilustra só a paleta</div>
+          <div class="map-grid" id="mapA"></div>
+          <div class="map-legend" id="legA"></div>
+        </div>
+        <div class="map-panel">
+          <h5>Mapa 2 — SUM(total_internacoes)</h5>
+          <div class="sub">mesmo tamanho, mesmo peso visual que o Mapa 1 — dois focos competindo</div>
+          <div class="map-grid" id="mapB"></div>
+          <div class="map-legend" id="legB"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- F -->
+    <div class="zone tagged" data-key="F">
+      <span class="badge-letter">F</span>
+      <div class="bars-row">
+        <div class="bar-panel">
+          <h5>Internações por idade (0–99, uma barra por idade)</h5>
+          <div class="age-chart" id="ageChart"></div>
+          <div class="age-axis" id="ageAxis"></div>
+        </div>
+        <div class="bar-panel">
+          <h5>Internações por município — ordem alfabética</h5>
+          <div class="muni-chart" id="muniChart"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- G -->
+    <div class="zone tagged" data-key="G">
+      <span class="badge-letter">G</span>
+      <div class="scatter-wrap">
+        <h5>Valor AIH × dias de permanência — 1200×180, marca = registro individual</h5>
+        <canvas id="scatter" width="1160" height="180"></canvas>
+      </div>
+    </div>
+
+    <div class="fold">~ ~ ~ dobra aproximada da tela (1080p) — o foco cai 68% a partir daqui ~ ~ ~</div>
+
+    <!-- H -->
+    <div class="zone tagged" data-key="H">
+      <span class="badge-letter">H</span>
+      <div class="hero-buried">
+        <h5>★ Série temporal — AVG(taxa_ocupacao) por mês, detalhe = 287 hospitais, eixo Y fixado 0,26–0,34</h5>
+        <svg id="tsSvg" viewBox="0 0 1160 190" preserveAspectRatio="none"></svg>
+      </div>
+    </div>
+
+    <!-- I -->
+    <div class="zone tagged" data-key="I">
+      <span class="badge-letter">I</span>
+      <div class="filters-row">
+        <span class="fchip">Município ▾ (228)</span>
+        <span class="fchip">Hospital ▾ (287)</span>
+        <span class="fchip">Tipo de leito ▾</span>
+        <span class="fchip">Especialidade ▾ (58)</span>
+        <span class="fchip">Sexo ▾</span>
+        <span class="fchip">Raça/cor ▾</span>
+        <span class="fchip lowcontrast" title="Valores: Alta Complexidade, Méida Complexidade (sic — mantido, ver regra 3 do spec), Baixa Complexidade">Complexidade ▾</span>
+        <span class="fchip">Caráter da internação ▾</span>
+        <span class="fchip">Motivo de saída ▾ (27)</span>
+        <span class="fchip">Faixa de valor ▾</span>
+      </div>
+    </div>
+
+    <!-- J -->
+    <div class="zone tagged" data-key="J">
+      <span class="badge-letter">J</span>
+      <div class="footnote">&nbsp;</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="drawer" id="drawer">
+  <div class="drawer-inner">
+    <span class="dletter" id="dLetter">·</span>
+    <div>
+      <div class="dtitle" id="dTitle">—</div>
+      <ul class="dsins" id="dSins"></ul>
+      <div class="dfix" id="dFix"></div>
+    </div>
+  </div>
+</div>
+
+<p class="credit">Companheiro visual de <span style="font-family:var(--font-mono)">dashboard_v1_spec.md</span> —
+  os 46 pecados completos (38 do deck do Aurélien + 8 do refinamento dos UXers) e o mapa por região
+  estão lá; aqui é só a versão que se vê e se aponta.</p>
+
+<script>
+(function () {
+  "use strict";
+
+  /* deterministic PRNG so re-opening the file gives the same synthetic fill every time */
+  function mulberry32(seed) {
+    return function () {
+      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+      var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  var rng = mulberry32(20260725);
+  function pt(n, d) {
+    d = d === undefined ? 0 : d;
+    return n.toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d });
+  }
+
+  /* ---------- theme + annotation toggles ---------- */
+  var root = document.documentElement;
+  document.getElementById("themeToggle").addEventListener("click", function () {
+    var cur = root.getAttribute("data-theme");
+    var next = cur === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+  });
+  var annotBtn = document.getElementById("annotToggle");
+  var drawer = document.getElementById("drawer");
+  annotBtn.addEventListener("click", function () {
+    var on = document.body.classList.toggle("annotated");
+    annotBtn.classList.toggle("on", on);
+    annotBtn.textContent = on ? "🔍 Ocultar diagnóstico" : "🔍 Mostrar diagnóstico";
+    document.getElementById("hintBar").style.display = on ? "none" : "block";
+    if (!on) drawer.classList.remove("show");
+  });
+
+  var ANNOT = {
+    N: { t: "Barra de navegação (nova · bloco UX)", sins: [
+        "Sobrecarga de escolhas [UXers]: sidebar e topbar ao mesmo tempo, mais filtros e botões extras.",
+        "Lei de Hick [UXers]: 17 ícones de menu antes mesmo dos 10 filtros da região I.",
+        "Lei de Jakob [UXers]: nenhum ícone usa o glifo padrão do setor — decifrar em vez de reconhecer. Era a lacuna mais importante do inventário antigo.",
+        "Ajuda ausente [UXers]: 17 ícones, nenhum é ajuda/glossário."
+      ], fix: "Um menu só (sidebar OU topbar), ícones padrão do setor, ícone de ajuda visível." },
+    A: { t: "Banner de título (bloco FD)", sins: [
+        "Figura-fundo [p.30]: o degradê é o “figura” da tela; o dado devia ser.",
+        "Hierarquia + tipografia [p.53, p.54]: 3 tamanhos na mesma frase, CAIXA ALTA, fonte decorativa, baixo contraste.",
+        "Nome do produto = a própria síndrome do cockpit [p.61, p.112]: “Painel Gerencial Integrado” não declara nenhuma pergunta."
+      ], fix: "Nome que declara a pergunta (“A ocupação do RS voltou ao patamar pré-pandemia?”), escala tipográfica de 3 níveis, fundo neutro." },
+    B: { t: "Faixa de 8 KPIs (bloco FD + UX)", sins: [
+        "Similaridade quebrada [p.27]: 8 cartões de mesma função, 8 estilos diferentes (cor, borda, tamanho).",
+        "Região comum [UXers]: o filtro Ano mora dentro do mesmo bloco visual dos KPIs — o antes literal do exemplo deles.",
+        "Métrica de vaidade [UXers]: nem todo KPI leva a uma decisão — “228 municípios” não muda a ação de ninguém.",
+        "Contexto ausente [p.59]: nenhum KPI tem meta, variação ou período de referência."
+      ], fix: "Um estilo só de tile; filtro fora do bloco de KPIs; cortar/trocar o KPI de vaidade; cada número com sua comparação." },
+    C: { t: "Tabelão (bloco FD + UX)", sins: [
+        "Prägnanz + carga extrínseca [p.32, p.43]: ~82 mil células, quase todas ruído.",
+        "Figura-fundo [UXers]: o fundo do container é o mesmo cinza do resto da página — nenhum contraste de card.",
+        "Grid escuro [UXers]: linhas de grade escuras em vez de claras.",
+        "Nielsen — controle do usuário [UXers]: colunas sem nenhum controle de ordenação."
+      ], fix: "Se a tabela é mesmo necessária, ela vira relatório separado [p.75]; se ficar: fundo branco, grid claro, colunas ordenáveis." },
+    D: { t: "Três gráficos circulares (bloco FD + A11)", sins: [
+        "Prägnanz [p.32]: 58 fatias sem forma simples, ~35 abaixo de 1%.",
+        "Diversidade de tipos de gráfico [UXers]: a pizza de especialidades ganha tratamento 3D — pizza, 3D e rosca na mesma linha.",
+        "Fonte mínima [UXers]: legenda de 58 itens a 10px, abaixo do mínimo de 14px/9pt.",
+        "Contexto ausente [p.59]: “Sem Informação” (11%) tratado como categoria normal, sem nota."
+      ], fix: "2D, mesmo tipo de gráfico (barra ordenada) e mesma paleta pros três [p.27]; fonte de legenda ≥14px." },
+    E: { t: "Dois mapas concorrentes (âncora de Acessibilidade)", sins: [
+        "Daltonismo [p.79 + UXers]: Mapa 1 usa verde→vermelho (Aurélien), Mapa 2 usa azul→vermelho (UXers) — os dois piores pares, um por mapa.",
+        "Limite de 3–5 tons [p.82]: 9 passos em cada mapa inventam uma precisão que não existe."
+      ], fix: "Paleta segura de 4 níveis nos dois; destino comum [p.31] — um mapa-herói + detalhe on-demand." },
+    F: { t: "Duas barras mal feitas (bloco FD)", sins: [
+        "Continuidade quebrada [p.33]: ordem alfabética não segue nenhum fluxo de leitura.",
+        "Ponto focal [UXers]: nenhuma barra tem destaque de cor — Porto Alegre (23% do estado) se perde tão bem quanto qualquer outra.",
+        "Cor redundante [p.104]: cada barra com uma cor arbitrária, decorativo, não codifica nada.",
+        "Rótulo rotacionado [p.105]: 90° = “não sei por que meu pescoço dói ultimamente”."
+      ], fix: "Ordenar por valor, barra horizontal, cinza em geral com destaque de cor primária só na barra relevante [UXers]." },
+    G: { t: "Dispersão espremida (só Aurélien — fora do refinamento)", sins: [
+        "Dispersão retangular [p.106]: 1200×180 só pra “caber no dashboard” distorce a relação real.",
+        "Performance [p.111]: 3,7 milhões de marcas sobrepostas é o que derruba a demo sozinho."
+      ], fix: "Agregar por faixa de valor/complexidade; devolver a proporção pra ~1:1 [p.34]. Primeira a cortar se o tempo apertar." },
+    H: { t: "Série temporal (o herói enterrado — bloco FD, sem mudanças)", sins: [
+        "Eixo truncado [p.103]: Y fixado em 0,26–0,34 — a mentira central da V1.",
+        "Rolagem [p.90] + scroll depth [UXers]: o insight que responde à pergunta nº1 do briefing está no rodapé.",
+        "Destino comum mal usado [p.31]: 287 linhas sobrepostas se movem juntas sem comunicar nada.",
+        "Contexto ausente [p.59 + UXers]: a pandemia — o arco narrativo inteiro do recorte — não está anotada em lugar nenhum."
+      ], fix: "Este é o ponto focal que devia abrir a tela [p.29, p.86]: eixo em zero, 1–3 séries destacadas, evento anotado." },
+    I: { t: "Filtros espalhados (bloco UX + A11)", sins: [
+        "Lei de Hick [UXers]: 10 filtros aqui + 17 ícones de menu na região N — 27 escolhas antes de olhar um gráfico.",
+        "Proximidade [UXers, exemplo específico]: espaçamento igual dentro de um mesmo assunto e entre assuntos diferentes — nada agrupa por tema.",
+        "Contraste [UXers]: o chip “Complexidade” usa fundo escuro com fonte escura, quase ilegível."
+      ], fix: "No máximo 3-5 filtros com botão “mostrar mais” [Lei de Hick]; agrupar por espaçamento; contraste AA em todo chip." },
+    J: { t: "Rodapé vazio (bloco UX — Nielsen)", sins: [
+        "Nielsen — visibilidade do sistema [UXers]: nenhuma indicação de origem dos dados nem de última atualização — o antes literal do exemplo deles.",
+        "Contexto ausente [p.59]: 187,8% de ocupação aparece crua na tabela/mapa, sem nota em lugar nenhum."
+      ], fix: "Fonte + data de atualização reais, perto do número que qualificam — dá credibilidade [p.69], não é letra miúda." }
+  };
+
+  document.querySelectorAll(".zone.tagged").forEach(function (z) {
+    var key = z.dataset.key, a = ANNOT[key];
+    function show() {
+      if (!document.body.classList.contains("annotated")) return;
+      document.getElementById("dLetter").textContent = key;
+      document.getElementById("dTitle").textContent = key + " — " + a.t;
+      document.getElementById("dSins").innerHTML = a.sins.map(function (s) { return "<li>" + s + "</li>"; }).join("");
+      document.getElementById("dFix").innerHTML = "<b>A virada →</b> " + a.fix;
+      drawer.classList.add("show");
+    }
+    z.addEventListener("mouseenter", show);
+    z.querySelector(".badge-letter").addEventListener("focus", show);
+    z.querySelector(".badge-letter").setAttribute("tabindex", "0");
+  });
+
+  /* ---------- C: giant table (synthetic fill, real dimensions captioned) ---------- */
+  var MUNI_ROWS = ["Alvorada","Bagé","Bento Gonçalves","Cachoeirinha","Camaquã","Canoas","Carazinho",
+    "Caxias do Sul","Cruz Alta","Erechim","Esteio","Farroupilha","Gravataí","Guaíba","Ijuí","Lajeado",
+    "Montenegro","Novo Hamburgo","Osório","Passo Fundo","Pelotas","Porto Alegre","Rio Grande",
+    "Santa Cruz do Sul","Santa Maria","Santo Ângelo","São Leopoldo","Sapucaia do Sul","Uruguaiana","Viamão"];
+  var MONTHS = [];
+  (function () {
+    var names = ["01/2019","02/2019","03/2019","04/2019","05/2019","06/2019","07/2019","08/2019","09/2019","10/2019","11/2019","12/2019","01/2020","02/2020"];
+    MONTHS = names;
+  })();
+  (function buildGiantTable() {
+    var tbl = document.getElementById("giantTable");
+    var thead = document.createElement("thead");
+    var htr = document.createElement("tr");
+    var corner = document.createElement("th");
+    corner.className = "corner"; corner.textContent = "município / cnes";
+    htr.appendChild(corner);
+    MONTHS.forEach(function (m) { var th = document.createElement("th"); th.textContent = m; htr.appendChild(th); });
+    thead.appendChild(htr); tbl.appendChild(thead);
+    var tbody = document.createElement("tbody");
+    MUNI_ROWS.forEach(function (name, i) {
+      var tr = document.createElement("tr");
+      var td0 = document.createElement("td");
+      td0.className = "rowhead";
+      td0.textContent = name + " · " + (2200000 + i * 137).toString().slice(0, 7);
+      tr.appendChild(td0);
+      MONTHS.forEach(function () {
+        var td = document.createElement("td");
+        td.textContent = pt(0.15 + rng() * 0.4, 4);
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    tbl.appendChild(tbody);
+    document.getElementById("tRows").textContent = MUNI_ROWS.length;
+    document.getElementById("tCols").textContent = MONTHS.length;
+  })();
+
+  /* ---------- D: pies via conic-gradient (cheap, and it's exactly how a real bad pie looks) ---------- */
+  function conicFrom(weights, colors) {
+    var total = weights.reduce(function (a, b) { return a + b; }, 0);
+    var acc = 0, stops = [];
+    weights.forEach(function (w, i) {
+      var start = (acc / total) * 100;
+      acc += w;
+      var end = (acc / total) * 100;
+      stops.push(colors[i % colors.length] + " " + start.toFixed(3) + "% " + end.toFixed(3) + "%");
+    });
+    return "conic-gradient(" + stops.join(",") + ")";
+  }
+
+  /* D1 — 58 slices: 8 named real-ish categories + long tail of illustrative fillers + NULL */
+  (function buildD1() {
+    var named = ["Cirúrgico","Clínico","Complementar — UTI Adulto","Obstétrico","Pediátrico",
+      "Hospital-Dia","Complementar — UTI Neonatal","Psiquiatria"];
+    var cats = named.slice();
+    for (var i = named.length; i < 57; i++) cats.push("Especialidade " + (i + 1) + " (ilustrativo)");
+    cats.push("NULL");
+    var weights = cats.map(function (_, i) {
+      if (cats[i] === "NULL") return 2.6;
+      return 100 / Math.pow(i + 2, 1.35);
+    });
+    var palette = ["#e8534a","#f2924a","#f2d84a","#5cb85c","#57c7d4","#4a7ff2","#9a5cf2","#f25ca0",
+      "#c94f4f","#4fa8c9","#a8c94f","#c9a84f","#7a4fc9","#4fc98d","#c94fa8","#8dc94f"];
+    var colors = cats.map(function (_, i) { return cats[i] === "NULL" ? "#bbbbbb" : palette[i % palette.length]; });
+    document.getElementById("pieD1").style.background = conicFrom(weights, colors);
+    var total = weights.reduce(function (a, b) { return a + b; }, 0);
+    var leg = document.getElementById("legendD1");
+    leg.innerHTML = cats.map(function (c, i) {
+      return "<li><span class='sw' style='background:" + colors[i] + "'></span>" + c + " — " + pt(weights[i] / total * 100, 4) + "%</li>";
+    }).join("");
+  })();
+
+  /* D2 — sex, real counts */
+  (function buildD2() {
+    var fem = 2065368, masc = 1674138, tot = fem + masc;
+    document.getElementById("pieD2").style.background = conicFrom([fem, masc], ["#f25ca0", "#4a7ff2"]);
+    document.getElementById("labelsD2").innerHTML =
+      "<div><span class='sw' style='display:inline-block;width:8px;height:8px;border-radius:2px;background:#f25ca0'></span> Feminino " + pt(fem / tot * 100, 4) + "%</div>" +
+      "<div><span class='sw' style='display:inline-block;width:8px;height:8px;border-radius:2px;background:#4a7ff2'></span> Masculino " + pt(masc / tot * 100, 4) + "%</div>";
+  })();
+
+  /* D3 — race/cor, counts sum to the real total (3.739.506); Sem Informação = 410.050 real, rest illustrative split */
+  (function buildD3() {
+    var cats = ["Branca", "Parda", "Preta", "Amarela", "Indígena", "Sem Informação"];
+    var counts = [2319377, 748150, 187116, 56101, 18712, 410050];
+    var colors = ["#f2d84a", "#f2924a", "#9a5cf2", "#5cb85c", "#57c7d4", "#bbbbbb"];
+    var total = counts.reduce(function (a, b) { return a + b; }, 0);
+    document.getElementById("pieD3").style.background = conicFrom(counts, colors);
+    document.getElementById("legendD3").innerHTML = cats.map(function (c, i) {
+      return "<li><span class='sw' style='background:" + colors[i] + "'></span>" + c + " — " + pt(counts[i] / total * 100, 4) + "%</li>";
+    }).join("");
+  })();
+
+  /* ---------- E: two schematic maps, two bad palettes ---------- */
+  function buildMap(elId, legId, hasHospitalCount, palette) {
+    var el = document.getElementById(elId);
+    var frag = document.createDocumentFragment();
+    var cols = 24, rows = 21;
+    for (var i = 0; i < cols * rows; i++) {
+      var d = document.createElement("div");
+      d.className = "c";
+      if (i < hasHospitalCount && rng() < 0.92) {
+        var v = rng();
+        var idx = Math.min(palette.length - 1, Math.floor(v * palette.length));
+        d.style.background = palette[idx];
+      } else {
+        d.style.background = "#e8e8e8";
+      }
+      frag.appendChild(d);
+    }
+    el.innerHTML = "";
+    el.appendChild(frag);
+    var leg = document.getElementById(legId);
+    leg.innerHTML = palette.map(function (c) { return "<span class='sw' style='background:" + c + "'></span>"; }).join("") +
+      "<span class='lbl'>" + (legId === "legA" ? "AVG(taxa_ocupacao)" : "SUM(total_internacoes)") + " — sem título de legenda</span>";
+  }
+  var greenRed = ["#1a7a3c","#5aa53c","#a3c93c","#e8d23c","#e8a23c","#e8723c","#e8523c","#c92e2e","#8c1414"];
+  /* [UXers] antes literal pro par de daltonismo: destaques em azul e vermelho (Mapa 1 já cobre o par verde/vermelho do Aurélien) */
+  var blueRed = ["#08306b","#2166ac","#4393c3","#92c5de","#eaeaea","#f4a582","#d6604d","#b2182b","#67001f"];
+  buildMap("mapA", "legA", 228, greenRed);
+  buildMap("mapB", "legB", 228, blueRed);
+
+  /* ---------- F1: age 0-99, real tail (97/98/99), synthetic bimodal elsewhere ---------- */
+  (function buildAge() {
+    var data = [];
+    for (var age = 0; age <= 99; age++) {
+      var young = 3600 * Math.exp(-Math.pow(age - 2, 2) / (2 * 7 * 7));
+      var old = 4200 * Math.exp(-Math.pow(age - 66, 2) / (2 * 17 * 17));
+      var base = 350 + young + old;
+      data.push(base * (0.94 + rng() * 0.12));
+    }
+    data[97] = 1889; data[98] = 1343; data[99] = 951; /* real, conferido contra a base */
+    var max = Math.max.apply(null, data);
+    var chart = document.getElementById("ageChart");
+    var axis = document.getElementById("ageAxis");
+    var hueFrag = document.createDocumentFragment(), axisFrag = document.createDocumentFragment();
+    data.forEach(function (v, age) {
+      var b = document.createElement("div");
+      b.className = "b";
+      b.style.height = Math.max(2, (v / max) * 146) + "px";
+      b.style.background = "hsl(" + Math.round((age / 99) * 300) + ",70%,55%)";
+      hueFrag.appendChild(b);
+      var s = document.createElement("span");
+      s.textContent = age % 5 === 0 ? age : "";
+      axisFrag.appendChild(s);
+    });
+    chart.appendChild(hueFrag);
+    axis.appendChild(axisFrag);
+  })();
+
+  /* ---------- F2: municipalities A-Z, Porto Alegre real (848.764 = 23%), rest illustrative ---------- */
+  (function buildMuniBars() {
+    var data = [
+      ["Alvorada", 34210], ["Bagé", 41880], ["Bento Gonçalves", 38950], ["Cachoeira do Sul", 22140],
+      ["Cachoeirinha", 19870], ["Camaquã", 15230], ["Canoas", 96410], ["Carazinho", 27650],
+      ["Caxias do Sul", 142380], ["Charqueadas", 9840], ["Cruz Alta", 24310], ["Dom Pedrito", 6120],
+      ["Erechim", 33170], ["Esteio", 18420], ["Estância Velha", 7660], ["Farroupilha", 21980],
+      ["Gravataí", 45230], ["Guaíba", 16590], ["Igrejinha", 8340], ["Ijuí", 25470],
+      ["Lajeado", 29880], ["Montenegro", 20110], ["Novo Hamburgo", 58940], ["Osório", 12760],
+      ["Passo Fundo", 71230], ["Pelotas", 108650], ["Porto Alegre", 848764], ["Rio Grande", 52340],
+      ["Rosário do Sul", 9210], ["Santa Cruz do Sul", 39760], ["Santa Maria", 89420],
+      ["Santana do Livramento", 26580], ["Santo Ângelo", 24990], ["São Borja", 13870],
+      ["São Gabriel", 15640], ["São Leopoldo", 61320], ["Sapiranga", 17230], ["Sapucaia do Sul", 22860],
+      ["Tapes", 4120], ["Taquara", 18760], ["Torres", 9430], ["Uruguaiana", 43210],
+      ["Vacaria", 19980], ["Venâncio Aires", 16340], ["Viamão", 31450], ["Xangri-lá", 3210]
+    ];
+    var max = Math.max.apply(null, data.map(function (d) { return d[1]; }));
+    var chart = document.getElementById("muniChart");
+    var frag = document.createDocumentFragment();
+    data.forEach(function (d) {
+      var col = document.createElement("div");
+      col.className = "col";
+      var b = document.createElement("div");
+      b.className = "b2";
+      /* [UXers] "ponto focal": nenhuma barra recebe destaque de cor, nem Porto Alegre */
+      b.style.height = Math.max(2, (d[1] / max) * 130) + "px";
+      b.style.background = "hsl(" + Math.round(rng() * 360) + ",55%,55%)";
+      var lbl = document.createElement("span");
+      lbl.className = "lbl";
+      lbl.textContent = d[0];
+      col.appendChild(b); col.appendChild(lbl);
+      frag.appendChild(col);
+    });
+    chart.appendChild(frag);
+  })();
+
+  /* ---------- G: squished scatter, no transparency, right-skewed like real AIH values ---------- */
+  (function buildScatter() {
+    var cv = document.getElementById("scatter");
+    var ctx = cv.getContext("2d");
+    var W = cv.width, H = cv.height;
+    ctx.fillStyle = "#fcfcfc"; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#2a3b6b";
+    var N = 4000, maxVal = 198575, meanVal = 1750.28;
+    for (var i = 0; i < N; i++) {
+      var u = Math.max(1e-6, rng());
+      var valor = Math.min(maxVal, -meanVal * Math.log(u));
+      var dias = Math.max(0, valor / 900 + (rng() - 0.5) * 12);
+      dias = Math.min(60, dias);
+      var x = 6 + (valor / maxVal) * (W - 12);
+      var y = H - 6 - (Math.min(dias, 40) / 40) * (H - 12);
+      ctx.fillRect(x, y, 2, 2);
+    }
+  })();
+
+  /* ---------- H: buried time series, truncated axis, spaghetti ---------- */
+  (function buildTimeSeries() {
+    var yearMeans = { 2019: 0.318, 2020: 0.268, 2021: 0.298, 2022: 0.323, 2023: 0.335 };
+    var anchors = [
+      [0, 0.322], [6, 0.318], [15, 0.19], [18, 0.268], [24, 0.24],
+      [30, 0.298], [42, 0.323], [54, 0.335], [59, 0.34]
+    ];
+    function interp(t) {
+      for (var i = 0; i < anchors.length - 1; i++) {
+        var a = anchors[i], b = anchors[i + 1];
+        if (t >= a[0] && t <= b[0]) {
+          var f = (t - a[0]) / (b[0] - a[0]);
+          return a[1] + (b[1] - a[1]) * f;
+        }
+      }
+      return anchors[anchors.length - 1][1];
+    }
+    var base = [];
+    for (var t = 0; t < 60; t++) base.push(interp(t));
+    [2019, 2020, 2021, 2022, 2023].forEach(function (yr, yi) {
+      var idxs = []; for (var m = 0; m < 12; m++) idxs.push(yi * 12 + m);
+      var avg = idxs.reduce(function (s, i) { return s + base[i]; }, 0) / 12;
+      var scale = yearMeans[yr] / avg;
+      idxs.forEach(function (i) { base[i] *= scale; });
+    });
+
+    var svg = document.getElementById("tsSvg");
+    var W = 1160, H = 190, padL = 34, padR = 6, padT = 8, padB = 20;
+    var yMin = 0.26, yMax = 0.34;
+    function X(i) { return padL + (i / 59) * (W - padL - padR); }
+    function Y(v) { var c = Math.max(yMin, Math.min(yMax, v)); return padT + (1 - (c - yMin) / (yMax - yMin)) * (H - padT - padB); }
+
+    var svgns = "http://www.w3.org/2000/svg";
+    function el(tag, attrs) {
+      var e = document.createElementNS(svgns, tag);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      return e;
+    }
+
+    /* clip so off-domain hospital lines cut off at the truncated axis, adding to the chaos */
+    var clip = el("clipPath", { id: "tsClip" });
+    clip.appendChild(el("rect", { x: padL, y: padT, width: W - padL - padR, height: H - padT - padB }));
+    svg.appendChild(el("defs", {})).appendChild(clip);
+
+    [yMin, (yMin + yMax) / 2, yMax].forEach(function (v) {
+      var y = Y(v);
+      svg.appendChild(el("line", { x1: padL, x2: W - padR, y1: y, y2: y, stroke: "#e5e5e5", "stroke-width": 1 }));
+      var t = el("text", { x: 4, y: y + 3, "font-size": 9, fill: "#999", "font-family": "monospace" });
+      t.textContent = v.toFixed(2).replace(".", ",");
+      svg.appendChild(t);
+    });
+
+    var spagGroup = el("g", { "clip-path": "url(#tsClip)" });
+    svg.appendChild(spagGroup);
+    var N_LINES = 55; /* stand-in for 287 hospitals — kept lighter for render weight */
+    for (var h = 0; h < N_LINES; h++) {
+      var d = "";
+      var drift = (rng() - 0.5) * 0.05;
+      var wobble = 0.01 + rng() * 0.05;
+      var phase = rng() * 10;
+      for (var i2 = 0; i2 < 60; i2++) {
+        var v = base[i2] + drift + Math.sin(i2 / 4 + phase) * wobble * 0.4 + (rng() - 0.5) * wobble;
+        var x = X(i2), y = Y(v);
+        d += (i2 === 0 ? "M" : "L") + x.toFixed(1) + "," + y.toFixed(1) + " ";
+      }
+      spagGroup.appendChild(el("path", { d: d, fill: "none", stroke: "#8aa0c9", "stroke-width": 1, opacity: 0.55 }));
+    }
+    /* the AVG line exists but gets no visual priority over it's the whole point */
+    var davg = "";
+    for (var i3 = 0; i3 < 60; i3++) davg += (i3 === 0 ? "M" : "L") + X(i3).toFixed(1) + "," + Y(base[i3]).toFixed(1) + " ";
+    spagGroup.appendChild(el("path", { d: davg, fill: "none", stroke: "#2b4c8c", "stroke-width": 1.4, opacity: 0.85 }));
+
+    [0, 12, 24, 36, 48, 59].forEach(function (i4) {
+      var yr = 2019 + Math.floor(i4 / 12);
+      var t = el("text", { x: X(i4), y: H - 5, "font-size": 9, fill: "#999", "font-family": "monospace", "text-anchor": "middle" });
+      t.textContent = yr;
+      svg.appendChild(t);
+    });
+  })();
+
+})();
+</script>
+</body>
+</html>
