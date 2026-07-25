@@ -12,6 +12,9 @@ __pycache__/
 # Claude
 CLAUDE.md
 
+# Third-party reference material (licensed content, not ours to redistribute)
+references/
+
 # C extensions
 *.so
 

@@ -1,0 +1,1063 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard V1 — o "antes" (propositalmente ruim)</title>
+<style>
+  :root {
+    --paper:#f5f6f8; --surface:#ffffff; --surface-2:#fbfbfc;
+    --ink:#171b21; --muted:#5b6470; --faint:#8a929c;
+    --hairline:#e2e5ea; --hairline-2:#eceef1;
+    --accent:#146b74; --accent-ink:#0f5158; --accent-soft:rgba(20,107,116,.09);
+    --turn:#b0632f; --turn-soft:rgba(176,99,47,.10);
+    --shadow:0 1px 2px rgba(20,27,35,.04), 0 8px 28px rgba(20,27,35,.06);
+    --font-body:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --font-display:"Segoe UI Semibold","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --font-serif:Georgia,"Iowan Old Style","Times New Roman",serif;
+    --font-mono:"Cascadia Code",ui-monospace,"Consolas","SF Mono",Menlo,monospace;
+    --maxw:74ch;
+    --radius:10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:#0e1116; --surface:#161b22; --surface-2:#12161c;
+      --ink:#e8ebef; --muted:#9aa3ae; --faint:#727b86;
+      --hairline:#262c35; --hairline-2:#1e242c;
+      --accent:#4bb5bd; --accent-ink:#7fd0d6; --accent-soft:rgba(75,181,189,.13);
+      --turn:#d98a52; --turn-soft:rgba(217,138,82,.14);
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#0e1116; --surface:#161b22; --surface-2:#12161c;
+    --ink:#e8ebef; --muted:#9aa3ae; --faint:#727b86;
+    --hairline:#262c35; --hairline-2:#1e242c;
+    --accent:#4bb5bd; --accent-ink:#7fd0d6; --accent-soft:rgba(75,181,189,.13);
+    --turn:#d98a52; --turn-soft:rgba(217,138,82,.14);
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+  }
+  :root[data-theme="light"] {
+    --paper:#f5f6f8; --surface:#ffffff; --surface-2:#fbfbfc;
+    --ink:#171b21; --muted:#5b6470; --faint:#8a929c;
+    --hairline:#e2e5ea; --hairline-2:#eceef1;
+    --accent:#146b74; --accent-ink:#0f5158; --accent-soft:rgba(20,107,116,.09);
+    --turn:#b0632f; --turn-soft:rgba(176,99,47,.10);
+    --shadow:0 1px 2px rgba(20,27,35,.04), 0 8px 28px rgba(20,27,35,.06);
+  }
+
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; scroll-padding-top:84px; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior:auto; } }
+  body {
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--font-body); font-size:1.0625rem; line-height:1.62;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  a { color:var(--accent); text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  ::selection { background:var(--accent-soft); }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    position:sticky; top:0; z-index:40;
+    display:flex; align-items:center; gap:16px;
+    padding:12px clamp(16px,4vw,40px);
+    background:color-mix(in srgb, var(--paper) 86%, transparent);
+    backdrop-filter:saturate(1.4) blur(10px);
+    border-bottom:1px solid var(--hairline);
+  }
+  .topbar .mark {
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--muted); white-space:nowrap;
+  }
+  .topbar .mark b { color:var(--accent); font-weight:600; }
+  .topbar .spacer { flex:1; }
+  .toggle {
+    appearance:none; cursor:pointer; font:inherit; font-size:.8rem;
+    display:inline-flex; align-items:center; gap:7px;
+    padding:6px 12px; border-radius:999px;
+    background:var(--surface); color:var(--muted);
+    border:1px solid var(--hairline);
+  }
+  .toggle:hover { color:var(--ink); border-color:var(--accent); }
+  .toggle:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+
+  /* ---------- shell ---------- */
+  .shell {
+    display:grid; grid-template-columns:1fr; gap:0;
+    max-width:1200px; margin:0 auto; padding:0 clamp(16px,4vw,40px);
+  }
+  @media (min-width:1040px) {
+    .shell { grid-template-columns:230px minmax(0,1fr); gap:56px; }
+  }
+
+  /* ---------- side nav ---------- */
+  nav.toc { font-size:.9rem; }
+  @media (min-width:1040px) {
+    nav.toc {
+      position:sticky; top:76px; align-self:start;
+      max-height:calc(100vh - 96px); overflow:auto;
+      padding:32px 0; border-right:1px solid var(--hairline-2);
+    }
+  }
+  nav.toc .toc-label {
+    font-family:var(--font-mono); font-size:.66rem; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--faint); margin:0 0 12px;
+  }
+  nav.toc ol { list-style:none; margin:0; padding:0; }
+  nav.toc li { margin:0; }
+  nav.toc a {
+    display:flex; gap:10px; align-items:baseline;
+    padding:5px 10px; border-radius:7px; color:var(--muted);
+    border-left:2px solid transparent; margin-left:-2px;
+  }
+  nav.toc a .n { font-family:var(--font-mono); font-size:.72rem; color:var(--faint); min-width:1.1em; }
+  nav.toc a:hover { color:var(--ink); background:var(--accent-soft); text-decoration:none; }
+  nav.toc a.active { color:var(--accent-ink); border-left-color:var(--accent); font-weight:600; }
+  nav.toc a.active .n { color:var(--accent); }
+  /* mobile toc = horizontal chips */
+  @media (max-width:1039px) {
+    nav.toc {
+      position:sticky; top:57px; z-index:30; margin:0 calc(-1 * clamp(16px,4vw,40px));
+      padding:10px clamp(16px,4vw,40px);
+      background:color-mix(in srgb, var(--paper) 90%, transparent);
+      backdrop-filter:blur(8px); border-bottom:1px solid var(--hairline);
+      overflow-x:auto; -webkit-overflow-scrolling:touch;
+    }
+    nav.toc .toc-label { display:none; }
+    nav.toc ol { display:flex; gap:6px; white-space:nowrap; }
+    nav.toc a { border:1px solid var(--hairline); border-radius:999px; padding:5px 12px; }
+    nav.toc a .txt { display:inline; }
+    nav.toc a.active { border-color:var(--accent); background:var(--accent-soft); }
+  }
+
+  /* ---------- main ---------- */
+  main { padding:0 0 120px; min-width:0; }
+
+  header.hero { padding:56px 0 40px; border-bottom:1px solid var(--hairline); }
+  .eyebrow {
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--accent); margin:0 0 18px;
+  }
+  h1 {
+    font-family:var(--font-display); font-weight:700;
+    font-size:clamp(2.1rem,5.2vw,3.15rem); line-height:1.04;
+    letter-spacing:-.02em; text-wrap:balance; margin:0 0 20px;
+  }
+  h1 .q { color:var(--turn); font-style:italic; font-family:var(--font-serif); font-weight:400; }
+  .lede { font-size:1.18rem; color:var(--muted); max-width:60ch; margin:0 0 26px; }
+  .meta-row {
+    display:flex; flex-wrap:wrap; gap:8px 10px; font-size:.82rem;
+  }
+  .meta-row .pill {
+    display:inline-flex; align-items:center; gap:7px;
+    padding:5px 11px; border-radius:999px; background:var(--surface);
+    border:1px solid var(--hairline); color:var(--muted);
+  }
+  .meta-row .pill b { color:var(--ink); font-weight:600; }
+  .attribution {
+    margin-top:26px; font-size:.85rem; color:var(--faint);
+    padding-top:18px; border-top:1px dashed var(--hairline);
+  }
+  .attribution em { color:var(--muted); }
+
+  section.block { padding:52px 0; border-bottom:1px solid var(--hairline-2); }
+  section.block:last-child { border-bottom:0; }
+  .sec-head { display:flex; align-items:baseline; gap:14px; margin:0 0 8px; }
+  .sec-head .snum {
+    font-family:var(--font-mono); font-size:.9rem; color:var(--accent);
+    font-weight:600; padding-top:.15em;
+  }
+  h2 {
+    font-family:var(--font-display); font-weight:700;
+    font-size:clamp(1.5rem,3vw,2rem); line-height:1.12;
+    letter-spacing:-.015em; text-wrap:balance; margin:0;
+  }
+  .sec-intro { color:var(--muted); max-width:var(--maxw); margin:14px 0 0; }
+  h3 {
+    font-family:var(--font-display); font-weight:600; font-size:1.16rem;
+    letter-spacing:-.01em; margin:34px 0 12px;
+  }
+  h4 {
+    font-family:var(--font-mono); font-size:.74rem; letter-spacing:.13em;
+    text-transform:uppercase; color:var(--muted); margin:26px 0 12px; font-weight:600;
+  }
+  p { max-width:var(--maxw); }
+
+  /* inline atoms */
+  .pg {
+    font-family:var(--font-mono); font-size:.78em; white-space:nowrap;
+    padding:1px 6px; border-radius:5px; background:var(--accent-soft);
+    color:var(--accent-ink); border:1px solid color-mix(in srgb,var(--accent) 22%, transparent);
+  }
+  code, .field {
+    font-family:var(--font-mono); font-size:.86em;
+    background:var(--hairline-2); padding:1px 5px; border-radius:5px;
+  }
+  .prio {
+    font-family:var(--font-mono); font-size:.68rem; font-weight:700; letter-spacing:.06em;
+    padding:2px 7px; border-radius:5px; border:1px solid transparent; white-space:nowrap;
+  }
+  .prio.p0 { color:#fff; background:var(--accent); }
+  .prio.p1 { color:var(--accent-ink); background:var(--accent-soft); border-color:color-mix(in srgb,var(--accent) 30%, transparent); }
+  .prio.p2 { color:var(--muted); background:var(--surface); border-color:var(--hairline); }
+
+  /* rules list */
+  .rules { list-style:none; counter-reset:r; margin:22px 0 0; padding:0; display:grid; gap:12px; max-width:var(--maxw); }
+  .rules li {
+    counter-increment:r; position:relative; padding:16px 18px 16px 56px;
+    background:var(--surface); border:1px solid var(--hairline); border-radius:var(--radius);
+  }
+  .rules li::before {
+    content:counter(r); position:absolute; left:16px; top:15px;
+    width:26px; height:26px; display:grid; place-items:center;
+    font-family:var(--font-mono); font-size:.82rem; font-weight:700; color:var(--accent);
+    background:var(--accent-soft); border-radius:7px;
+  }
+  .rules li b { font-weight:600; }
+
+  /* epigraph */
+  .epigraph {
+    margin:8px 0 26px; padding:28px 30px; border-radius:var(--radius);
+    background:var(--surface); border:1px solid var(--hairline);
+    border-left:3px solid var(--turn); box-shadow:var(--shadow); max-width:var(--maxw);
+  }
+  .epigraph p {
+    font-family:var(--font-serif); font-style:italic; font-size:1.24rem; line-height:1.5;
+    color:var(--ink); margin:0; max-width:none;
+  }
+  .epigraph .who { font-family:var(--font-mono); font-style:normal; font-size:.74rem;
+    letter-spacing:.1em; text-transform:uppercase; color:var(--faint); margin-top:16px; }
+  .attack { list-style:none; margin:22px 0 0; padding:0; display:grid; gap:10px; max-width:var(--maxw); }
+  .attack li { padding-left:22px; position:relative; color:var(--muted); }
+  .attack li::before { content:"→"; position:absolute; left:0; color:var(--turn); font-weight:700; }
+  .attack li b { color:var(--ink); font-weight:600; }
+
+  /* ---------- wireframe schematic ---------- */
+  .wire {
+    margin:24px 0 10px; border:1px solid var(--hairline); border-radius:14px;
+    background:var(--surface-2); padding:14px; box-shadow:var(--shadow); overflow:hidden;
+  }
+  .zone {
+    display:grid; grid-template-columns:30px 1fr; gap:12px; align-items:stretch;
+    margin:8px 0;
+  }
+  .zone .badge {
+    font-family:var(--font-mono); font-weight:700; font-size:.82rem; color:var(--muted);
+    display:grid; place-items:center; background:var(--hairline-2); border-radius:7px;
+  }
+  .zbody {
+    border:1px solid var(--hairline); border-radius:9px; background:var(--surface);
+    padding:11px 13px;
+  }
+  .zbody .zt { font-weight:600; font-size:.95rem; }
+  .zbody .zc { font-size:.82rem; color:var(--muted); margin-top:3px; }
+  .zbody .zc .pg { font-size:.72rem; }
+  .chips { display:flex; flex-wrap:wrap; gap:5px; margin-top:9px; }
+  .chips .k {
+    font-family:var(--font-mono); font-size:.7rem; padding:4px 8px; border-radius:6px;
+    color:var(--muted); background:var(--surface-2);
+  }
+  /* the "8 estilos" sin, shown literally */
+  .chips.mismatch .k:nth-child(1){ border:1px solid var(--hairline); }
+  .chips.mismatch .k:nth-child(2){ border:1px dashed var(--turn); color:var(--turn); }
+  .chips.mismatch .k:nth-child(3){ border:2px solid var(--accent); }
+  .chips.mismatch .k:nth-child(4){ box-shadow:0 2px 6px rgba(0,0,0,.18); border:1px solid var(--hairline-2); }
+  .chips.mismatch .k:nth-child(5){ border:1px solid var(--accent); background:var(--accent-soft); }
+  .chips.mismatch .k:nth-child(6){ border:1px dotted var(--muted); font-size:.8rem; }
+  .chips.mismatch .k:nth-child(7){ border:1px solid var(--turn); background:var(--turn-soft); }
+  .chips.mismatch .k:nth-child(8){ border:1px solid var(--hairline); font-size:.62rem; }
+  .pies { display:flex; gap:14px; margin-top:9px; }
+  .pie { width:34px; height:34px; border-radius:50%; border:1px solid var(--hairline);
+    background:conic-gradient(var(--accent-soft) 0 40%, var(--turn-soft) 0 62%, var(--hairline-2) 0 100%); }
+  .pie.many { background:repeating-conic-gradient(var(--hairline-2) 0 6deg, var(--surface-2) 6deg 12deg); }
+  .duo { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:9px; }
+  .duo .m { height:40px; border-radius:7px; border:1px solid var(--hairline); background:var(--surface-2); display:grid; place-items:center; font-size:.7rem; color:var(--faint); font-family:var(--font-mono); }
+  .zbody.table-block { min-height:96px; background:
+      repeating-linear-gradient(var(--surface) 0 22px, var(--hairline-2) 22px 23px); position:relative; }
+  .zbody.table-block::after {
+      content:"228 municípios × 60 meses × 6 medidas"; position:absolute; inset:auto 13px 10px auto;
+      font-size:.72rem; color:var(--faint); font-family:var(--font-mono); }
+  .hero-strip { display:flex; align-items:center; gap:12px; }
+  .hero-strip .spark {
+    flex:1; height:34px; border-radius:6px;
+    background:linear-gradient(90deg,var(--accent-soft),transparent);
+    border:1px dashed var(--accent); position:relative;
+  }
+  .hero-strip .star { color:var(--turn); font-weight:700; }
+  .fold {
+    display:flex; align-items:center; gap:12px; margin:16px 2px; color:var(--turn);
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase;
+  }
+  .fold::before, .fold::after { content:""; flex:1; height:0; border-top:1px dashed var(--turn); opacity:.6; }
+  .gradient-sin {
+    display:inline-block; width:56px; height:12px; border-radius:3px; vertical-align:middle;
+    background:linear-gradient(90deg,#2b5c9a,#7b3fa0); margin:0 2px;
+  }
+
+  /* ---------- reference tables ---------- */
+  .scroller { overflow-x:auto; -webkit-overflow-scrolling:touch;
+    border:1px solid var(--hairline); border-radius:var(--radius); margin:14px 0 8px; box-shadow:var(--shadow); }
+  table { border-collapse:collapse; width:100%; font-size:.9rem; background:var(--surface); }
+  thead th {
+    text-align:left; font-family:var(--font-mono); font-size:.68rem; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--faint); font-weight:600;
+    padding:12px 14px; border-bottom:1px solid var(--hairline); white-space:nowrap;
+    background:var(--surface-2); position:sticky; top:0;
+  }
+  tbody td { padding:11px 14px; border-bottom:1px solid var(--hairline-2); vertical-align:top; }
+  tbody tr:last-child td { border-bottom:0; }
+  tbody tr:hover { background:var(--accent-soft); }
+  td .field, td code { font-size:.82em; }
+  .num { font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .strong-cell { color:var(--accent-ink); font-weight:600; }
+  .cap { font-size:.8rem; color:var(--faint); margin:6px 2px 0; }
+
+  /* attribute effectiveness — mark strengths */
+  .lvl { font-weight:600; }
+  .lvl.hi { color:var(--accent-ink); }
+  .lvl.lo { color:var(--faint); font-weight:400; }
+  .lvl.mid { color:var(--muted); }
+
+  /* ---------- region cards ---------- */
+  .regions { display:grid; gap:16px; margin-top:22px; }
+  @media (min-width:640px){ .regions { grid-template-columns:1fr 1fr; } }
+  .region {
+    background:var(--surface); border:1px solid var(--hairline); border-radius:14px;
+    padding:20px 20px 18px; box-shadow:var(--shadow); display:flex; flex-direction:column;
+  }
+  .region .rh { display:flex; align-items:center; gap:11px; margin-bottom:4px; }
+  .region .rl {
+    width:30px; height:30px; border-radius:8px; display:grid; place-items:center;
+    font-family:var(--font-mono); font-weight:700; font-size:.92rem;
+    color:var(--accent); background:var(--accent-soft);
+  }
+  .region .rn { font-family:var(--font-display); font-weight:600; font-size:1.05rem; }
+  .region .what { font-size:.86rem; color:var(--muted); margin:2px 0 14px; }
+  .region ul.sins { list-style:none; margin:0 0 14px; padding:0; display:grid; gap:8px; font-size:.9rem; }
+  .region ul.sins li { padding-left:18px; position:relative; }
+  .region ul.sins li::before {
+    content:""; position:absolute; left:0; top:.62em; width:7px; height:7px; border-radius:2px;
+    background:var(--muted);
+  }
+  .region ul.sins li b { font-weight:600; }
+  .region .turn {
+    margin-top:auto; font-size:.9rem; padding:12px 14px; border-radius:9px;
+    background:var(--turn-soft); border:1px solid color-mix(in srgb,var(--turn) 26%, transparent);
+  }
+  .region .turn .lab {
+    font-family:var(--font-mono); font-size:.66rem; letter-spacing:.13em; text-transform:uppercase;
+    color:var(--turn); font-weight:700; display:block; margin-bottom:4px;
+  }
+
+  /* ledger */
+  table.ledger td:first-child { font-variant-numeric:tabular-nums; color:var(--faint); font-family:var(--font-mono); font-size:.8rem; width:2.4em; }
+  table.ledger td.viol { font-weight:600; white-space:nowrap; }
+  table.ledger td.fix { color:var(--turn); }
+
+  /* how-to blocks */
+  .cols { display:grid; gap:20px; margin-top:20px; }
+  @media (min-width:760px){ .cols { grid-template-columns:1fr 1fr; } }
+  .panel {
+    background:var(--surface); border:1px solid var(--hairline); border-radius:var(--radius);
+    padding:20px 22px; box-shadow:var(--shadow);
+  }
+  .panel h4 { margin-top:0; }
+  .panel ol, .panel ul { margin:0; padding-left:1.2em; }
+  .panel li { margin:7px 0; padding-left:4px; }
+  .panel li::marker { color:var(--accent); }
+  .steps { counter-reset:s; list-style:none; padding:0; }
+  .steps li { counter-increment:s; position:relative; padding-left:34px; margin:12px 0; }
+  .steps li::before {
+    content:counter(s); position:absolute; left:0; top:0; width:24px; height:24px;
+    display:grid; place-items:center; font-family:var(--font-mono); font-size:.78rem; font-weight:700;
+    color:var(--accent); background:var(--accent-soft); border-radius:6px;
+  }
+
+  footer.foot {
+    max-width:1200px; margin:0 auto; padding:40px clamp(16px,4vw,40px) 60px;
+    border-top:1px solid var(--hairline); color:var(--faint); font-size:.82rem;
+  }
+  footer.foot .field { font-size:.82em; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="mark"><b>DV · TUG</b> &nbsp;/&nbsp; Dashboard V1 — o "antes"</span>
+  <span class="spacer"></span>
+  <button class="toggle" id="themeToggle" type="button" aria-label="Alternar tema claro/escuro">
+    <span id="themeIcon">◐</span><span id="themeLabel">Tema</span>
+  </button>
+</div>
+
+<div class="shell">
+
+  <nav class="toc" aria-label="Sumário">
+    <p class="toc-label">Sumário</p>
+    <ol>
+      <li><a href="#uxers"><span class="n">·</span><span class="txt">Refinamento dos UXers</span></a></li>
+      <li><a href="#regras"><span class="n">1</span><span class="txt">Regras do jogo</span></a></li>
+      <li><a href="#persona"><span class="n">2</span><span class="txt">A persona do erro</span></a></li>
+      <li><a href="#layout"><span class="n">3</span><span class="txt">O layout invertido</span></a></li>
+      <li><a href="#inventario"><span class="n">4</span><span class="txt">Inventário de princípios</span></a></li>
+      <li><a href="#mapa"><span class="n">5</span><span class="txt">Mapa por região</span></a></li>
+      <li><a href="#placar"><span class="n">6</span><span class="txt">Placar de pecados</span></a></li>
+      <li><a href="#processo"><span class="n">7</span><span class="txt">Como vamos rodar</span></a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <p class="eyebrow">Especificação de construção · versão 1</p>
+      <h1>Dashboard V1 — o <span class="q">"antes"</span>, propositalmente ruim</h1>
+      <p class="lede">
+        A primeira versão do painel de ocupação hospitalar é ruim <em>de propósito</em>:
+        existe para ser desmontada ao vivo, princípio a princípio, pela dupla de UX no TUG.
+        O que está quebrado é o <b>design</b> — nunca os números.
+      </p>
+      <div class="meta-row">
+        <span class="pill"><b>Fonte</b> SIH-SUS × CNES (DATASUS)</span>
+        <span class="pill"><b>Recorte</b> Rio Grande do Sul</span>
+        <span class="pill"><b>Período</b> 2019–2023</span>
+        <span class="pill"><b>Grão</b> hospital · município · mês</span>
+        <span class="pill"><b>Saída</b> <span class="field">dashboard_v1.twbx</span></span>
+      </div>
+      <p class="attribution">
+        Princípios de <em>Learn Design Driven Data Visualization</em> — Aurélien Vautier /
+        Dataviz Clarity (CC&nbsp;BY-NC-ND&nbsp;4.0). As marcas <span class="pg">p.NN</span>
+        apontam para os slides do deck; a seção 4 é a chave completa dessas referências.
+      </p>
+    </header>
+
+    <!-- 0 -->
+    <section class="block" id="uxers">
+      <div class="sec-head"><span class="snum">·</span><h2>Refinamento dos UXers</h2></div>
+      <p class="sec-intro">
+        A dupla de UX revisou o deck do Aurélien e devolveu <span class="field">docs/uxers_guidance.md</span>
+        — um filtro de prioridade sobre o mesmo material, dividido em três blocos: <b>Fundamentos
+        de Design</b>, <b>Experiência do usuário</b>, <b>Acessibilidade</b>, cada um com pares
+        antes/depois. Esta versão do documento incorpora esse filtro.
+      </p>
+      <ul class="attack">
+        <li><b>Não virar caricatura</b>: cada região agora carrega 1 princípio primário + no
+          máximo 1-2 secundários coerentes, em vez da pilha de 4-5 violações da primeira
+          passada.</li>
+        <li><b>Três blocos, espalhados</b>: <b>N</b> e <b>I</b> carregam Experiência do Usuário,
+          <b>E</b> é a região-âncora de Acessibilidade, o resto segue primariamente Fundamentos
+          de Design.</li>
+        <li><b>Região nova: N — barra de navegação.</b> A Lei de Jakob não tinha lugar dedicado
+          antes, e é uma das "Top 5 UX Laws" que os UXers marcaram como prioridade máxima
+          (junto com Proximidade, Lei de Hick, Ponto Focal e Prägnanz).</li>
+        <li><b>Atributos pré-atentivos</b> (seção 4.1) seguem como referência, mas perdem peso
+          cognitivo como pilar organizador — pedido explícito dos UXers.</li>
+      </ul>
+      <p class="cap">Onde este refinamento e o deck do Aurélien divergem no mesmo princípio (ex.: o
+        par de cores mais hostil a daltonismo — verde/vermelho pro Aurélien, azul/vermelho pros
+        UXers), <span class="field">uxers_guidance.md</span> vence por ser a camada de decisão
+        mais recente; o V1 usa os dois, um em cada mapa da região E.</p>
+    </section>
+
+    <!-- 1 -->
+    <section class="block" id="regras">
+      <div class="sec-head"><span class="snum">01</span><h2>Regras do jogo</h2></div>
+      <p class="sec-intro">
+        Um dashboard ruim de apresentação só funciona se for <b>plausível</b>. Caricatura, a
+        plateia ri e não se reconhece; sutil demais, ninguém enxerga do fundo da sala. Estas
+        cinco regras seguram o equilíbrio.
+      </p>
+      <ol class="rules">
+        <li><b>Os números têm que estar certos.</b> Nada de dado inventado. O que quebra é o
+          <em>design</em>, não a pipeline. Única exceção: a seção 9 do deck (uso enganoso), onde a
+          mentira é de <b>apresentação</b> — eixo, escala, ordenação — e não de cálculo.</li>
+        <li><b>Todo pecado é reversível ao vivo.</b> Cada violação do placar (seção 6) tem
+          correção demonstrável em Tableau em menos de 2 minutos. Se não conserta no palco, não entra.</li>
+        <li><b>Nada de erro bobo nosso.</b> Rótulo trocado tira o foco do argumento. (Exceção
+          autorizada: a fonte traz <span class="field">"Méida Complexidade"</span> com typo — esse a
+          gente <b>mantém</b>, porque ilustra que a confiabilidade do dado é parte da narrativa
+          <span class="pg">p.69</span>.)</li>
+        <li><b>1 princípio primário por região, no máximo 1-2 secundários coerentes.</b> Empilhar
+          cinco violações soltas no mesmo gráfico impede a dupla de isolar um princípio de cada
+          vez — e vira caricatura. Ver o mapa por região refinado (seção 5).</li>
+        <li><b>O dashboard tem que carregar.</b> Lento é ótimo — é o argumento da seção 10 do deck.
+          Travado não é: a demo tem que rodar.</li>
+      </ol>
+    </section>
+
+    <!-- 2 -->
+    <section class="block" id="persona">
+      <div class="sec-head"><span class="snum">02</span><h2>A persona do erro</h2></div>
+      <p class="sec-intro">
+        Vale abrir a apresentação com isto, porque explica <em>por que</em> o dashboard ficou
+        assim — e todo mundo na plateia já viveu essa reunião.
+      </p>
+      <blockquote class="epigraph">
+        <p>"A Secretaria pediu um painel gerencial integrado de ocupação hospitalar. Perguntamos
+          quem usa: <em>‘todo mundo’</em>. O que precisa responder: <em>‘a gente quer ver tudo’</em>.
+          Levantamos 30 indicadores numa reunião de uma hora. Ninguém desenhou nada antes de abrir
+          o Tableau."</p>
+        <div class="who">O briefing que gerou a V1</div>
+      </blockquote>
+      <ul class="attack">
+        <li><b>"Cockpit" é desistir do perímetro</b> <span class="pg">p.112</span> → daí a abundância
+          de dados <span class="pg">p.113</span> que o usuário vai ter que filtrar depois <span class="pg">p.114</span>.</li>
+        <li><b>Produto pra todo mundo é produto pra ninguém</b> <span class="pg">p.91</span>.</li>
+        <li><b>Mudar de ferramenta não muda a cabeça</b> <span class="pg">p.94</span> — o Tableau
+          não salva ninguém de pular a etapa de <em>Define</em>.</li>
+      </ul>
+    </section>
+
+    <!-- 3 -->
+    <section class="block" id="layout">
+      <div class="sec-head"><span class="snum">03</span><h2>O layout invertido</h2></div>
+      <p class="sec-intro">
+        Página fixa de <b>1200 × 2600 px</b> — força rolagem em qualquer tela. A ordem de leitura
+        está de cabeça pra baixo: o topo (o imóvel mais caro, onde os padrões F e Z começam
+        <span class="pg">p.86</span>) recebe o conteúdo de menor valor; o insight de verdade — a
+        série temporal de ocupação, a pergunta nº 1 do briefing — fica enterrado no rodapé, abaixo
+        da dobra <span class="pg">p.90</span>.
+      </p>
+
+      <div class="wire" role="img" aria-label="Esquema do layout ruim: tabela gigante no topo, gráfico-herói enterrado no rodapé">
+        <div class="zone">
+          <div class="badge">N</div>
+          <div class="zbody">
+            <div class="zt">Barra de navegação — sidebar E topbar juntas</div>
+            <div class="zc">17 ícones sem rótulo, nenhum padrão, sem ajuda <span class="pg">UXers</span> — Lei de Jakob + Lei de Hick</div>
+          </div>
+        </div>
+        <div class="zone">
+          <div class="badge">A</div>
+          <div class="zbody">
+            <div class="zt">Banner "PAINEL GERENCIAL ESTRATÉGICO INTEGRADO…"</div>
+            <div class="zc">CAIXA ALTA, fonte decorativa, 3 tamanhos, degradê <span class="gradient-sin"></span> <span class="pg">p.53</span> <span class="pg">p.54</span></div>
+          </div>
+        </div>
+        <div class="zone">
+          <div class="badge">B</div>
+          <div class="zbody">
+            <div class="zt">[Ano ▾] + Faixa de 8 KPIs — mesmo bloco, 8 cores, 8 tamanhos, 8 bordas</div>
+            <div class="chips mismatch">
+              <span class="k">30,8%</span><span class="k">3739506</span><span class="k">22616421</span>
+              <span class="k">107,9</span><span class="k">6545187195,36</span><span class="k">0,0605</span>
+              <span class="k">228</span><span class="k">287</span>
+            </div>
+            <div class="zc">similaridade quebrada <span class="pg">p.27</span> · região comum quebrada <span class="pg">UXers</span> · métrica de vaidade <span class="pg">UXers</span></div>
+          </div>
+        </div>
+        <div class="zone">
+          <div class="badge">C</div>
+          <div class="zbody table-block">
+            <div class="zt">TABELÃO — no melhor lugar da tela, grid escuro, fundo = mesmo cinza da página</div>
+            <div class="zc">Prägnanz <span class="pg">p.32</span> · figura-fundo <span class="pg">UXers</span> · sem ordenação <span class="pg">UXers</span></div>
+          </div>
+        </div>
+        <div class="zone">
+          <div class="badge">D</div>
+          <div class="zbody">
+            <div class="zt">Três gráficos circulares — um deles em estilo 3D</div>
+            <div class="pies"><span class="pie many"></span><span class="pie"></span><span class="pie"></span></div>
+            <div class="zc">Prägnanz <span class="pg">p.32</span> · diversidade de tipos <span class="pg">UXers</span> · legenda 10px <span class="pg">UXers</span></div>
+          </div>
+        </div>
+        <div class="zone">
+          <div class="badge">E</div>
+          <div class="zbody">
+            <div class="zt">Dois mapas concorrentes — Acessibilidade</div>
+            <div class="duo"><span class="m">taxa · verde→vermelho</span><span class="m">internações · azul→vermelho</span></div>
+            <div class="zc">daltonismo, dois pares ruins <span class="pg">p.79</span> <span class="pg">UXers</span> · 9 passos <span class="pg">p.82</span></div>
+          </div>
+        </div>
+        <div class="zone">
+          <div class="badge">F</div>
+          <div class="zbody">
+            <div class="zt">Duas barras mal feitas — nenhuma com destaque de cor</div>
+            <div class="duo"><span class="m">idade 0–99 · 100 barras</span><span class="m">municípios A→Z · rótulo 90°</span></div>
+            <div class="zc">ordenação alfabética esconde Porto Alegre · sem ponto focal <span class="pg">UXers</span> · pescoço dói <span class="pg">p.105</span></div>
+          </div>
+        </div>
+        <div class="zone">
+          <div class="badge">G</div>
+          <div class="zbody">
+            <div class="zt">Dispersão espremida — 3,7 mi de marcas em 1200×180</div>
+            <div class="zc">retangular só pra "caber" <span class="pg">p.106</span> · mata a performance <span class="pg">p.111</span></div>
+          </div>
+        </div>
+
+        <div class="fold">dobra aproximada da tela (1080p) — foco cai 68%</div>
+
+        <div class="zone">
+          <div class="badge">H</div>
+          <div class="zbody" style="border-color:var(--turn);">
+            <div class="hero-strip">
+              <div class="spark"></div>
+              <div style="min-width:0;">
+                <div class="zt"><span class="star">★</span> Série temporal — o insight, enterrado</div>
+                <div class="zc">eixo Y fixado em 0,26–0,34 <span class="pg">p.103</span> · 287 linhas espaguete <span class="pg">p.31</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="zone">
+          <div class="badge">I</div>
+          <div class="zbody">
+            <div class="zt">10 filtros aqui no rodapé — longe de tudo que controlam</div>
+            <div class="chips">
+              <span class="k">Município</span><span class="k">Hospital</span><span class="k">Tipo leito</span>
+              <span class="k">Especialidade</span><span class="k">Sexo</span><span class="k">Raça</span>
+              <span class="k">Complexidade</span><span class="k">Caráter</span><span class="k">Motivo saída</span><span class="k">Faixa valor</span>
+            </div>
+            <div class="zc">Lei de Hick <span class="pg">UXers</span> (+17 ícones em N) · contraste ruim num chip <span class="pg">UXers</span></div>
+          </div>
+        </div>
+        <div class="zone">
+          <div class="badge">J</div>
+          <div class="zbody">
+            <div class="zt" style="font-weight:500;color:var(--muted);font-size:.85rem;">Rodapé vazio — sem fonte, sem data de atualização <span class="pg">UXers</span> (Nielsen: visibilidade do sistema)</div>
+          </div>
+        </div>
+      </div>
+      <p class="cap">O esquema acima é o mapa do crime. Cada bloco N–J é detalhado na seção 5, com a correção que a V2 aponta.</p>
+    </section>
+
+    <!-- 4 -->
+    <section class="block" id="inventario">
+      <div class="sec-head"><span class="snum">04</span><h2>Inventário de princípios utilizáveis</h2></div>
+      <p class="sec-intro">
+        O catálogo dos princípios do deck que dá pra <b>aplicar</b> (na V2) ou <b>violar de
+        propósito</b> (na V1) — e a <b>chave</b> de todas as referências <span class="pg">p.NN</span>
+        deste documento. O deck separa duas famílias que trabalham juntas <span class="pg">p.36</span>:
+        <b>atributos pré-atentivos</b> trazem clareza (destacam <em>um</em> ponto); <b>Gestalt</b>
+        organiza a complexidade (agrupa <em>muitos</em>).
+      </p>
+      <p class="cap">Este inventário é só o deck do Aurélien — os princípios do refinamento dos
+        UXers (Lei de Jakob, heurísticas de Nielsen, métrica de vaidade, Lei de Hick aplicada a
+        menu) estão em <span class="field">docs/uxers_guidance.md</span>, não aqui. Os UXers
+        também pediram pra cortar o peso cognitivo da seção 4.1 abaixo — fica como referência,
+        não mais como pilar organizador do wireframe (seção 5).</p>
+
+      <h3>4.1 · Atributos pré-atentivos — a tabela mais útil do deck <span class="pg">p.22</span></h3>
+      <p>Ela diz qual atributo serve pra <b>categoria</b> (dimensão) e qual serve pra <b>quantidade</b>
+        (medida). Leitura prática: <b>matiz para categorias; posição, comprimento e intensidade para
+        quantidades.</b></p>
+      <div class="scroller">
+        <table>
+          <thead><tr><th>Atributo</th><th>Categoria</th><th>Quantidade</th></tr></thead>
+          <tbody>
+            <tr><td>Cor (matiz)</td><td><span class="lvl hi">Alto</span></td><td><span class="lvl lo">Baixo</span></td></tr>
+            <tr><td>Cor (intensidade)</td><td><span class="lvl mid">Médio</span></td><td><span class="lvl hi">Alto</span></td></tr>
+            <tr><td>Tamanho</td><td><span class="lvl mid">Médio</span></td><td><span class="lvl hi">Alto</span></td></tr>
+            <tr><td>Forma</td><td><span class="lvl hi">Alto</span></td><td><span class="lvl lo">Baixo</span></td></tr>
+            <tr><td>Posição</td><td><span class="lvl hi">Alto</span></td><td><span class="lvl hi">Alto</span></td></tr>
+            <tr><td>Orientação</td><td><span class="lvl mid">Médio</span></td><td><span class="lvl lo">Baixo</span></td></tr>
+            <tr><td>Largura</td><td><span class="lvl lo">Baixo</span></td><td><span class="lvl mid">Médio</span></td></tr>
+            <tr><td>Comprimento</td><td><span class="lvl lo">Baixo</span></td><td><span class="lvl hi">Alto</span></td></tr>
+            <tr><td>Agrupamento</td><td><span class="lvl mid">Médio</span></td><td><span class="lvl lo">Baixo</span></td></tr>
+            <tr><td>Enclausuramento</td><td><span class="lvl mid">Médio</span></td><td><span class="lvl lo">Baixo</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="cap">Quase todo pecado de cor da V1 é usar matiz (o mais forte) como enfeite — e sobrar nada pra destacar o que importa.</p>
+
+      <h3>4.2 · Princípios de Gestalt — organizar o caos</h3>
+      <div class="scroller">
+        <table>
+          <thead><tr><th>Princípio</th><th>Slide</th><th>Em uma frase</th></tr></thead>
+          <tbody>
+            <tr><td class="strong-cell">Fechamento</td><td class="num"><span class="pg">p.25</span></td><td>A mente completa o que o olho começa (dispensa grade fechada)</td></tr>
+            <tr><td class="strong-cell">Proximidade</td><td class="num"><span class="pg">p.26</span></td><td>Perto = relacionado</td></tr>
+            <tr><td class="strong-cell">Similaridade</td><td class="num"><span class="pg">p.27</span></td><td>Formas iguais sinalizam função igual</td></tr>
+            <tr><td class="strong-cell">Região comum</td><td class="num"><span class="pg">p.28</span></td><td>Um recorte compartilhado une elementos</td></tr>
+            <tr><td class="strong-cell">Ponto focal</td><td class="num"><span class="pg">p.29</span></td><td>Leve o olho pro que mais importa</td></tr>
+            <tr><td class="strong-cell">Figura-fundo</td><td class="num"><span class="pg">p.30</span></td><td>Contraste separa o sujeito do cenário</td></tr>
+            <tr><td class="strong-cell">Destino comum</td><td class="num"><span class="pg">p.31</span></td><td>Direção compartilhada implica propósito compartilhado</td></tr>
+            <tr><td class="strong-cell">Prägnanz</td><td class="num"><span class="pg">p.32</span></td><td>A clareza nasce da forma mais simples</td></tr>
+            <tr><td class="strong-cell">Continuação</td><td class="num"><span class="pg">p.33</span></td><td>O fluxo guia a atenção naturalmente</td></tr>
+            <tr><td class="strong-cell">Simetria</td><td class="num"><span class="pg">p.34</span></td><td>Lados equilibrados trazem ordem</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>4.3 · Carga cognitiva — não fritar o circuito</h3>
+      <div class="scroller">
+        <table>
+          <thead><tr><th>Conceito</th><th>Slide</th><th>Em uma frase</th></tr></thead>
+          <tbody>
+            <tr><td class="strong-cell">Carga intrínseca</td><td class="num"><span class="pg">p.42</span></td><td>Dificuldade natural do próprio dado — difícil de reduzir</td></tr>
+            <tr><td class="strong-cell">Carga extrínseca</td><td class="num"><span class="pg">p.43</span></td><td>Esforço desperdiçado por design ruim — <b>é a que a gente corta</b></td></tr>
+            <tr><td class="strong-cell">Carga germânica</td><td class="num"><span class="pg">p.44</span></td><td>Esforço que ajuda a entender — dá pra aumentar de leve pra baixar a intrínseca</td></tr>
+            <tr><td class="strong-cell">Peso no olho</td><td class="num"><span class="pg">p.47</span></td><td>Stephen Few: boa dataviz tira o esforço do cérebro e põe nos olhos</td></tr>
+            <tr><td class="strong-cell">Nada a tirar</td><td class="num"><span class="pg">p.48</span></td><td>St. Exupéry: perfeição é quando não há mais o que remover</td></tr>
+            <tr><td class="strong-cell">Zona Pokémon</td><td class="num"><span class="pg">p.50</span></td><td>Cor é pra destacar, não pra encher</td></tr>
+            <tr><td class="strong-cell">Hierarquia de texto</td><td class="num"><span class="pg">p.53</span></td><td>Nem todo elemento tem a mesma importância</td></tr>
+            <tr><td class="strong-cell">Tipografia</td><td class="num"><span class="pg">p.54</span></td><td>8 pecados: decorativa, ilegível, baixo contraste, tamanhos soltos, bold/itálico demais, CAIXA ALTA, ligaduras</td></tr>
+            <tr><td class="strong-cell">Sobrecarga de escolha</td><td class="num"><span class="pg">p.55</span></td><td>Opções demais = indecisão ou escolha ruim</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>4.4 · Contexto e apoio — usuário antes do dado</h3>
+      <div class="scroller">
+        <table>
+          <thead><tr><th>Conceito</th><th>Slide</th><th>Em uma frase</th></tr></thead>
+          <tbody>
+            <tr><td class="strong-cell">Sempre dar contexto</td><td class="num"><span class="pg">p.59</span></td><td>Número sozinho quase nunca conta a história</td></tr>
+            <tr><td class="strong-cell">Nome do produto</td><td class="num"><span class="pg">p.61</span></td><td>Um bom projeto merece um bom nome — que declare a pergunta</td></tr>
+            <tr><td class="strong-cell">Ilusão de sucesso</td><td class="num"><span class="pg">p.62</span></td><td>Seu produto de dados está mesmo agregando valor?</td></tr>
+            <tr><td class="strong-cell">Desenhar pro erro</td><td class="num"><span class="pg">p.63</span></td><td>Projete para os enganos, não reze pra evitá-los</td></tr>
+            <tr><td class="strong-cell">Confiança sustenta a narrativa</td><td class="num"><span class="pg">p.69</span></td><td>A narrativa vale o que vale a qualidade declarada do dado</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>4.5 · Layout claro — usuário feliz</h3>
+      <div class="scroller">
+        <table>
+          <thead><tr><th>Conceito</th><th>Slide</th><th>Em uma frase</th></tr></thead>
+          <tbody>
+            <tr><td class="strong-cell">Daltonismo</td><td class="num"><span class="pg">p.79</span></td><td>~8% dos homens, 0,5% das mulheres — nunca dependa só de cor</td></tr>
+            <tr><td class="strong-cell">Data-ink ratio (Tufte)</td><td class="num"><span class="pg">p.81</span></td><td>Proporção da tinta que mostra dado vs. tinta total</td></tr>
+            <tr><td class="strong-cell">Limite de 3–5 tons</td><td class="num"><span class="pg">p.82</span></td><td>Incluindo a cor da fonte</td></tr>
+            <tr><td class="strong-cell">Livro embaralhado</td><td class="num"><span class="pg">p.84</span></td><td>Ordem do layout = ordem da leitura</td></tr>
+            <tr><td class="strong-cell">Filtro perto do alvo</td><td class="num"><span class="pg">p.85</span></td><td>Sempre próximo do gráfico que controla</td></tr>
+            <tr><td class="strong-cell">Padrão F / Z</td><td class="num"><span class="pg">p.86</span></td><td>Do agregado/importante para o detalhe</td></tr>
+            <tr><td class="strong-cell">Margens / respiro</td><td class="num"><span class="pg">p.87</span></td><td>Segmente com espaço vazio, não com borda</td></tr>
+            <tr><td class="strong-cell">Alinhamento</td><td class="num"><span class="pg">p.88</span></td><td>Alinhamento consistente cria harmonia</td></tr>
+            <tr><td class="strong-cell">Estilos misturados</td><td class="num"><span class="pg">p.89</span></td><td>Misturar estilos confunde e quebra o fluxo</td></tr>
+            <tr><td class="strong-cell">Rolagem</td><td class="num"><span class="pg">p.90</span></td><td>NN/g: o foco cai 68% depois da primeira dobra</td></tr>
+            <tr><td class="strong-cell">Pra todos = pra ninguém</td><td class="num"><span class="pg">p.91</span></td><td>Produto para todo mundo não serve a ninguém</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>4.6 · Uso enganoso &amp; performance</h3>
+      <div class="scroller">
+        <table>
+          <thead><tr><th>Conceito</th><th>Slide</th><th>Em uma frase</th></tr></thead>
+          <tbody>
+            <tr><td class="strong-cell">Eixo truncado</td><td class="num"><span class="pg">p.103</span></td><td>Só com um motivo muito bom, a serviço do dado</td></tr>
+            <tr><td class="strong-cell">Cor redundante</td><td class="num"><span class="pg">p.104</span></td><td>Dobrar a altura da barra com cor é desnecessário</td></tr>
+            <tr><td class="strong-cell">Rótulo rotacionado</td><td class="num"><span class="pg">p.105</span></td><td>"Não sei por que meu pescoço dói ultimamente"</td></tr>
+            <tr><td class="strong-cell">Dispersão espremida</td><td class="num"><span class="pg">p.106</span></td><td>Retangular só pra "caber no dashboard" distorce</td></tr>
+            <tr><td class="strong-cell">Cherry-picking (Tufte)</td><td class="num"><span class="pg">p.108</span></td><td>A maior ameaça à credibilidade é o dado escolhido a dedo</td></tr>
+            <tr><td class="strong-cell">Carga e resposta rápidas</td><td class="num"><span class="pg">p.111</span></td><td>Não são bônus — são a base de um bom produto</td></tr>
+            <tr><td class="strong-cell">Síndrome do cockpit</td><td class="num"><span class="pg">p.112</span></td><td>Ao dizer "cockpit" você já desistiu do perímetro</td></tr>
+            <tr><td class="strong-cell">Desafie a necessidade</td><td class="num"><span class="pg">p.119</span></td><td>Deixe-os laser-focados em 1 objetivo</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section class="block" id="mapa">
+      <div class="sec-head"><span class="snum">05</span><h2>Mapa de princípios por região</h2></div>
+      <p class="sec-intro">
+        Enquanto o placar (seção 6) é a lista plana pra riscar ao vivo, este é a lente
+        <b>por região da tela</b>: para cada bloco do wireframe, quais princípios estão em jogo e —
+        o mais importante pro workshop — <b>para onde a virada aponta</b> <span style="color:var(--turn);font-weight:700;">→</span>.
+        Depois do refinamento dos UXers, cada região carrega 1 princípio primário + no máximo
+        1-2 secundários coerentes, etiquetada por bloco — Fundamentos de Design, Experiência do
+        Usuário ou Acessibilidade — não a pilha da primeira passada.
+      </p>
+
+      <div class="regions">
+
+        <article class="region">
+          <div class="rh"><span class="rl">N</span><span class="rn">Barra de navegação <span style="font-weight:400;color:var(--faint);">· nova</span></span></div>
+          <p class="what">Sidebar e topbar juntas, 17 ícones sem rótulo, nenhum de ajuda.</p>
+          <ul class="sins">
+            <li><b>Sobrecarga de escolhas</b> <span class="pg">UXers</span>: sidebar e topbar ao mesmo tempo, mais filtros e botões.</li>
+            <li><b>Lei de Hick</b> <span class="pg">UXers</span>: 17 opções de menu antes mesmo dos filtros (I).</li>
+            <li><b>Lei de Jakob</b> <span class="pg">UXers</span>: ícones fora do padrão do setor — decifrar, não reconhecer. Lacuna mais importante do inventário antigo.</li>
+            <li><b>Ajuda ausente</b> <span class="pg">UXers</span>: nenhum ícone de suporte/glossário.</li>
+          </ul>
+          <div class="turn"><span class="lab">A virada</span>Um menu só, ícones padrão do setor, ícone de ajuda visível — Lei de Hick e Lei de Jakob resolvidas juntas.</div>
+        </article>
+
+        <article class="region">
+          <div class="rh"><span class="rl">A</span><span class="rn">Banner de título</span></div>
+          <p class="what">Nome de cockpit, CAIXA ALTA, 3 tamanhos, degradê no fundo.</p>
+          <ul class="sins">
+            <li><b>Figura-fundo</b> <span class="pg">p.30</span>: o degradê é o "figura"; o dado devia ser.</li>
+            <li><b>Hierarquia + Tipografia</b> <span class="pg">p.53</span> <span class="pg">p.54</span>: 3 tamanhos = zero hierarquia.</li>
+            <li><b>Nome do produto + Cockpit</b> <span class="pg">p.61</span> <span class="pg">p.112</span>: o nome é a própria síndrome.</li>
+          </ul>
+          <div class="turn"><span class="lab">A virada</span>Um nome que declara a <b>pergunta</b>, escala tipográfica de 3 níveis, fundo neutro que deixa o número virar sujeito.</div>
+        </article>
+
+        <article class="region">
+          <div class="rh"><span class="rl">B</span><span class="rn">Faixa de KPIs</span></div>
+          <p class="what">8 cartões de mesma função com 8 estilos, filtro Ano no mesmo bloco.</p>
+          <ul class="sins">
+            <li><b>Similaridade</b> <span class="pg">p.27</span>: 8 estilos gritam "somos coisas diferentes".</li>
+            <li><b>Região comum</b> <span class="pg">UXers</span>: filtro Ano no mesmo espaço visual dos KPIs.</li>
+            <li><b>Métrica de vaidade</b> <span class="pg">UXers</span>: "Municípios" não leva a nenhuma decisão.</li>
+            <li><b>Contexto</b> <span class="pg">p.59</span>: "6,05 dias" e "6,05%" lado a lado sem unidade.</li>
+          </ul>
+          <div class="turn"><span class="lab">A virada</span>Um estilo só; filtro fora do bloco de KPIs; cortar/trocar o KPI de vaidade; cada número com sua comparação.</div>
+        </article>
+
+        <article class="region">
+          <div class="rh"><span class="rl">C</span><span class="rn">Tabelão</span></div>
+          <p class="what">228 × 60 × 6 no melhor imóvel da tela, 4 casas decimais, grid escuro.</p>
+          <ul class="sins">
+            <li><b>Prägnanz + carga extrínseca</b> <span class="pg">p.32</span> <span class="pg">p.43</span>: ~82 mil células de ruído.</li>
+            <li><b>Figura-fundo</b> <span class="pg">UXers</span>: fundo do container igual ao da página — sem contraste de card.</li>
+            <li><b>Nielsen — controle do usuário</b> <span class="pg">UXers</span>: colunas sem ordenação.</li>
+          </ul>
+          <div class="turn"><span class="lab">A virada</span>Se a tabela é mesmo necessária, ela é um <b>relatório separado</b> <span class="pg">p.75</span>, não a capa. Se ficar: fundo branco, grid claro, colunas ordenáveis.</div>
+        </article>
+
+        <article class="region">
+          <div class="rh"><span class="rl">D</span><span class="rn">Gráficos circulares</span></div>
+          <p class="what">Pizza de 58 fatias em estilo 3D, rosca de sexo, pizza de raça/cor.</p>
+          <ul class="sins">
+            <li><b>Prägnanz</b> <span class="pg">p.32</span>: 58 fatias, ~35 abaixo de 1%.</li>
+            <li><b>Diversidade de tipos de gráfico</b> <span class="pg">UXers</span>: pizza 2D, pizza 3D e rosca na mesma linha.</li>
+            <li><b>Fonte mínima</b> <span class="pg">UXers</span>: legenda de 58 itens a 10px, abaixo do mínimo de 14px/9pt.</li>
+            <li><b>Contexto</b> <span class="pg">p.59</span>: NULL e "Sem Informação" (11%) sem nota.</li>
+          </ul>
+          <div class="turn"><span class="lab">A virada</span>2D, mesmo tipo (barra ordenada), mesma paleta pros três <span class="pg">p.27</span>; fonte de legenda ≥14px.</div>
+        </article>
+
+        <article class="region">
+          <div class="rh"><span class="rl">E</span><span class="rn">Mapas concorrentes <span style="font-weight:400;color:var(--faint);">· âncora A11</span></span></div>
+          <p class="what">Dois mapas do mesmo tamanho; verde→vermelho e azul→vermelho, 9 passos.</p>
+          <ul class="sins">
+            <li><b>Daltonismo</b> <span class="pg">p.79</span> <span class="pg">UXers</span>: dois pares ruins diferentes, um por mapa.</li>
+            <li><b>3–5 tons</b> <span class="pg">p.82</span>: 9 passos inventam precisão que não existe.</li>
+          </ul>
+          <div class="turn"><span class="lab">A virada</span>Paleta segura de 4 níveis nos dois; <b>destino comum</b> <span class="pg">p.31</span> — um mapa-herói + detalhe on-demand em vez de dois competindo.</div>
+        </article>
+
+        <article class="region">
+          <div class="rh"><span class="rl">F</span><span class="rn">Barras mal feitas</span></div>
+          <p class="what">Idade em 100 barras; municípios A→Z, rótulo a 90°, sem destaque de cor.</p>
+          <ul class="sins">
+            <li><b>Continuidade</b> <span class="pg">p.33</span>: ordem alfabética quebra o fluxo.</li>
+            <li><b>Ponto focal</b> <span class="pg">UXers</span>: nenhuma barra destacada — nem Porto Alegre (23% do estado).</li>
+            <li><b>Cor redundante</b> <span class="pg">p.104</span>: cor por barra arbitrária, não codifica nada.</li>
+            <li><b>Rótulo rotacionado</b> <span class="pg">p.105</span>: 90° → barra horizontal.</li>
+          </ul>
+          <div class="turn"><span class="lab">A virada</span>Ordenar por valor, barra horizontal, cinza em geral com destaque de cor primária só na barra relevante <span class="pg">UXers</span>.</div>
+        </article>
+
+        <article class="region">
+          <div class="rh"><span class="rl">G</span><span class="rn">Dispersão espremida <span style="font-weight:400;color:var(--faint);">· só Aurélien</span></span></div>
+          <p class="what">Valor × permanência, 3,7 mi de marcas em 1200×180 px.</p>
+          <ul class="sins">
+            <li><b>Dispersão retangular</b> <span class="pg">p.106</span>: achata a relação real.</li>
+            <li><b>Performance</b> <span class="pg">p.111</span>: a planilha que sozinha derruba a demo.</li>
+          </ul>
+          <div class="turn"><span class="lab">A virada</span>Agregar (por faixa de valor/complexidade) resolve performance <b>e</b> revela o padrão; proporção ~1:1 (<b>simetria</b> <span class="pg">p.34</span>) devolve a leitura dos eixos. Fora do refinamento dos UXers — primeira a cortar se o tempo apertar.</div>
+        </article>
+
+        <article class="region">
+          <div class="rh"><span class="rl">H</span><span class="rn">Série temporal (o herói enterrado)</span></div>
+          <p class="what">Ocupação mensal 2019–2023, eixo Y 0,26–0,34, 287 linhas, no rodapé.</p>
+          <ul class="sins">
+            <li><b>Eixo truncado</b> <span class="pg">p.103</span>: ~7 p.p. reais viram colapso e pico.</li>
+            <li><b>Rolagem</b> <span class="pg">p.90</span> <span class="pg">UXers</span>: a resposta nº 1 no rodapé.</li>
+            <li><b>Destino comum</b> <span class="pg">p.31</span>: 287 linhas espaguete não comunicam.</li>
+            <li><b>Contexto</b> <span class="pg">p.59</span> <span class="pg">UXers</span>: a pandemia não está marcada.</li>
+          </ul>
+          <div class="turn"><span class="lab">A virada</span>Este é o <b>ponto focal</b> <span class="pg">p.29</span> que devia abrir a tela: eixo em zero, 1–3 séries destacadas, anotação do evento — a pergunta respondida em 3 segundos.</div>
+        </article>
+
+        <article class="region">
+          <div class="rh"><span class="rl">I</span><span class="rn">Filtros espalhados</span></div>
+          <p class="what">10 filtros no rodapé, sem botão "aplicar", espaçamento uniforme.</p>
+          <ul class="sins">
+            <li><b>Lei de Hick</b> <span class="pg">UXers</span>: 10 filtros aqui + 17 ícones de menu em N.</li>
+            <li><b>Proximidade</b> <span class="pg">UXers</span>: espaçamento igual dentro e entre grupos temáticos — nada agrupa por assunto.</li>
+            <li><b>Contraste</b> <span class="pg">UXers</span>: chip "Complexidade" com fundo e fonte escuros.</li>
+          </ul>
+          <div class="turn"><span class="lab">A virada</span>No máximo 3-5 filtros com "mostrar mais" <span class="pg">UXers</span>; agrupar por espaçamento menor dentro do mesmo tema; contraste AA em todo chip.</div>
+        </article>
+
+        <article class="region">
+          <div class="rh"><span class="rl">J</span><span class="rn">Rodapé vazio</span></div>
+          <p class="what">Nem fonte, nem data de atualização — nada.</p>
+          <ul class="sins">
+            <li><b>Nielsen — visibilidade do sistema</b> <span class="pg">UXers</span>: zero indicação de origem/atualização dos dados.</li>
+            <li><b>Contexto</b> <span class="pg">p.59</span>: 187,8% de ocupação aparece na tabela/mapa sem nota em lugar nenhum.</li>
+            <li><b>Confiança sustenta a narrativa</b> <span class="pg">p.69</span>: esconder a limitação enfraquece a afirmação.</li>
+          </ul>
+          <div class="turn"><span class="lab">A virada</span>A nota de método não é letra miúda — é o que dá <b>credibilidade</b>. Fonte + data reais, perto do número que qualificam.</div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section class="block" id="placar">
+      <div class="sec-head"><span class="snum">06</span><h2>Placar de pecados</h2></div>
+      <p class="sec-intro">
+        O roteiro do workshop: 46 rounds (38 do deck do Aurélien + 8 do refinamento dos UXers,
+        linhas 39-46). A dupla pode ir riscando ao vivo — princípio, onde está, e a correção que
+        a V2 aponta.
+      </p>
+      <div class="scroller">
+        <table class="ledger">
+          <thead><tr><th>#</th><th>Princípio violado</th><th>Deck</th><th>Onde está</th><th>Correção na V2</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td class="viol">Proximidade</td><td class="num"><span class="pg">p.26</span></td><td>Filtros (I) longe dos alvos</td><td class="fix">Filtro junto do gráfico que controla</td></tr>
+            <tr><td>2</td><td class="viol">Similaridade</td><td class="num"><span class="pg">p.27</span></td><td>KPIs (B) com 8 estilos</td><td class="fix">Um só estilo de tile por função</td></tr>
+            <tr><td>3</td><td class="viol">Região comum</td><td class="num"><span class="pg">p.28</span></td><td>Tudo com borda, nada agrupado</td><td class="fix">Agrupar por espaço vazio, não por borda</td></tr>
+            <tr><td>4</td><td class="viol">Ponto focal</td><td class="num"><span class="pg">p.29</span></td><td>Tabelão + 2 mapas competindo</td><td class="fix">Um único herói na tela</td></tr>
+            <tr><td>5</td><td class="viol">Figura-fundo</td><td class="num"><span class="pg">p.30</span></td><td>Degradê (A); tabelão com fundo igual à página (C)</td><td class="fix">Fundo neutro; card com contraste</td></tr>
+            <tr><td>6</td><td class="viol">Destino comum</td><td class="num"><span class="pg">p.31</span></td><td>287 linhas espaguete (H)</td><td class="fix">Agregar; destacar 1–3 séries</td></tr>
+            <tr><td>7</td><td class="viol">Prägnanz</td><td class="num"><span class="pg">p.32</span></td><td>Tabelão (C); pizza 3D de 58 fatias (D1)</td><td class="fix">Simplificar; 2D só</td></tr>
+            <tr><td>8</td><td class="viol">Continuidade</td><td class="num"><span class="pg">p.33</span></td><td>Barras em ordem alfabética (F2)</td><td class="fix">Ordenar por valor</td></tr>
+            <tr><td>9</td><td class="viol">Fechamento / Simetria</td><td class="num"><span class="pg">p.25</span> <span class="pg">p.34</span></td><td>Grade completa, alinhamento caótico</td><td class="fix">Remover grade; alinhar em grid</td></tr>
+            <tr><td>10</td><td class="viol">Atributos pré-atentivos</td><td class="num"><span class="pg">p.22</span></td><td>Matiz usado pra quantidade</td><td class="fix">Intensidade/posição pra quantitativo</td></tr>
+            <tr><td>11</td><td class="viol">Sobrecarga extrínseca</td><td class="num"><span class="pg">p.43</span></td><td>Tabelão, 3 pizzas, 100 barras</td><td class="fix">Cortar o que não responde à pergunta</td></tr>
+            <tr><td>12</td><td class="viol">Zona Pokémon</td><td class="num"><span class="pg">p.50</span></td><td>8 cores nos KPIs, barras arco-íris</td><td class="fix">Paleta de 3–5 tons</td></tr>
+            <tr><td>13</td><td class="viol">Hierarquia de texto</td><td class="num"><span class="pg">p.53</span></td><td>Banner com 3 tamanhos, tudo em caps</td><td class="fix">Escala tipográfica de 3 níveis</td></tr>
+            <tr><td>14</td><td class="viol">Tipografia</td><td class="num"><span class="pg">p.54</span></td><td>Fonte decorativa, caps, baixo contraste</td><td class="fix">Sans-serif legível, contraste AA</td></tr>
+            <tr><td>15</td><td class="viol">Sobrecarga de escolha / Lei de Hick</td><td class="num"><span class="pg">p.55</span> <span class="pg">UXers</span></td><td>Nav (N): 17 ícones; filtros (I): 10, sem "mostrar mais"</td><td class="fix">Menu de 5 + filtros de 3 + "mostrar mais"</td></tr>
+            <tr><td>16</td><td class="viol">Contexto ausente</td><td class="num"><span class="pg">p.59</span></td><td>KPIs (B) sem comparação, meta ou período</td><td class="fix">Cada KPI com sua comparação</td></tr>
+            <tr><td>17</td><td class="viol">Nome do produto</td><td class="num"><span class="pg">p.61</span> <span class="pg">p.112</span></td><td>"Painel Gerencial Integrado v1.4"</td><td class="fix">Nome que declara a pergunta</td></tr>
+            <tr><td>18</td><td class="viol">Desenhar para o erro</td><td class="num"><span class="pg">p.63</span></td><td>187% de ocupação crua na tabela (C) e mapa (E)</td><td class="fix">Nota de método + tratar outlier</td></tr>
+            <tr><td>19</td><td class="viol">Produto errado</td><td class="num"><span class="pg">p.71</span> <span class="pg">p.73</span></td><td>Tabelão dentro de um dashboard</td><td class="fix">Dashboard ≠ relatório: separar</td></tr>
+            <tr><td>20</td><td class="viol">Daltonismo (par 1)</td><td class="num"><span class="pg">p.79</span></td><td>Mapa 1 verde→vermelho (E)</td><td class="fix">Paleta segura, testada</td></tr>
+            <tr><td>21</td><td class="viol">Data-ink ratio</td><td class="num"><span class="pg">p.81</span></td><td>Grade, bordas, sombras, degradê</td><td class="fix">Remover tudo que não é dado</td></tr>
+            <tr><td>22</td><td class="viol">3–5 tons</td><td class="num"><span class="pg">p.82</span></td><td>Mapa com 9 passos</td><td class="fix">Reduzir a 4 níveis</td></tr>
+            <tr><td>23</td><td class="viol">Layout embaralhado</td><td class="num"><span class="pg">p.84</span></td><td>Insight no rodapé, tabela no topo</td><td class="fix">Ordem = importância</td></tr>
+            <tr><td>24</td><td class="viol">Filtro perto do alvo</td><td class="num"><span class="pg">p.85</span></td><td>Filtros (I)</td><td class="fix">Reposicionar junto do gráfico</td></tr>
+            <tr><td>25</td><td class="viol">Padrão F/Z</td><td class="num"><span class="pg">p.86</span></td><td>Ordem invertida</td><td class="fix">Alto→baixo em agregação e importância</td></tr>
+            <tr><td>26</td><td class="viol">Margens / respiro</td><td class="num"><span class="pg">p.87</span></td><td>Zero margem, bordas em tudo</td><td class="fix">Espaço vazio como separador</td></tr>
+            <tr><td>27</td><td class="viol">Alinhamento</td><td class="num"><span class="pg">p.88</span></td><td>Logos e tiles desalinhados</td><td class="fix">Grid consistente</td></tr>
+            <tr><td>28</td><td class="viol">Estilos misturados</td><td class="num"><span class="pg">p.89</span></td><td>3 paletas diferentes nas pizzas</td><td class="fix">Um sistema visual só</td></tr>
+            <tr><td>29</td><td class="viol">Rolagem</td><td class="num"><span class="pg">p.90</span></td><td>2600 px de altura</td><td class="fix">Caber numa tela</td></tr>
+            <tr><td>30</td><td class="viol">Feito pra todo mundo</td><td class="num"><span class="pg">p.91</span></td><td>Sem persona</td><td class="fix">Definir persona única</td></tr>
+            <tr><td>31</td><td class="viol">Processo pulado</td><td class="num"><span class="pg">p.94</span> <span class="pg">p.99</span></td><td>Abriu o Tableau primeiro</td><td class="fix">Define → Design → Develop</td></tr>
+            <tr><td>32</td><td class="viol">Eixo truncado</td><td class="num"><span class="pg">p.103</span></td><td>Eixo Y 0,26–0,34 (H)</td><td class="fix">Eixo em zero, ou justificar</td></tr>
+            <tr><td>33</td><td class="viol">Cor redundante</td><td class="num"><span class="pg">p.104</span></td><td>Barras coloridas por barra</td><td class="fix">Cor só pra destacar</td></tr>
+            <tr><td>34</td><td class="viol">Rótulo vertical</td><td class="num"><span class="pg">p.105</span></td><td>Municípios a 90° (F2)</td><td class="fix">Barras horizontais</td></tr>
+            <tr><td>35</td><td class="viol">Dispersão espremida</td><td class="num"><span class="pg">p.106</span></td><td>(G) em 1200×180</td><td class="fix">Proporção ~1:1</td></tr>
+            <tr><td>36</td><td class="viol">Cherry-picking / ordenação</td><td class="num"><span class="pg">p.108</span></td><td>Porto Alegre (23%) escondido no alfabeto (F2)</td><td class="fix">Ordenar por valor, destacar</td></tr>
+            <tr><td>37</td><td class="viol">Performance</td><td class="num"><span class="pg">p.111</span></td><td>3,7 mi de marcas, 10 filtros</td><td class="fix">Agregar na fonte</td></tr>
+            <tr><td>38</td><td class="viol">Síndrome do cockpit</td><td class="num"><span class="pg">p.112</span>–<span class="pg">p.114</span></td><td>30 indicadores numa tela</td><td class="fix">1 objetivo, 1 tela</td></tr>
+            <tr><td>39</td><td class="viol">Lei de Jakob</td><td class="num"><span class="pg">UXers</span></td><td>Nav (N): ícones fora do padrão</td><td class="fix">Ícones padrão, reconhecíveis</td></tr>
+            <tr><td>40</td><td class="viol">Ajuda ausente</td><td class="num"><span class="pg">UXers</span></td><td>Nav (N): 17 ícones, nenhum de ajuda</td><td class="fix">Botão de ajuda/glossário</td></tr>
+            <tr><td>41</td><td class="viol">Métrica de vaidade</td><td class="num"><span class="pg">UXers</span></td><td>KPI "Municípios" (B) sem decisão associada</td><td class="fix">Cortar ou trocar por métrica acionável</td></tr>
+            <tr><td>42</td><td class="viol">Nielsen — controle do usuário</td><td class="num"><span class="pg">UXers</span></td><td>Tabelão (C) sem ordenação</td><td class="fix">Colunas ordenáveis</td></tr>
+            <tr><td>43</td><td class="viol">Nielsen — visibilidade do sistema</td><td class="num"><span class="pg">UXers</span></td><td>Rodapé vazio (J): sem fonte, sem data</td><td class="fix">Fonte + data visíveis</td></tr>
+            <tr><td>44</td><td class="viol">Fonte mínima</td><td class="num"><span class="pg">UXers</span></td><td>Legenda da pizza D1, 10px</td><td class="fix">Mínimo 14px/9pt</td></tr>
+            <tr><td>45</td><td class="viol">Contraste</td><td class="num"><span class="pg">UXers</span></td><td>Chip "Complexidade" (I): fundo/fonte escuros</td><td class="fix">Fundo escuro + fonte clara</td></tr>
+            <tr><td>46</td><td class="viol">Daltonismo (par 2)</td><td class="num"><span class="pg">UXers</span></td><td>Mapa 2 azul→vermelho (E)</td><td class="fix">Verde→laranja</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 7 -->
+    <section class="block" id="processo">
+      <div class="sec-head"><span class="snum">07</span><h2>Como vamos rodar</h2></div>
+      <p class="sec-intro">
+        A ordem de construção garante uma demo completa mesmo parando na metade; o registro do
+        "antes" é o que sobe no slide de abertura.
+      </p>
+
+      <div class="cols">
+        <div class="panel">
+          <h4>Ordem de construção</h4>
+          <ol class="steps">
+            <li><b>Fonte</b> — uma única fonte de dados do Tableau, três tabelas ligadas por <b>Relacionamentos</b> (não Joins físicos) em <span class="field">id_estabelecimento_cnes + ano_mes</span>. <span class="field">hospitalizacoes</span> e <span class="field">leitos</span> têm grãos diferentes — um join físico faria fan-out; <span class="field">occupancy</span> já vem agregada e serve de tabela "segura". Não renomear campo nenhum.</li>
+            <li><b>P0 primeiro</b> — N → A → B → C → D → H → I → J. Isso já cobre a maior parte do placar.</li>
+            <li><b>P1</b> — E (mapas) → F (barras).</li>
+            <li><b>P2</b> — G (dispersão), por último. Se travar a demo, cortar sem dó: o argumento de performance se sustenta só com os filtros e o menu de N.</li>
+            <li><b>Montagem</b> — <em>Tiled</em> onde couber, com flutuantes desalinhados de propósito nos logos e KPIs.</li>
+            <li><b>Tooltips</b> — não editar nenhuma; o padrão do Tableau já expõe nome técnico ao usuário.</li>
+          </ol>
+        </div>
+        <div class="panel">
+          <h4>Registrar o "antes"</h4>
+          <ul>
+            <li><b>Print da página inteira</b> (1200×2600) — vira o slide de abertura.</li>
+            <li><b>Print da primeira dobra</b> — o que o usuário realmente vê.</li>
+            <li><b>Tempo de carga</b> cronometrado + resposta ao filtrar um município — número real vale mais que "estava lento" <span class="pg">p.111</span>.</li>
+            <li><b>Gravação</b> de alguém tentando responder <em>"a ocupação subiu ou caiu em 2020?"</em> — o teste de usabilidade mais barato, e o mais convincente no palco.</li>
+          </ul>
+          <p style="margin:16px 0 0;font-size:.85rem;color:var(--muted);max-width:none;">Guardar em <span class="field">docs/assets/v1/</span>.</p>
+        </div>
+      </div>
+
+      <h4 style="margin-top:32px;">Próximos passos</h4>
+      <ol class="steps" style="max-width:var(--maxw);">
+        <li>Construir a V1 no Tableau conforme esta especificação.</li>
+        <li>Capturar os artefatos do "antes".</li>
+        <li>Workshop de redesign com a dupla de UX, usando o placar (seção 6, lista) e o mapa (seção 5, por região) como roteiro.</li>
+        <li>Produzir a V2 e documentar o <em>depois</em>.</li>
+      </ol>
+    </section>
+
+  </main>
+</div>
+
+<footer class="foot">
+  Dashboard de ocupação hospitalar (RS, 2019–2023) · SIH-SUS × CNES via Base dos Dados.
+  Documento de trabalho para a apresentação no Tableau User Group. Princípios de
+  <em>Learn Design Driven Data Visualization</em> — Aurélien Vautier / Dataviz Clarity,
+  CC BY-NC-ND 4.0, refinados por <span class="field">docs/uxers_guidance.md</span>. Fonte técnica
+  completa da construção: <span class="field">docs/dashboard_v1_spec.md</span>.
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var btn = document.getElementById('themeToggle');
+  var icon = document.getElementById('themeIcon');
+  var label = document.getElementById('themeLabel');
+
+  function apply(mode) {
+    if (mode === 'light' || mode === 'dark') {
+      root.setAttribute('data-theme', mode);
+    } else {
+      root.removeAttribute('data-theme');
+    }
+    var dark = mode === 'dark' ||
+      (mode !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    icon.textContent = dark ? '☀' : '☾';
+    label.textContent = dark ? 'Claro' : 'Escuro';
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('dv_theme'); } catch (e) {}
+  apply(saved);
+
+  btn.addEventListener('click', function () {
+    var dark = root.getAttribute('data-theme') === 'dark' ||
+      (!root.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    var next = dark ? 'light' : 'dark';
+    apply(next);
+    try { localStorage.setItem('dv_theme', next); } catch (e) {}
+  });
+
+  // active section in the TOC
+  var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+  var map = {};
+  links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+  if ('IntersectionObserver' in window) {
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          links.forEach(function (a) { a.classList.remove('active'); });
+          var a = map[en.target.id];
+          if (a) {
+            a.classList.add('active');
+            if (window.innerWidth < 1040) {
+              a.scrollIntoView({ block: 'nearest', inline: 'center' });
+            }
+          }
+        }
+      });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    document.querySelectorAll('section.block').forEach(function (s) { obs.observe(s); });
+  }
+})();
+</script>
+
+</body>
+</html>
