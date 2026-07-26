@@ -106,24 +106,60 @@
   .dfix { font-size:.86rem; color:var(--turn); }
   .dfix b { font-weight:700; }
 
-  /* N — nav chrome: sidebar + topbar together, unfamiliar icon glyphs, no help icon */
-  .navbar { display:flex; background:#20242c; color:#cfd3dc; }
-  .navbar .sidebar {
-    display:flex; flex-direction:column; gap:6px; padding:8px 6px;
-    background:#171a20; border-right:1px solid #333;
+  /* N — nav chrome: rail lateral de altura inteira + appbar no topo do conteúdo.
+     Parece um app de BI de verdade — e é justamente por parecer que os pecados contam:
+     17 opções de menu (12 + 5), glifos que ninguém reconhece, nenhum ícone de ajuda. */
+  .railzone { flex:none; display:flex; }
+  .rail {
+    width:56px; background:#171a20; color:#8d95a1;
+    display:flex; flex-direction:column; align-items:center; gap:2px; padding:10px 0 12px;
   }
-  .navbar .topbar { display:flex; align-items:center; gap:6px; padding:8px 10px; flex:1; flex-wrap:wrap; }
-  .navbar .ic {
-    width:22px; height:22px; display:grid; place-items:center; border-radius:4px;
-    background:#2c313c; font-size:.75rem; color:#9aa3ae; flex:none;
+  .rail .mark {
+    width:32px; height:32px; border-radius:8px; margin-bottom:10px; flex:none;
+    display:grid; place-items:center; background:linear-gradient(140deg,#2b4c8c,#7b3fa0);
+    color:#fff; font-family:var(--font-mono); font-weight:700; font-size:.58rem;
   }
-  .navbar .topbar .ic { width:20px; height:20px; }
+  .rail .ic {
+    width:34px; height:30px; flex:none; display:grid; place-items:center; border-radius:6px;
+    font-size:.95rem; color:#8d95a1; position:relative;
+  }
+  .rail .ic:hover { background:#22262e; color:#cfd3dc; }
+  .rail .ic.on { background:#2b3140; color:#fff; }
+  .rail .ic.on::before {
+    content:""; position:absolute; left:-11px; top:6px; bottom:6px;
+    width:3px; border-radius:0 2px 2px 0; background:#5b8def;
+  }
+  .rail .sep { width:24px; height:1px; background:#2b3038; margin:6px 0; flex:none; }
+  .rail .spring { flex:1 1 auto; }
+  .rail .avatar {
+    width:28px; height:28px; border-radius:50%; flex:none; display:grid; place-items:center;
+    background:#3a4152; color:#cfd3dc; font-family:var(--font-mono); font-size:.58rem; font-weight:700;
+  }
+
+  .topzone { flex:none; }
+  .appbar {
+    display:flex; align-items:center; gap:8px; height:44px; padding:0 14px;
+    background:#20242c; border-bottom:1px solid #2c313c; color:#aab1bc;
+  }
+  .appbar .crumb {
+    font-family:var(--font-mono); font-size:.66rem; letter-spacing:.07em;
+    text-transform:uppercase; color:#7f8794; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .appbar .crumb b { color:#dfe3ee; font-weight:600; }
+  .appbar .spring { flex:1 1 auto; }
+  .appbar .ic {
+    width:28px; height:28px; flex:none; display:grid; place-items:center;
+    border-radius:6px; font-size:.9rem; color:#98a0ac;
+  }
+  .appbar .ic:hover { background:#2c313c; color:#e6e9ee; }
 
   /* ---------- the stage: this IS the mockup, styled to look like a real (bad) export ---------- */
   .stage {
     width:1200px; margin:0 auto; background:#ffffff; color:#1a1a1a;
     box-shadow:var(--shadow); border-radius:2px; overflow:hidden;
+    display:flex; align-items:stretch;
   }
+  .stagemain { flex:1 1 auto; min-width:0; display:flex; flex-direction:column; }
   .zone { position:relative; }
   body.annotated .zone.tagged { outline:2px dashed var(--turn); outline-offset:-2px; }
   .badge-letter {
@@ -140,17 +176,23 @@
     padding:22px 26px 20px; color:#dfe3ee; position:relative;
   }
   .banner .logos { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; }
-  .logo { border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-weight:700; color:#fff; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.3); }
-  .logo.l1 { width:54px; height:54px; font-size:.72rem; }
-  .logo.l2 { width:38px; height:38px; font-size:.6rem; margin-top:10px; }
-  .logo.l3 { width:64px; height:34px; font-size:.6rem; align-self:flex-end; margin-left:8px; }
+  /* três marcas fictícias (assets/logos/), tamanhos e alinhamentos deliberadamente
+     desencontrados — cada uma com placa de cor própria brigando com o degradê */
+  .logo-svg { display:block; }
+  .logo-svg.l1 { width:46px; height:46px; }
+  .logo-svg.l2 { width:32px; height:32px; margin-top:11px; }
+  .logo-svg.l3 { width:38px; height:38px; align-self:flex-end; margin-left:9px; }
+  /* Tipografia: Arial, não fonte decorativa. O pecado aqui é CAIXA ALTA + três tamanhos
+     na mesma frase + baixo contraste sobre degradê — erros que times reais cometem.
+     Papyrus era caricatura: a plateia ri e não se reconhece (regra 1 do spec). */
   .banner h1 {
-    font-family:Papyrus,"Brush Script MT","Segoe Print",cursive; margin:4px 0 2px; text-transform:uppercase;
-    line-height:1.15; letter-spacing:.01em; text-shadow:0 1px 2px rgba(0,0,0,.25); max-width:760px;
+    font-family:Arial,"Helvetica Neue",Helvetica,sans-serif; margin:4px 0 2px; text-transform:uppercase;
+    font-weight:700; line-height:1.18; letter-spacing:.06em;
+    text-shadow:0 1px 2px rgba(0,0,0,.25); max-width:780px;
   }
-  .banner h1 .s1 { font-size:1.5rem; }
-  .banner h1 .s2 { font-size:1.9rem; }
-  .banner h1 .s3 { font-size:1.15rem; }
+  .banner h1 .s1 { font-size:1.42rem; }
+  .banner h1 .s2 { font-size:1.86rem; letter-spacing:.02em; }
+  .banner h1 .s3 { font-size:1.08rem; letter-spacing:.13em; }
   .banner .ver { font-family:var(--font-mono); font-size:.68rem; color:#b9c0e0; opacity:.85; }
 
   /* B — KPI row (filter Ano lives inside the same container — broken "região comum") */
@@ -252,9 +294,30 @@
   svg#tsSvg { width:100%; height:190px; display:block; }
 
   /* I — filters */
-  .filters-row { display:flex; flex-wrap:wrap; gap:8px; padding:16px; background:#eee; border-top:1px solid #ddd; }
-  .fchip { font-size:.74rem; padding:5px 11px; background:#fff; border:1px solid #b8b8b8; border-radius:3px; color:#333; cursor:default; }
+  /* I — filtros ESPALHADOS pela página. Ninguém empilha 10 filtros num rodapé; o que
+     acontece de verdade é isto: vão sendo encaixados onde couber, em épocas diferentes,
+     por gente diferente. Cada bloco fica LONGE do gráfico que controla (proximidade
+     [UXers]) e cada um tem estilo próprio (similaridade [p.27]). Dentro de cada bloco o
+     espaçamento é uniforme — nenhum agrupamento por tema. */
+  .fstrip { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:9px 16px; }
+  .fstrip .flabel {
+    font-size:.64rem; text-transform:uppercase; letter-spacing:.09em; color:#7d7d7d;
+    margin-right:2px; white-space:nowrap;
+  }
+  .fchip {
+    font-size:.74rem; padding:5px 11px; background:#fff; border:1px solid #b8b8b8;
+    border-radius:3px; color:#333; cursor:default; white-space:nowrap;
+  }
   .fchip.lowcontrast { background:#3a3a3a; color:#4a4a4a; border-color:#3a3a3a; } /* [UXers] antes literal: fundo escuro + fonte escura */
+  /* cinco estilos diferentes pra cinco blocos — a inconsistência é o ponto */
+  .fstrip.v1 { background:#ececec; border-top:1px solid #dcdcdc; border-bottom:1px solid #dcdcdc; }
+  .fstrip.v2 { background:#fff; border-bottom:1px dashed #c9c9c9; }
+  .fstrip.v2 .fchip { border-radius:999px; background:#f4f6fa; border-color:#c3ccd8; }
+  .fstrip.v3 { background:#e8eef7; border-top:1px solid #cdd8e6; border-bottom:1px solid #cdd8e6; }
+  .fstrip.v3 .fchip { background:#fff; border-color:#a8bad2; }
+  .fstrip.v4 { background:#fafafa; border:1px solid #d8d8d8; border-radius:4px; margin:10px 16px; padding:8px 12px; }
+  .fstrip.v4 .fchip { font-size:.68rem; padding:4px 8px; }
+  .fstrip.v5 { background:#eee; border-top:1px solid #ddd; padding:16px; }
 
   /* J — footer */
   .footnote { padding:12px 16px; font-size:.72rem; color:#888; background:#f7f7f7; border-top:1px solid #e2e2e2; }
@@ -296,18 +359,30 @@
 <div class="stage-scroll">
   <div class="stage" id="stage">
 
-    <!-- N -->
-    <div class="zone tagged" data-key="N">
+    <!-- N (1 de 2) — rail lateral, altura inteira: 12 ícones sem rótulo -->
+    <div class="zone tagged railzone" data-key="N">
       <span class="badge-letter">N</span>
-      <div class="navbar">
-        <div class="sidebar">
-          <span class="ic">⌬</span><span class="ic">⏣</span><span class="ic">⍟</span><span class="ic">⌗</span>
-          <span class="ic">⏢</span><span class="ic">⌂</span><span class="ic">◈</span><span class="ic">⎔</span>
-          <span class="ic">⌇</span><span class="ic">⌖</span><span class="ic">⏦</span><span class="ic">⌤</span>
-        </div>
-        <div class="topbar">
-          <span class="ic">⏛</span><span class="ic">⌾</span><span class="ic">⍜</span><span class="ic">⌰</span><span class="ic">⏗</span>
-        </div>
+      <nav class="rail">
+        <div class="mark">SES</div>
+        <span class="ic on">⌬</span><span class="ic">⏣</span><span class="ic">⍟</span><span class="ic">⌗</span>
+        <div class="sep"></div>
+        <span class="ic">⏢</span><span class="ic">⌸</span><span class="ic">◈</span><span class="ic">⎔</span>
+        <div class="sep"></div>
+        <span class="ic">⌇</span><span class="ic">⌖</span><span class="ic">⏦</span><span class="ic">⌤</span>
+        <span class="spring"></span>
+        <div class="avatar">FS</div>
+      </nav>
+    </div>
+
+    <div class="stagemain">
+
+    <!-- N (2 de 2) — appbar no topo do conteúdo: +5 ícones, nenhum de ajuda -->
+    <div class="zone tagged topzone" data-key="N">
+      <span class="badge-letter">N</span>
+      <div class="appbar">
+        <span class="crumb">SES/RS · BI Corporativo / Assistência / <b>Ocupação Hospitalar</b></span>
+        <span class="spring"></span>
+        <span class="ic">⏛</span><span class="ic">⌾</span><span class="ic">⍜</span><span class="ic">⌰</span><span class="ic">⏗</span>
       </div>
     </div>
 
@@ -316,10 +391,24 @@
       <span class="badge-letter">A</span>
       <div class="banner">
         <div class="logos">
-          <div class="logo l1">SES</div>
+          <!-- logo-svg: cópias inline de assets/logos/*.svg — marcas FICTÍCIAS, ver
+               assets/logos/README.md. Se editar lá, replicar aqui. -->
+          <svg class="logo-svg l1" viewBox="0 0 64 64" role="img" aria-label="SED — Secretaria Estadual de Dados (fictícia)">
+            <path d="M32 3 58 14.5V34c0 13.2-10.9 23.9-26 27C16.9 57.9 6 47.2 6 34V14.5L32 3Z" fill="#17386B"/>
+            <path d="M32 9.5 52.2 18.4V34c0 10.4-8.6 19-20.2 21.8C20.4 53 11.8 44.4 11.8 34V18.4L32 9.5Z" fill="none" stroke="#fff" stroke-opacity=".38" stroke-width="1.6"/>
+            <g fill="#fff"><rect x="18.5" y="34" width="7" height="13" rx="2.2"/><rect x="28.5" y="28" width="7" height="19" rx="2.2"/><rect x="38.5" y="22" width="7" height="25" rx="2.2"/></g>
+          </svg>
           <div style="display:flex;gap:6px;">
-            <div class="logo l2">SUS</div>
-            <div class="logo l3">GOV·RS</div>
+            <svg class="logo-svg l2" viewBox="0 0 64 64" role="img" aria-label="Rede Saúde Integrada (fictícia)">
+              <circle cx="32" cy="32" r="29" fill="#0E7C86"/>
+              <circle cx="32" cy="32" r="23.5" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.6"/>
+              <path d="M11 32h9.5l4.5-11 7 22 5.5-13 3.5 6H53" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <svg class="logo-svg l3" viewBox="0 0 64 64" role="img" aria-label="Painel+ (fictícia)">
+              <rect x="3" y="3" width="58" height="58" rx="14" fill="#5B3A9E"/>
+              <circle cx="32" cy="32" r="17" fill="none" stroke="#fff" stroke-opacity=".42" stroke-width="8"/>
+              <circle cx="32" cy="32" r="17" fill="none" stroke="#fff" stroke-width="8" stroke-dasharray="32 75" transform="rotate(-90 32 32)"/>
+            </svg>
           </div>
         </div>
         <h1>
@@ -347,6 +436,16 @@
       </div>
     </div>
 
+    <!-- I (1 de 5) — controla a dispersão G e o recorte geral de AIH, lá embaixo -->
+    <div class="zone tagged" data-key="I">
+      <span class="badge-letter">I</span>
+      <div class="fstrip v1">
+        <span class="flabel">Filtros</span>
+        <span class="fchip">Faixa de valor ▾</span>
+        <span class="fchip">Motivo de saída ▾ (27)</span>
+      </div>
+    </div>
+
     <!-- C -->
     <div class="zone tagged" data-key="C">
       <span class="badge-letter">C</span>
@@ -366,7 +465,7 @@
             <div class="pie-disc threed" id="pieD1"></div>
             <ul class="pie-legend" id="legendD1"></ul>
           </div>
-          <div class="pie-note">nomes de cauda longa sintéticos — a contagem (58 fatias, ~35 abaixo de 1%) e o NULL (41.796 leitos) são reais. Efeito 3D e legenda 10px: diversidade de tipos + fonte mínima [UXers].</div>
+          <div class="pie-note">nomes de cauda longa sintéticos — a contagem (58 fatias, 40 abaixo de 1%) e o NULL (41.796 leitos) são reais. Efeito 3D e legenda 10px: diversidade de tipos + fonte mínima [UXers].</div>
         </div>
         <div class="pie-panel">
           <h5>Sexo</h5>
@@ -382,6 +481,16 @@
             <ul class="pie-legend" id="legendD3" style="max-height:none;"></ul>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- I (2 de 5) — controla F1 (idade) e G, ambos abaixo; nada da região D acima -->
+    <div class="zone tagged" data-key="I">
+      <span class="badge-letter">I</span>
+      <div class="fstrip v2">
+        <span class="flabel">Refinar</span>
+        <span class="fchip lowcontrast" title="Valores: Alta Complexidade, Méida Complexidade (sic — mantido, ver regra 3 do spec), Baixa Complexidade">Complexidade ▾</span>
+        <span class="fchip">Caráter da internação ▾</span>
       </div>
     </div>
 
@@ -420,6 +529,16 @@
       </div>
     </div>
 
+    <!-- I (3 de 5) — controla a pizza D1, que fica MUITO acima -->
+    <div class="zone tagged" data-key="I">
+      <span class="badge-letter">I</span>
+      <div class="fstrip v3">
+        <span class="flabel">Leitos</span>
+        <span class="fchip">Tipo de leito ▾</span>
+        <span class="fchip">Especialidade ▾ (58)</span>
+      </div>
+    </div>
+
     <!-- G -->
     <div class="zone tagged" data-key="G">
       <span class="badge-letter">G</span>
@@ -431,6 +550,16 @@
 
     <div class="fold">~ ~ ~ dobra aproximada da tela (1080p) — o foco cai 68% a partir daqui ~ ~ ~</div>
 
+    <!-- I (4 de 5) — controla as roscas D2/D3, lá em cima; e está ABAIXO da dobra -->
+    <div class="zone tagged" data-key="I">
+      <span class="badge-letter">I</span>
+      <div class="fstrip v4">
+        <span class="flabel">Paciente</span>
+        <span class="fchip">Sexo ▾</span>
+        <span class="fchip">Raça/cor ▾</span>
+      </div>
+    </div>
+
     <!-- H -->
     <div class="zone tagged" data-key="H">
       <span class="badge-letter">H</span>
@@ -440,20 +569,14 @@
       </div>
     </div>
 
-    <!-- I -->
+    <!-- I (5 de 5) — os dois filtros de maior alcance (tabelão C, mapas E, barras F2),
+         todos MUITO acima, no último lugar onde alguém procuraria -->
     <div class="zone tagged" data-key="I">
       <span class="badge-letter">I</span>
-      <div class="filters-row">
+      <div class="fstrip v5">
+        <span class="flabel">Filtros globais</span>
         <span class="fchip">Município ▾ (228)</span>
         <span class="fchip">Hospital ▾ (287)</span>
-        <span class="fchip">Tipo de leito ▾</span>
-        <span class="fchip">Especialidade ▾ (58)</span>
-        <span class="fchip">Sexo ▾</span>
-        <span class="fchip">Raça/cor ▾</span>
-        <span class="fchip lowcontrast" title="Valores: Alta Complexidade, Méida Complexidade (sic — mantido, ver regra 3 do spec), Baixa Complexidade">Complexidade ▾</span>
-        <span class="fchip">Caráter da internação ▾</span>
-        <span class="fchip">Motivo de saída ▾ (27)</span>
-        <span class="fchip">Faixa de valor ▾</span>
       </div>
     </div>
 
@@ -463,6 +586,7 @@
       <div class="footnote">&nbsp;</div>
     </div>
 
+    </div><!-- /stagemain -->
   </div>
 </div>
 
@@ -518,17 +642,19 @@
   });
 
   var ANNOT = {
-    N: { t: "Barra de navegação (nova · bloco UX)", sins: [
-        "Sobrecarga de escolhas [UXers]: sidebar e topbar ao mesmo tempo, mais filtros e botões extras.",
+    N: { t: "Barra de navegação — rail + appbar (nova · bloco UX)", sins: [
+        "Sobrecarga de escolhas [UXers]: dois menus concorrentes ao mesmo tempo — rail lateral (12) e appbar (5) — sem nenhuma regra que diga o que mora em qual.",
         "Lei de Hick [UXers]: 17 ícones de menu antes mesmo dos 10 filtros da região I.",
         "Lei de Jakob [UXers]: nenhum ícone usa o glifo padrão do setor — decifrar em vez de reconhecer. Era a lacuna mais importante do inventário antigo.",
-        "Ajuda ausente [UXers]: 17 ícones, nenhum é ajuda/glossário."
-      ], fix: "Um menu só (sidebar OU topbar), ícones padrão do setor, ícone de ajuda visível." },
+        "Ajuda ausente [UXers]: 17 ícones, nenhum é ajuda/glossário.",
+        "O disfarce é o pecado: a moldura é competente — rail de altura inteira, item ativo marcado, avatar no rodapé. Justamente por parecer profissional é que ninguém questiona os 17 destinos."
+      ], fix: "Um menu só (rail OU appbar), ícones padrão do setor com rótulo, ícone de ajuda visível." },
     A: { t: "Banner de título (bloco FD)", sins: [
         "Figura-fundo [p.30]: o degradê é o “figura” da tela; o dado devia ser.",
-        "Hierarquia + tipografia [p.53, p.54]: 3 tamanhos na mesma frase, CAIXA ALTA, fonte decorativa, baixo contraste.",
+        "Hierarquia + tipografia [p.53, p.54]: 3 tamanhos na mesma frase, CAIXA ALTA em tudo, entreletra esticada, baixo contraste do cinza sobre o degradê. A fonte é Arial — o problema nunca foi a fonte ser feia, é não haver escala nem hierarquia.",
+        "Três marcas fictícias [p.81]: tamanhos e alinhamentos desencontrados, cada uma com placa de cor própria brigando com o degradê — data-ink gasto em quem assina, não no que se mede.",
         "Nome do produto = a própria síndrome do cockpit [p.61, p.112]: “Painel Gerencial Integrado” não declara nenhuma pergunta."
-      ], fix: "Nome que declara a pergunta (“A ocupação do RS voltou ao patamar pré-pandemia?”), escala tipográfica de 3 níveis, fundo neutro." },
+      ], fix: "Nome que declara a pergunta (“A ocupação do RS voltou ao patamar pré-pandemia?”), escala tipográfica de 3 níveis, caixa alta só onde for título, fundo neutro, uma marca só e discreta." },
     B: { t: "Faixa de 8 KPIs (bloco FD + UX)", sins: [
         "Similaridade quebrada [p.27]: 8 cartões de mesma função, 8 estilos diferentes (cor, borda, tamanho).",
         "Região comum [UXers]: o filtro Ano mora dentro do mesmo bloco visual dos KPIs — o antes literal do exemplo deles.",
@@ -567,11 +693,13 @@
         "Destino comum mal usado [p.31]: 287 linhas sobrepostas se movem juntas sem comunicar nada.",
         "Contexto ausente [p.59 + UXers]: a pandemia — o arco narrativo inteiro do recorte — não está anotada em lugar nenhum."
       ], fix: "Este é o ponto focal que devia abrir a tela [p.29, p.86]: eixo em zero, 1–3 séries destacadas, evento anotado." },
-    I: { t: "Filtros espalhados (bloco UX + A11)", sins: [
-        "Lei de Hick [UXers]: 10 filtros aqui + 17 ícones de menu na região N — 27 escolhas antes de olhar um gráfico.",
-        "Proximidade [UXers, exemplo específico]: espaçamento igual dentro de um mesmo assunto e entre assuntos diferentes — nada agrupa por tema.",
-        "Contraste [UXers]: o chip “Complexidade” usa fundo escuro com fonte escura, quase ilegível."
-      ], fix: "No máximo 3-5 filtros com botão “mostrar mais” [Lei de Hick]; agrupar por espaçamento; contraste AA em todo chip." },
+    I: { t: "Filtros espalhados — 5 blocos pela página (bloco UX + A11)", sins: [
+        "Proximidade [UXers]: NENHUM bloco fica perto do que controla. “Tipo de leito/Especialidade” fica embaixo e controla a pizza D1 lá no topo; “Sexo/Raça” está abaixo da dobra e controla as roscas D2/D3 acima; “Município/Hospital” fecha a página controlando o tabelão C, os mapas E e as barras F2.",
+        "Lei de Hick [UXers]: 10 filtros + 17 ícones de menu na região N = 27 escolhas antes de olhar um gráfico — agora ainda pior, porque estão espalhados e é preciso caçar.",
+        "Similaridade [p.27]: cinco blocos, cinco estilos (fundo, forma do chip, rótulo) — parecem cinco funcionalidades diferentes, mas fazem a mesma coisa.",
+        "Contraste [UXers]: o chip “Complexidade” usa fundo escuro com fonte escura, quase ilegível.",
+        "Por que isso é mais realista que um rodapé: ninguém empilha 10 filtros no pé da página de propósito. O que acontece é isto — vão sendo encaixados onde couber, em épocas diferentes, por gente diferente, e ninguém nunca volta pra reorganizar."
+      ], fix: "Um bloco só de filtros, na região comum do topo, com 3-5 opções e “mostrar mais” [Lei de Hick]; o que for específico de um gráfico fica encostado NELE; agrupar por espaçamento; contraste AA em todo chip." },
     J: { t: "Rodapé vazio (bloco UX — Nielsen)", sins: [
         "Nielsen — visibilidade do sistema [UXers]: nenhuma indicação de origem dos dados nem de última atualização — o antes literal do exemplo deles.",
         "Contexto ausente [p.59]: 187,8% de ocupação aparece crua na tabela/mapa, sem nota em lugar nenhum."

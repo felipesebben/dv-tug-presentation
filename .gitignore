@@ -15,6 +15,12 @@ CLAUDE.md
 # Third-party reference material (licensed content, not ours to redistribute)
 references/
 
+# Tableau: track the .twb source (thin XML, no embedded data); packaged .twbx
+# exports and Desktop's lock/temp files are generated artifacts, not source
+tableau/*.twbx
+tableau/~*
+tableau/*.twbr
+
 # C extensions
 *.so
 
