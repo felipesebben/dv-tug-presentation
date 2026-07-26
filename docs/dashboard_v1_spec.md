@@ -131,6 +131,8 @@ O empilhamento das demais regiões, dentro da coluna de conteúdo:
 │        └──────┘└──────┘└──────┘└──────┘└──────┘└──────┘└──────┘└──────┘            │
 │        filtro e KPIs no mesmo espaço do header — "região comum" quebrada           │
 ├─────────────────────────────────────────────────────────────────────────────────────┤
+│ FILTROS  [Faixa de valor ▾][Motivo de saída ▾]   → controlam a DISPERSÃO (G), abaixo │ I·1
+├─────────────────────────────────────────────────────────────────────────────────────┤
 │ ██ TABELÃO — 228 municípios × 60 meses × 6 medidas ██  (grid escuro, sem ordenação) │ C
 │ (container de 300px de altura, scroll interno, fundo = mesmo cinza do resto da      │
 │  página — nenhum contraste de card)                                                 │
@@ -140,7 +142,9 @@ O empilhamento das demais regiões, dentro da coluna de conteúdo:
 │  de leito (57+NULL)  │  + % com 4 casas     │  incl. "Sem Informação"              │
 │  legenda 58 itens,   │                      │  sem explicação                      │
 │  fonte 10px          │                      │                                      │
-├──────────────────────┴───────────┬──────────────────────────────────────────────────┤
+├──────────────────────┴───────────┴──────────────────────────────────────────────────┤
+│ REFINAR  [Complexidade ▾ (escuro/escuro)][Caráter ▾]  → controlam IDADE (F1) e G     │ I·2
+├──────────────────────────────────┬──────────────────────────────────────────────────┤
 │  MAPA 1 — taxa de ocupação       │  MAPA 2 — nº de internações                     │ E
 │  paleta verde→vermelho           │  paleta azul→vermelho                           │
 │  (dois mapas competindo pelo mesmo olhar, 9 passos cada)                            │
@@ -149,17 +153,21 @@ O empilhamento das demais regiões, dentro da coluna de conteúdo:
 │  (100 barras, uma por idade)     │  rótulos rotacionados 90°, nenhuma barra        │
 │                                   │  destacada (Porto Alegre igual às demais)       │
 ├──────────────────────────────────┴──────────────────────────────────────────────────┤
+│ LEITOS  [Tipo de leito ▾][Especialidade ▾]  → controlam a PIZZA D1, MUITO acima      │ I·3
+├─────────────────────────────────────────────────────────────────────────────────────┤
 │  DISPERSÃO — valor AIH × dias de permanência                                       │ G
 │  (3,7 mi de marcas espremidas em 1200 × 180 px)                                     │
 ├─────────────────────────────────────────────────────────────────────────────────────┤
 │ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  DOBRA APROXIMADA DA TELA (1080p)  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  │
 ├─────────────────────────────────────────────────────────────────────────────────────┤
+│ PACIENTE  [Sexo ▾][Raça/cor ▾]  → controlam as ROSCAS D2/D3, MUITO acima            │ I·4
+├─────────────────────────────────────────────────────────────────────────────────────┤
 │  SÉRIE TEMPORAL — taxa de ocupação mensal 2019-2023                                │ H
 │  (o insight de verdade, enterrado; eixo Y fixado em 0,26–0,34)                      │
 ├─────────────────────────────────────────────────────────────────────────────────────┤
-│ [Município ▾][Hospital ▾][Tipo leito ▾][Especialidade ▾][Sexo ▾][Raça ▾]           │ I
-│ [Complexidade ▾][Caráter ▾][Motivo saída ▾][Faixa de valor ▾]   ← 10 filtros,       │
-│ menu (N) já tinha 12+5 opções — Lei de Hick violada duas vezes na mesma tela        │
+│ FILTROS GLOBAIS  [Município ▾ (228)][Hospital ▾ (287)]                              │ I·5
+│ → controlam TABELÃO (C), MAPAS (E) e BARRAS (F2) — todos muito acima                 │
+│ 10 filtros em 5 blocos, nenhum perto do que controla; +17 ícones no menu (N)         │
 ├─────────────────────────────────────────────────────────────────────────────────────┤
 │                                    (rodapé vazio — sem fonte, sem data)              │ J
 └─────────────────────────────────────────────────────────────────────────────────────┘
@@ -330,12 +338,16 @@ Aurélien; `[UXers]` vêm de `docs/uxers_guidance.md`.
 ### A — Banner de título · bloco FD
 - **Figura-fundo** [p.30]: o degradê azul→roxo é o "figura" da tela; o dado devia ser.
 - **Hierarquia de texto** [p.53] + **Tipografia** [p.54]: 3 tamanhos na mesma frase, CAIXA
-  ALTA, fonte decorativa, baixo contraste.
+  ALTA em tudo, entreletra esticada, baixo contraste. A fonte é **Arial** — o pecado nunca
+  foi a fonte ser feia, é **não haver escala**. Ver a nota da seção 6.
+- **Marcas** [p.81]: três logos fictícios de tamanhos e alinhamentos diferentes, cada um
+  com placa de cor própria competindo com o degradê — data-ink gasto em quem assina.
 - **Nome do produto** [p.61] + **Cockpit** [p.112]: "Painel Gerencial Integrado v1.4" é
   literalmente o nome da síndrome.
 - **A virada**: um nome que declara a **pergunta** ("A ocupação hospitalar do RS voltou ao
-  patamar pré-pandemia?"), escala tipográfica de 3 níveis, fundo neutro que deixa o número
-  virar sujeito — Prägnanz [p.32] é o único luxo que vale gastar aqui.
+  patamar pré-pandemia?"), escala tipográfica de 3 níveis, caixa alta só onde for título,
+  uma marca só e discreta, fundo neutro que deixa o número virar sujeito — Prägnanz [p.32]
+  é o único luxo que vale gastar aqui.
 
 ### B — Faixa de KPIs · bloco FD (primário) + UX (secundário)
 - **Similaridade** [p.27]: 8 estilos gritam "somos 8 coisas diferentes" quando são 8 cartões
@@ -417,15 +429,34 @@ Aurélien; `[UXers]` vêm de `docs/uxers_guidance.md`.
   pergunta em 3 segundos.
 
 ### I — Filtros espalhados · bloco UX (primário) + A11 (secundário)
-- **Lei de Hick** [UXers]: 10 filtros — quase o "10 opções" do exemplo antes deles; somados
-  aos 17 ícones de menu da região N, já são 27 escolhas antes de olhar um gráfico.
-- **Proximidade** [UXers, exemplo específico]: o espaçamento entre filtros do mesmo assunto
-  (Sexo/Raça) é igual ao espaçamento entre filtros de assuntos diferentes (Motivo de
-  saída/Faixa de valor) — nada agrupa visualmente por tema.
+
+> **Mudou:** os 10 filtros não estão mais empilhados num rodapé. Ninguém faz isso de
+> propósito — e um erro que ninguém comete não ensina nada. Agora estão **espalhados em 5
+> blocos** ao longo da página, que é o que acontece de verdade: filtros vão sendo encaixados
+> onde couber, em épocas diferentes, por gente diferente, e ninguém volta pra reorganizar.
+
+- **Proximidade** [UXers]: agora o pecado é **estrutural**, não de espaçamento — **nenhum**
+  bloco fica perto do que controla:
+
+  | bloco | onde está | o que controla | onde isso está |
+  |---|---|---|---|
+  | Faixa de valor · Motivo de saída | logo abaixo dos KPIs | dispersão G | bem abaixo |
+  | Complexidade · Caráter | entre D e E | idade F1, dispersão G | abaixo |
+  | Tipo de leito · Especialidade | entre F e G | pizza D1 | **muito acima** |
+  | Sexo · Raça/cor | abaixo da dobra | roscas D2/D3 | **muito acima** |
+  | Município · Hospital | rodapé | tabelão C, mapas E, barras F2 | espalhados acima |
+
+- **Lei de Hick** [UXers]: 10 filtros + 17 ícones da região N = 27 escolhas antes de olhar
+  um gráfico — e agora **pior**, porque estão espalhados: não dá pra ver quantos são sem
+  rolar a página inteira, então nem a contagem o usuário consegue fazer.
+- **Similaridade** [p.27]: cinco blocos, cinco estilos (fundo, forma do chip, rótulo).
+  Parecem cinco funcionalidades diferentes; fazem exatamente a mesma coisa.
 - **Contraste** [UXers, Acessibilidade]: o chip "Complexidade" usa fundo escuro com fonte
   escura — quase ilegível.
-- **A virada**: no máximo 3-5 filtros [Lei de Hick, UXers] com botão "mostrar mais";
-  espaçamento menor dentro do mesmo tema do que entre temas; contraste mínimo AA em todo chip.
+- **A virada**: **um** bloco de filtros globais na região comum do topo, com 3-5 opções e
+  "mostrar mais" [Lei de Hick, UXers]; o que for específico de um gráfico fica **encostado
+  nele**; espaçamento menor dentro do mesmo tema do que entre temas; contraste mínimo AA em
+  todo chip.
 
 ### J — Rodapé sem ressalvas · bloco UX (Nielsen)
 - **Nielsen — visibilidade do sistema** [UXers]: nenhuma indicação de origem dos dados nem
@@ -472,10 +503,26 @@ de Jakob [UXers] — ícones que o usuário tem que decifrar, não reconhecer; a
 |---|---|
 | **Objeto** | Objeto de texto + 3 imagens |
 | **Texto** | `PAINEL GERENCIAL DE MONITORAMENTO ESTRATÉGICO INTEGRADO DE OCUPAÇÃO HOSPITALAR — SIH/SUS × CNES — RS — 2019 A 2023` / segunda linha: `v1.4_FINAL_rev2_ok` |
-| **Formato** | Tudo em CAIXA ALTA, fonte decorativa/condensada, 3 tamanhos diferentes na mesma frase, fundo em degradê azul→roxo, texto cinza-claro sobre o degradê |
-| **Imagens** | 3 logos/brasões, tamanhos e alinhamentos diferentes |
+| **Formato** | **Arial** (não fonte decorativa — ver nota abaixo), tudo em CAIXA ALTA, entreletra esticada, 3 tamanhos diferentes na mesma frase, fundo em degradê azul→roxo, texto cinza-claro sobre o degradê |
+| **Imagens** | 3 marcas **fictícias** de `assets/logos/` (`logo-sed.svg`, `logo-rede-saude.svg`, `logo-painel.svg`), em tamanhos e alinhamentos diferentes, cada uma com placa de cor própria brigando com o degradê |
 
-**Pecados**: nome de "cockpit" [p.112]; caixa alta + fonte decorativa + baixo contraste + tamanhos inconsistentes [p.54]; sem hierarquia de texto [p.53]; título que não diz nada sobre o dado; data-ink gasto em degradê [p.81].
+> **Por que Arial e não Papyrus.** A primeira versão usava fonte manuscrita/decorativa. Isso
+> era caricatura: ninguém publica um painel de secretaria em Papyrus, então a plateia ri e
+> **não se reconhece** — viola a regra 1 da seção 1. O pecado tipográfico de verdade,
+> aquele que todo mundo comete, é **não ter escala**: três tamanhos arbitrários na mesma
+> frase, caixa alta em tudo, entreletra esticada pra "preencher", e cinza-claro sobre
+> degradê. Em Arial isso continua ruim — e agora ruim de um jeito que a plateia reconhece
+> do próprio trabalho. O argumento fica mais forte, não mais fraco.
+
+> **Marcas fictícias, de propósito.** Nenhum logo reproduz identidade visual de órgão real.
+> Carimbar o brasão de uma secretaria de verdade numa peça apresentada publicamente como
+> mal feita seria injusto com o órgão e desnecessário pro argumento. Ver
+> `assets/logos/README.md`. Os nomes dos *sistemas* no título (SIH/SUS, CNES) seguem reais —
+> são as fontes dos dados, citadas, não branding.
+
+**Pecados**: nome de "cockpit" [p.112]; caixa alta + ausência de escala tipográfica + baixo
+contraste + tamanhos inconsistentes [p.54]; sem hierarquia de texto [p.53]; título que não
+diz nada sobre o dado; data-ink gasto em degradê e em três marcas desencontradas [p.81].
 
 ---
 
@@ -647,26 +694,38 @@ não aparece marcada em lugar nenhum.
 
 ### I. Filtros espalhados — P0
 
-**11 filtros**, distribuídos assim:
+**11 filtros**, em **6 lugares diferentes** da página. Nenhum deles no lugar certo.
 
-- 1 (`Ano`) **dentro do bloco de KPIs** (região B) — não é uma região própria, é a região
-  comum quebrada dessa região
-- 10 (`Município`, `Hospital`, `Tipo de leito`, `Especialidade`, `Sexo`, `Raça/cor`,
-  `Complexidade`, `Caráter da internação`, `Motivo de saída`, `Faixa de valor`)
-  **no rodapé**, depois de tudo — esta região (I)
+| # | bloco (estilo) | filtros | posição no layout | controla | distância |
+|---|---|---|---|---|---|
+| 0 | dentro dos KPIs | `Ano` | região B | tudo | região comum quebrada |
+| 1 | faixa cinza | `Faixa de valor`, `Motivo de saída` | entre **B** e **C** | dispersão G | bem abaixo |
+| 2 | branco, chip arredondado | `Complexidade`, `Caráter da internação` | entre **D** e **E** | idade F1, dispersão G | abaixo |
+| 3 | faixa azulada | `Tipo de leito`, `Especialidade` | entre **F** e **G** | pizza D1 | **muito acima** |
+| 4 | caixa com borda | `Sexo`, `Raça/cor` | **abaixo da dobra**, antes de H | roscas D2/D3 | **muito acima** |
+| 5 | rodapé cinza | `Município`, `Hospital` | fim da página (região I) | tabelão C, mapas E, barras F2 | espalhados acima |
 
-Todos como lista de múltipla seleção, mostrando todos os valores (o de município tem
-228 itens; o de motivo de saída tem 27; o de especialidade tem 58), **sem botão de aplicar**
-— cada clique redispara a consulta inteira. Nenhum filtro está perto do gráfico que afeta.
-Espaçamento entre chips **uniforme** — igual dentro de um mesmo assunto (Sexo/Raça) e entre
-assuntos diferentes (Motivo de saída/Faixa de valor), sem agrupamento visual por tema
-[UXers]. O chip `Complexidade` usa fundo escuro com fonte escura — quase ilegível [UXers,
+> **Por que não todos no rodapé.** Era assim na primeira versão, e é irreal: ninguém empilha
+> 10 filtros no pé da página de propósito. Um erro que ninguém comete não gera
+> reconhecimento na plateia — quebra a regra 1 da seção 1. O padrão real é este:
+> filtros encaixados **onde couber**, conforme foram pedidos, em épocas diferentes, por
+> pessoas diferentes, e ninguém nunca volta pra reorganizar. Espalhar também **fortalece**
+> o pecado de proximidade: em vez de "estão longe de tudo", vira "cada um está longe
+> especificamente do que controla" — que é demonstrável ao vivo, filtro por filtro.
+
+Todos como lista de múltipla seleção, mostrando todos os valores (município tem 228 itens;
+motivo de saída, 27; especialidade, 58), **sem botão de aplicar** — cada clique redispara a
+consulta inteira. Dentro de cada bloco o espaçamento é **uniforme**, sem agrupar por tema
+[UXers]. Os 5 blocos têm **estilos visuais diferentes entre si** (fundo, forma do chip,
+rótulo) — parecem funcionalidades distintas, mas fazem a mesma coisa [p.27]. O chip
+`Complexidade` usa fundo escuro com fonte escura — quase ilegível [UXers,
 Acessibilidade/contraste].
 
-**Pecados**: Lei de Hick — 10 filtros aqui + 17 ícones de menu na região N, sem "mostrar
-mais" [UXers]; proximidade — mesmo espaçamento dentro e entre grupos temáticos [UXers];
-filtro longe do alvo [p.85]; contraste — chip escuro sobre escuro [UXers]; sem botão de
-aplicar = reatividade destruída [p.111].
+**Pecados**: proximidade — nenhum bloco perto do que controla [UXers]; Lei de Hick — 10
+filtros + 17 ícones da região N, sem "mostrar mais", e agora nem contáveis sem rolar a
+página [UXers]; similaridade — 5 estilos pra mesma função [p.27]; filtro longe do alvo
+[p.85]; contraste — chip escuro sobre escuro [UXers]; sem botão de aplicar = reatividade
+destruída [p.111].
 
 ---
 
@@ -722,7 +781,7 @@ Checklist para o workshop. A dupla de UX pode ir riscando ao vivo — cada linha
 | 11 | Sobrecarga extrínseca | p.43, p.46 | Tabelão, 3 pizzas, 100 barras | Cortar o que não responde à pergunta |
 | 12 | Zona Pokémon | p.50 | 8 cores nos KPIs, barras arco-íris | Paleta de 3-5 tons |
 | 13 | Hierarquia de texto | p.53 | Banner com 3 tamanhos, tudo em caps | Escala tipográfica de 3 níveis |
-| 14 | Tipografia | p.54 | Fonte decorativa, caps, baixo contraste | Sans-serif legível, contraste AA |
+| 14 | Tipografia | p.54 | Caps em tudo, 3 tamanhos sem escala, entreletra esticada, baixo contraste (a fonte é Arial — o problema é a falta de escala) | Escala tipográfica de 3 níveis, caps só em título, contraste AA |
 | 15 | Sobrecarga de escolha / Lei de Hick | p.55, UXers | Nav (N): 17 ícones de menu; filtros (I): 10, sem "mostrar mais" | Menu de 5 + filtros de 3 + "mostrar mais" (Pareto) |
 | 16 | Contexto ausente | p.59 | KPIs (B) sem comparação, meta ou período | Cada KPI com sua comparação |
 | 17 | Nome do produto | p.61, p.112 | "Painel Gerencial Integrado v1.4" | Nome que declara a pergunta |

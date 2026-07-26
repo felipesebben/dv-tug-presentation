@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-labelledby="t-sed">
+  <title id="t-sed">SED — Secretaria Estadual de Dados (marca fictícia)</title>
+  <path d="M32 3 58 14.5V34c0 13.2-10.9 23.9-26 27C16.9 57.9 6 47.2 6 34V14.5L32 3Z" fill="#17386B"/>
+  <path d="M32 9.5 52.2 18.4V34c0 10.4-8.6 19-20.2 21.8C20.4 53 11.8 44.4 11.8 34V18.4L32 9.5Z"
+        fill="none" stroke="#fff" stroke-opacity=".38" stroke-width="1.6"/>
+  <g fill="#fff">
+    <rect x="18.5" y="34" width="7" height="13" rx="2.2"/>
+    <rect x="28.5" y="28" width="7" height="19" rx="2.2"/>
+    <rect x="38.5" y="22" width="7" height="25" rx="2.2"/>
+  </g>
+</svg>

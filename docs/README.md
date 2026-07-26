@@ -89,6 +89,15 @@ region and shows its principle(s)/citation/fix in a bottom drawer — condensed 
 `dashboard_v1_spec.md` section 5. Published as a Claude artifact for quick review;
 the file in this repo is the source of truth for that artifact.
 
+Three regions were deliberately made **more plausible** (caricature gets dismissed; a
+mistake the audience recognizes from their own work lands harder): **N** is a full-height
+left rail plus a content-column appbar rather than a floating strip of buttons; **A** uses
+Arial rather than a decorative font, so the typographic sin is the *absence of scale*
+(3 arbitrary sizes, all-caps, stretched tracking, low contrast) instead of an ugly
+typeface; **I**'s 10 filters are scattered across **5 differently-styled blocks** down the
+page rather than stacked in a footer, so each block sits far from the chart it controls.
+Region A embeds inline copies of the three fictional SVG marks in `assets/logos/`.
+
 ## Not yet created
 
 - `dashboard_v2_spec.md` — the "depois": documents the redesign once the UX

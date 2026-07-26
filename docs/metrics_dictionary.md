@@ -338,7 +338,20 @@ Série mensal (agregada em todos os hospitais): mínimo **23,13%** em **2020-05*
 | Motivo de saída | `hospitalizacoes` | **27** |
 | Faixa de valor | `hospitalizacoes` | contínuo (R$ 0 – 198.575,01) |
 
-Total: **11 filtros**, sendo 10 no rodapé (região I) + `Ano` na faixa de KPIs (região B).
+Total: **11 filtros**, sendo `Ano` na faixa de KPIs (região B) + 10 espalhados em **5 blocos**
+ao longo da página (região I), cada bloco deliberadamente longe do gráfico que controla:
+
+| bloco | filtros | fica | controla |
+|---|---|---|---|
+| I·1 | Faixa de valor, Motivo de saída | entre B e C | dispersão **G** |
+| I·2 | Complexidade, Caráter da internação | entre D e E | idade **F1**, dispersão **G** |
+| I·3 | Tipo de leito, Especialidade | entre F e G | pizza **D1** (muito acima) |
+| I·4 | Sexo, Raça/cor | abaixo da dobra | roscas **D2/D3** (muito acima) |
+| I·5 | Município, Hospital | rodapé | tabelão **C**, mapas **E**, barras **F2** |
+
+> Ao construir no Tableau: os filtros são de contexto/dashboard, então a **posição no
+> layout não muda o resultado** de nenhuma planilha — só o custo de encontrá-los. O número
+> que cada planilha produz é o mesmo desta seção independentemente de onde o filtro esteja.
 
 ---
 

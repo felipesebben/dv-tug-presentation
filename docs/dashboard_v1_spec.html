@@ -531,7 +531,7 @@
           <div class="badge">A</div>
           <div class="zbody">
             <div class="zt">Banner "PAINEL GERENCIAL ESTRATÉGICO INTEGRADO…"</div>
-            <div class="zc">CAIXA ALTA, fonte decorativa, 3 tamanhos, degradê <span class="gradient-sin"></span> <span class="pg">p.53</span> <span class="pg">p.54</span></div>
+            <div class="zc">CAIXA ALTA, 3 tamanhos sem escala, entreletra esticada, degradê, 3 marcas fictícias desencontradas <span class="gradient-sin"></span> <span class="pg">p.53</span> <span class="pg">p.54</span> <span class="pg">p.81</span></div>
           </div>
         </div>
         <div class="zone">
@@ -602,13 +602,13 @@
         <div class="zone">
           <div class="badge">I</div>
           <div class="zbody">
-            <div class="zt">10 filtros aqui no rodapé — longe de tudo que controlam</div>
+            <div class="zt">10 filtros em 5 blocos espalhados — nenhum perto do que controla</div>
             <div class="chips">
-              <span class="k">Município</span><span class="k">Hospital</span><span class="k">Tipo leito</span>
-              <span class="k">Especialidade</span><span class="k">Sexo</span><span class="k">Raça</span>
-              <span class="k">Complexidade</span><span class="k">Caráter</span><span class="k">Motivo saída</span><span class="k">Faixa valor</span>
+              <span class="k">I·1 Faixa valor + Motivo saída → G</span><span class="k">I·2 Complexidade + Caráter → F1/G</span>
+              <span class="k">I·3 Tipo leito + Especialidade → D1 ↑↑</span><span class="k">I·4 Sexo + Raça → D2/D3 ↑↑</span>
+              <span class="k">I·5 Município + Hospital → C/E/F2 ↑</span>
             </div>
-            <div class="zc">Lei de Hick <span class="pg">UXers</span> (+17 ícones em N) · contraste ruim num chip <span class="pg">UXers</span></div>
+            <div class="zc">Proximidade <span class="pg">UXers</span> · Lei de Hick <span class="pg">UXers</span> (+17 ícones em N) · 5 estilos pra mesma função <span class="pg">p.27</span> · contraste ruim num chip <span class="pg">UXers</span></div>
           </div>
         </div>
         <div class="zone">
@@ -868,13 +868,15 @@
 
         <article class="region">
           <div class="rh"><span class="rl">I</span><span class="rn">Filtros espalhados</span></div>
-          <p class="what">10 filtros no rodapé, sem botão "aplicar", espaçamento uniforme.</p>
+          <p class="what">10 filtros em <b>5 blocos espalhados</b> pela página, sem botão "aplicar", cada bloco com um estilo.</p>
           <ul class="sins">
-            <li><b>Lei de Hick</b> <span class="pg">UXers</span>: 10 filtros aqui + 17 ícones de menu em N.</li>
-            <li><b>Proximidade</b> <span class="pg">UXers</span>: espaçamento igual dentro e entre grupos temáticos — nada agrupa por assunto.</li>
+            <li><b>Proximidade</b> <span class="pg">UXers</span>: nenhum bloco perto do que controla — "Tipo de leito/Especialidade" fica embaixo e controla a pizza D1 no topo; "Sexo/Raça" está abaixo da dobra e controla as roscas D2/D3 acima.</li>
+            <li><b>Lei de Hick</b> <span class="pg">UXers</span>: 10 filtros + 17 ícones de menu em N — e agora nem contáveis sem rolar a página inteira.</li>
+            <li><b>Similaridade</b> <span class="pg">p.27</span>: 5 blocos, 5 estilos, mesma função.</li>
             <li><b>Contraste</b> <span class="pg">UXers</span>: chip "Complexidade" com fundo e fonte escuros.</li>
+            <li><b>Por que espalhado é mais realista que um rodapé</b>: ninguém empilha 10 filtros no pé da página de propósito. O padrão real é encaixar onde couber, em épocas diferentes, e nunca voltar pra reorganizar.</li>
           </ul>
-          <div class="turn"><span class="lab">A virada</span>No máximo 3-5 filtros com "mostrar mais" <span class="pg">UXers</span>; agrupar por espaçamento menor dentro do mesmo tema; contraste AA em todo chip.</div>
+          <div class="turn"><span class="lab">A virada</span>Um bloco só de filtros globais na região comum do topo, 3-5 opções com "mostrar mais" <span class="pg">UXers</span>; o que for específico de um gráfico fica encostado NELE; contraste AA em todo chip.</div>
         </article>
 
         <article class="region">
@@ -916,7 +918,7 @@
             <tr><td>11</td><td class="viol">Sobrecarga extrínseca</td><td class="num"><span class="pg">p.43</span></td><td>Tabelão, 3 pizzas, 100 barras</td><td class="fix">Cortar o que não responde à pergunta</td></tr>
             <tr><td>12</td><td class="viol">Zona Pokémon</td><td class="num"><span class="pg">p.50</span></td><td>8 cores nos KPIs, barras arco-íris</td><td class="fix">Paleta de 3–5 tons</td></tr>
             <tr><td>13</td><td class="viol">Hierarquia de texto</td><td class="num"><span class="pg">p.53</span></td><td>Banner com 3 tamanhos, tudo em caps</td><td class="fix">Escala tipográfica de 3 níveis</td></tr>
-            <tr><td>14</td><td class="viol">Tipografia</td><td class="num"><span class="pg">p.54</span></td><td>Fonte decorativa, caps, baixo contraste</td><td class="fix">Sans-serif legível, contraste AA</td></tr>
+            <tr><td>14</td><td class="viol">Tipografia</td><td class="num"><span class="pg">p.54</span></td><td>Caps em tudo, 3 tamanhos sem escala, entreletra esticada, baixo contraste (fonte é Arial — falta escala, não legibilidade)</td><td class="fix">Escala de 3 níveis, caps só em título, contraste AA</td></tr>
             <tr><td>15</td><td class="viol">Sobrecarga de escolha / Lei de Hick</td><td class="num"><span class="pg">p.55</span> <span class="pg">UXers</span></td><td>Nav (N): 17 ícones; filtros (I): 10, sem "mostrar mais"</td><td class="fix">Menu de 5 + filtros de 3 + "mostrar mais"</td></tr>
             <tr><td>16</td><td class="viol">Contexto ausente</td><td class="num"><span class="pg">p.59</span></td><td>KPIs (B) sem comparação, meta ou período</td><td class="fix">Cada KPI com sua comparação</td></tr>
             <tr><td>17</td><td class="viol">Nome do produto</td><td class="num"><span class="pg">p.61</span> <span class="pg">p.112</span></td><td>"Painel Gerencial Integrado v1.4"</td><td class="fix">Nome que declara a pergunta</td></tr>
