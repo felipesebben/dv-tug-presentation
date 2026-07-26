@@ -99,11 +99,28 @@ A ordem de leitura está deliberadamente invertida: o topo (o imóvel mais caro 
 onde os padrões F e Z começam [p.86]) recebe o conteúdo de menor valor; a série temporal
 de ocupação — o insight de verdade, a pergunta nº 1 do briefing — fica no rodapé.
 
+O rail lateral corre a **altura inteira** da página (como em qualquer app de BI real), e a
+appbar corre o topo da coluna de conteúdo — os dois menus visíveis ao mesmo tempo.
+
+```
+┌──────┬─────────────────────────────────────────────────────────────────────────────┐
+│ ▤    │ SES/RS · BI Corporativo / Assistência / Ocupação Hospitalar   ▤ ▤ ▤ ▤ ▤     │ N
+│ ▤ r  ├─────────────────────────────────────────────────────────────────────────────┤
+│ ▤ a  │ [logo] PAINEL GERENCIAL DE MONITORAMENTO ESTRATÉGICO INTEGRADO      [logo]  │ A
+│ ▤ i  │        DE OCUPAÇÃO HOSPITALAR — SIH/SUS × CNES — RS — 2019 A 2023   [logo]  │
+│ ▤ l  │        v1.4_FINAL_rev2_ok                     (fundo em degradê azul→roxo)  │
+│ ▤    ├─────────────────────────────────────────────────────────────────────────────┤
+│ 12×  │  ← a partir daqui, as regiões B..J empilham dentro da coluna de conteúdo     │
+│ (FS) │                                                                             │
+└──────┴─────────────────────────────────────────────────────────────────────────────┘
+  rail de altura inteira (12 ícones, item ativo marcado, avatar no pé)
+  + appbar no topo do conteúdo (+5 ícones) = 17 destinos, nenhum de "ajuda"
+```
+
+O empilhamento das demais regiões, dentro da coluna de conteúdo:
+
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────┐
-│ ▤▤▤ sidebar (12 ícones sem rótulo, nenhum padrão) │ ▤▤ topbar (+5, sem "ajuda") —   │ N
-│ os dois presentes ao mesmo tempo                                                    │
-├────────────────────────────────────────────────────────────────────────────────────┤
 │ [logo] PAINEL GERENCIAL DE MONITORAMENTO ESTRATÉGICO INTEGRADO DE     [logo][logo] │ A
 │        OCUPAÇÃO HOSPITALAR — SIH/SUS × CNES — RS — 2019 A 2023                     │
 │        v1.4_FINAL_rev2_ok                          (fundo em degradê azul→roxo)    │
@@ -293,16 +310,21 @@ cada uma está etiquetada com o bloco a que pertence: **FD** (Fundamentos de Des
 Aurélien; `[UXers]` vêm de `docs/uxers_guidance.md`.
 
 ### N — Barra de navegação *(região nova · bloco UX)*
-- **Sobrecarga de escolhas** [UXers]: sidebar **e** topbar ao mesmo tempo, mais filtros e
-  botões extras — o antes literal do exemplo deles.
-- **Lei de Hick** [UXers]: 12 ícones na sidebar + 5 na topbar = 17 opções de menu antes mesmo
+- **Sobrecarga de escolhas** [UXers]: rail lateral **e** appbar ao mesmo tempo, mais filtros e
+  botões extras — o antes literal do exemplo deles. Não há regra nenhuma que explique o que
+  mora em qual dos dois menus.
+- **Lei de Hick** [UXers]: 12 ícones no rail + 5 na appbar = 17 opções de menu antes mesmo
   de chegar nos 10 filtros da região I.
+- **A moldura competente é parte do pecado**: o rail tem altura inteira, item ativo marcado
+  e avatar no rodapé — parece um app de BI de verdade. É justamente por parecer profissional
+  que ninguém questiona os 17 destinos. Esse é o ponto pedagógico da região: o problema não é
+  "feio", é **caro de usar**.
 - **Lei de Jakob** [UXers]: nenhum ícone usa o glifo padrão do setor (filtro não é um funil,
   exportar não é uma seta pra baixo) — o usuário decifra em vez de reconhecer. Era a lacuna
   mais importante do inventário antigo: nenhuma região cobria a Lei de Jakob, uma das
   "Top 5 UX Laws" que os UXers marcaram como prioridade máxima.
 - **Ajuda ausente** [UXers]: 17 ícones, nenhum é "?" ou "ajuda"/glossário.
-- **A virada**: um menu só (sidebar OU topbar), ícones padrão do setor, ícone de ajuda visível
+- **A virada**: um menu só (rail OU appbar), ícones padrão do setor com rótulo, ícone de ajuda visível
   — Lei de Hick e Lei de Jakob resolvidas na mesma reforma.
 
 ### A — Banner de título · bloco FD
@@ -341,7 +363,7 @@ Aurélien; `[UXers]` vêm de `docs/uxers_guidance.md`.
   capa; se ficar, fundo branco contra o cinza da página, grid claro, colunas ordenáveis.
 
 ### D — Gráficos circulares (pizzas) · bloco FD (primário) + A11 (secundário)
-- **Prägnanz** [p.32]: 58 fatias não têm forma simples — ~35 delas ficam abaixo de 1%.
+- **Prägnanz** [p.32]: 58 fatias não têm forma simples — 40 delas ficam abaixo de 1%.
 - **Diversidade de tipos de gráfico** [UXers]: a pizza de especialidades ganha tratamento
   pseudo-3D — o antes literal deles ("pizza, 3D, bubble" na mesma tela).
 - **Fonte mínima** [UXers, Acessibilidade]: a legenda de 58 itens roda a 10px — abaixo do
@@ -426,11 +448,18 @@ Prioridade: **P0** = essencial pra demo (construir primeiro), **P1** = reforça 
 
 | | |
 |---|---|
-| **Objeto** | Uma faixa de sidebar (esquerda, vertical) + uma topbar (horizontal), as duas visíveis ao mesmo tempo, acima do banner A |
-| **Sidebar** | 12 ícones sem rótulo de texto, glifos inventados (não usar funil pra filtro, não usar seta-pra-baixo pra exportar, não usar engrenagem pra config) |
-| **Topbar** | +5 ícones, também sem rótulo; nenhum ícone de ajuda/"?"/glossário em nenhum dos dois |
+| **Objeto** | Um rail lateral vertical de **altura inteira** (esquerda, ~56px) + uma appbar horizontal no topo da coluna de conteúdo — os dois visíveis ao mesmo tempo. O banner A e as demais regiões ficam **dentro** da coluna à direita do rail, não abaixo de uma faixa de navegação |
+| **Rail** | 12 ícones sem rótulo de texto, glifos inventados (não usar funil pra filtro, não usar seta-pra-baixo pra exportar, não usar engrenagem pra config), separadores agrupando 4+4+4, um item com estado ativo, avatar do usuário no rodapé |
+| **Appbar** | +5 ícones, também sem rótulo, alinhados à direita; à esquerda um breadcrumb (`SES/RS · BI Corporativo / Assistência / Ocupação Hospitalar`). Nenhum ícone de ajuda/"?"/glossário em nenhum dos dois menus |
 
-**Pecados**: sobrecarga de escolhas [UXers] — sidebar **e** topbar juntos, mais filtros e
+> **Importante — a moldura tem que parecer boa.** Uma tira vertical de botões flutuando
+> acima do título não é um erro que exista no mundo real; é caricatura, e a plateia
+> descarta. O rail de altura inteira, com item ativo e avatar, é o que times de verdade
+> entregam. O pecado não está no acabamento, está na **contagem** (17 destinos) e no
+> **vocabulário** (glifos que ninguém reconhece). Fazer isso parecer profissional é o que
+> força a plateia a *procurar* o problema em vez de rir dele.
+
+**Pecados**: sobrecarga de escolhas [UXers] — rail **e** appbar juntos, mais filtros e
 botões; Lei de Hick [UXers] — 17 opções de menu antes mesmo dos 10 filtros da região I; Lei
 de Jakob [UXers] — ícones que o usuário tem que decifrar, não reconhecer; ajuda ausente
 [UXers] — nenhum dos 17 ícones é de suporte/glossário.
@@ -510,13 +539,13 @@ da página [UXers]; Nielsen — controle do usuário, sem ordenação [UXers].
 `tipo_especialidade_leito_desc` em Cor + `SUM(quantidade_total)` em Ângulo, com **efeito 3D**
 (bisel/sombra) aplicado — a diversidade de tipos de gráfico que os UXers citam
 explicitamente ("pizza, 3D, bubble" na mesma tela) [UXers].
-São **57 categorias distintas** na base, mais o `NULL` → **58 fatias**, das quais ~35 ficam
+São **57 categorias distintas** na base, mais o `NULL` → **58 fatias**, das quais 40 ficam
 abaixo de 1%. Legenda à direita com os 58 itens, fonte **10px** [UXers, abaixo do mínimo de
 14px/9pt]. Rótulo de percentual com 4 casas nas fatias.
 Manter a categoria `NULL` (41.796 leitos) sem tratamento — só a fatia sem nome.
 
 **D2 — Rosca de sexo**
-Duas categorias (Feminino 2.065.368 / Masculino 1.674.138) num donut, 2D. Rótulos `55,2299%` e `44,7701%`.
+Duas categorias (Feminino 2.065.368 / Masculino 1.674.138) num donut, 2D. Rótulos `55,2310%` e `44,7690%`.
 
 **D3 — Pizza de raça/cor**
 Seis fatias, 2D, incluindo `Sem Informação` (410.050 = 11% do total) sem nenhuma nota

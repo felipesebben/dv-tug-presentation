@@ -9,7 +9,8 @@
 
 For someone new to the project, the natural read order is: `data_briefing.md` →
 `uxers_guidance.md` → `dashboard_v1_spec.md` → `dashboard_v1_spec.html` (or
-`dashboard_v1_wireframe.html`) for the visual version.
+`dashboard_v1_wireframe.html`) for the visual version. Read `metrics_dictionary.md`
+whenever you need to know what a number on the dashboard actually measures.
 
 ## Files
 
@@ -23,6 +24,28 @@ is an approximation and can exceed 100%, data is administrative not clinical,
 single-state scope, ~6-month lag). Does **not** prescribe chart types or layout —
 that's `uxers_guidance.md` and `dashboard_v1_spec.md`'s job. Input to everything else
 in this folder.
+
+### `metrics_dictionary.md`
+Definition-of-record for every number shown on the dashboard, verified against
+`data/refined/*.parquet` — **the build reference to keep open while making the Tableau
+sheets**. Section 3 covers every chart region (C–J) with its source table, shelf
+assignment, real values to build against, and per-chart trap; it opens with the warning
+that `dashboard_v1_wireframe.html` is **only partly** fed by real data (header anchors
+real, fine fill synthetic), so the wireframe must not be used as a build target — this
+file is the source of truth, and where Tableau disagrees with the wireframe, Tableau is
+right. Sections 1–2 cover the 8 KPI tiles: the exact SQL, the grain it's
+computed at, and the trap it hides. Leads with the `107,9 leitos` tile — which is the
+**mean beds per hospital per month**, not RS's bed count (~28.775/month), a 267× gap —
+and covers the three occupancy-rate weightings (30,8% unweighted vs 43,1% weighted vs
+39,6% SUS-only denominator), the SUS-numerator/total-denominator bias that systematically
+understates occupancy, the real `6,05 dias / 6,05%` collision, and the `indicador_obito`
+vs `motivo_saida` cross-validation (they agree on all 3.739.506 rows; use
+`indicador_obito`). Also the **metadata provenance** section: which `dicionario` tables
+resolve which coded columns, why the `basedosdados-dev` auxiliary-files bucket returns
+`UserProjectMissing` (it's requester-pays, not broken — with the `--billing-project`
+command, unrun, and why we don't need it), and the 6- vs 7-digit municipality-code trap.
+Closes with the six caveats that should surface in V2's footer. Doubles as a presentation
+artifact: V1 deliberately ships **no** data dictionary, and this is what it's missing.
 
 ### `uxers_guidance.md`
 Transcription of `references/uxers_guidance.pdf` — the two UX co-presenters' own

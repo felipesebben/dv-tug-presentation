@@ -106,24 +106,60 @@
   .dfix { font-size:.86rem; color:var(--turn); }
   .dfix b { font-weight:700; }
 
-  /* N — nav chrome: sidebar + topbar together, unfamiliar icon glyphs, no help icon */
-  .navbar { display:flex; background:#20242c; color:#cfd3dc; }
-  .navbar .sidebar {
-    display:flex; flex-direction:column; gap:6px; padding:8px 6px;
-    background:#171a20; border-right:1px solid #333;
+  /* N — nav chrome: rail lateral de altura inteira + appbar no topo do conteúdo.
+     Parece um app de BI de verdade — e é justamente por parecer que os pecados contam:
+     17 opções de menu (12 + 5), glifos que ninguém reconhece, nenhum ícone de ajuda. */
+  .railzone { flex:none; display:flex; }
+  .rail {
+    width:56px; background:#171a20; color:#8d95a1;
+    display:flex; flex-direction:column; align-items:center; gap:2px; padding:10px 0 12px;
   }
-  .navbar .topbar { display:flex; align-items:center; gap:6px; padding:8px 10px; flex:1; flex-wrap:wrap; }
-  .navbar .ic {
-    width:22px; height:22px; display:grid; place-items:center; border-radius:4px;
-    background:#2c313c; font-size:.75rem; color:#9aa3ae; flex:none;
+  .rail .mark {
+    width:32px; height:32px; border-radius:8px; margin-bottom:10px; flex:none;
+    display:grid; place-items:center; background:linear-gradient(140deg,#2b4c8c,#7b3fa0);
+    color:#fff; font-family:var(--font-mono); font-weight:700; font-size:.58rem;
   }
-  .navbar .topbar .ic { width:20px; height:20px; }
+  .rail .ic {
+    width:34px; height:30px; flex:none; display:grid; place-items:center; border-radius:6px;
+    font-size:.95rem; color:#8d95a1; position:relative;
+  }
+  .rail .ic:hover { background:#22262e; color:#cfd3dc; }
+  .rail .ic.on { background:#2b3140; color:#fff; }
+  .rail .ic.on::before {
+    content:""; position:absolute; left:-11px; top:6px; bottom:6px;
+    width:3px; border-radius:0 2px 2px 0; background:#5b8def;
+  }
+  .rail .sep { width:24px; height:1px; background:#2b3038; margin:6px 0; flex:none; }
+  .rail .spring { flex:1 1 auto; }
+  .rail .avatar {
+    width:28px; height:28px; border-radius:50%; flex:none; display:grid; place-items:center;
+    background:#3a4152; color:#cfd3dc; font-family:var(--font-mono); font-size:.58rem; font-weight:700;
+  }
+
+  .topzone { flex:none; }
+  .appbar {
+    display:flex; align-items:center; gap:8px; height:44px; padding:0 14px;
+    background:#20242c; border-bottom:1px solid #2c313c; color:#aab1bc;
+  }
+  .appbar .crumb {
+    font-family:var(--font-mono); font-size:.66rem; letter-spacing:.07em;
+    text-transform:uppercase; color:#7f8794; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .appbar .crumb b { color:#dfe3ee; font-weight:600; }
+  .appbar .spring { flex:1 1 auto; }
+  .appbar .ic {
+    width:28px; height:28px; flex:none; display:grid; place-items:center;
+    border-radius:6px; font-size:.9rem; color:#98a0ac;
+  }
+  .appbar .ic:hover { background:#2c313c; color:#e6e9ee; }
 
   /* ---------- the stage: this IS the mockup, styled to look like a real (bad) export ---------- */
   .stage {
     width:1200px; margin:0 auto; background:#ffffff; color:#1a1a1a;
     box-shadow:var(--shadow); border-radius:2px; overflow:hidden;
+    display:flex; align-items:stretch;
   }
+  .stagemain { flex:1 1 auto; min-width:0; display:flex; flex-direction:column; }
   .zone { position:relative; }
   body.annotated .zone.tagged { outline:2px dashed var(--turn); outline-offset:-2px; }
   .badge-letter {
@@ -296,18 +332,30 @@
 <div class="stage-scroll">
   <div class="stage" id="stage">
 
-    <!-- N -->
-    <div class="zone tagged" data-key="N">
+    <!-- N (1 de 2) — rail lateral, altura inteira: 12 ícones sem rótulo -->
+    <div class="zone tagged railzone" data-key="N">
       <span class="badge-letter">N</span>
-      <div class="navbar">
-        <div class="sidebar">
-          <span class="ic">⌬</span><span class="ic">⏣</span><span class="ic">⍟</span><span class="ic">⌗</span>
-          <span class="ic">⏢</span><span class="ic">⌂</span><span class="ic">◈</span><span class="ic">⎔</span>
-          <span class="ic">⌇</span><span class="ic">⌖</span><span class="ic">⏦</span><span class="ic">⌤</span>
-        </div>
-        <div class="topbar">
-          <span class="ic">⏛</span><span class="ic">⌾</span><span class="ic">⍜</span><span class="ic">⌰</span><span class="ic">⏗</span>
-        </div>
+      <nav class="rail">
+        <div class="mark">SES</div>
+        <span class="ic on">⌬</span><span class="ic">⏣</span><span class="ic">⍟</span><span class="ic">⌗</span>
+        <div class="sep"></div>
+        <span class="ic">⏢</span><span class="ic">⌸</span><span class="ic">◈</span><span class="ic">⎔</span>
+        <div class="sep"></div>
+        <span class="ic">⌇</span><span class="ic">⌖</span><span class="ic">⏦</span><span class="ic">⌤</span>
+        <span class="spring"></span>
+        <div class="avatar">FS</div>
+      </nav>
+    </div>
+
+    <div class="stagemain">
+
+    <!-- N (2 de 2) — appbar no topo do conteúdo: +5 ícones, nenhum de ajuda -->
+    <div class="zone tagged topzone" data-key="N">
+      <span class="badge-letter">N</span>
+      <div class="appbar">
+        <span class="crumb">SES/RS · BI Corporativo / Assistência / <b>Ocupação Hospitalar</b></span>
+        <span class="spring"></span>
+        <span class="ic">⏛</span><span class="ic">⌾</span><span class="ic">⍜</span><span class="ic">⌰</span><span class="ic">⏗</span>
       </div>
     </div>
 
@@ -366,7 +414,7 @@
             <div class="pie-disc threed" id="pieD1"></div>
             <ul class="pie-legend" id="legendD1"></ul>
           </div>
-          <div class="pie-note">nomes de cauda longa sintéticos — a contagem (58 fatias, ~35 abaixo de 1%) e o NULL (41.796 leitos) são reais. Efeito 3D e legenda 10px: diversidade de tipos + fonte mínima [UXers].</div>
+          <div class="pie-note">nomes de cauda longa sintéticos — a contagem (58 fatias, 40 abaixo de 1%) e o NULL (41.796 leitos) são reais. Efeito 3D e legenda 10px: diversidade de tipos + fonte mínima [UXers].</div>
         </div>
         <div class="pie-panel">
           <h5>Sexo</h5>
@@ -463,6 +511,7 @@
       <div class="footnote">&nbsp;</div>
     </div>
 
+    </div><!-- /stagemain -->
   </div>
 </div>
 
@@ -518,12 +567,13 @@
   });
 
   var ANNOT = {
-    N: { t: "Barra de navegação (nova · bloco UX)", sins: [
-        "Sobrecarga de escolhas [UXers]: sidebar e topbar ao mesmo tempo, mais filtros e botões extras.",
+    N: { t: "Barra de navegação — rail + appbar (nova · bloco UX)", sins: [
+        "Sobrecarga de escolhas [UXers]: dois menus concorrentes ao mesmo tempo — rail lateral (12) e appbar (5) — sem nenhuma regra que diga o que mora em qual.",
         "Lei de Hick [UXers]: 17 ícones de menu antes mesmo dos 10 filtros da região I.",
         "Lei de Jakob [UXers]: nenhum ícone usa o glifo padrão do setor — decifrar em vez de reconhecer. Era a lacuna mais importante do inventário antigo.",
-        "Ajuda ausente [UXers]: 17 ícones, nenhum é ajuda/glossário."
-      ], fix: "Um menu só (sidebar OU topbar), ícones padrão do setor, ícone de ajuda visível." },
+        "Ajuda ausente [UXers]: 17 ícones, nenhum é ajuda/glossário.",
+        "O disfarce é o pecado: a moldura é competente — rail de altura inteira, item ativo marcado, avatar no rodapé. Justamente por parecer profissional é que ninguém questiona os 17 destinos."
+      ], fix: "Um menu só (rail OU appbar), ícones padrão do setor com rótulo, ícone de ajuda visível." },
     A: { t: "Banner de título (bloco FD)", sins: [
         "Figura-fundo [p.30]: o degradê é o “figura” da tela; o dado devia ser.",
         "Hierarquia + tipografia [p.53, p.54]: 3 tamanhos na mesma frase, CAIXA ALTA, fonte decorativa, baixo contraste.",
