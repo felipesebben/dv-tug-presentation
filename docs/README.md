@@ -109,6 +109,26 @@ the whole talk: no amount of design catches it.
 Ends with a build order that puts the palette and workbook-level formatting *before* the
 first sheet, which is what stops V1's inconsistency from reaccumulating.
 
+### `dashboard_v2_wireframe.html`
+Mid/high-fidelity **visual mockup** of V2 and the counterpart to
+`dashboard_v1_wireframe.html` — the two are meant to be shown side by side. Four
+navigable tabs rendered inside a true 1200×800 frame, so "fits on one screen" is visible
+rather than claimed. Unlike the V1 wireframe, **every number and series is real**, read
+from `data/refined/` — no synthetic fill.
+
+The KPI tiles are the part worth studying: each carries a year-over-year delta *and* a
+60-month sparkline, with the context chosen per indicator rather than repeated for
+symmetry. Leitos SUS is the case that justifies the pattern — its +0,3% delta reads as
+"nothing happened" until the sparkline shows the 2021 peak and rollback.
+
+Two deliberate departures, both annotated in the page itself: the dashboard canvas is
+**fixed light** and does not follow the viewer's theme (its palette was contrast-validated
+against a white card, so theming it would invalidate the measurement), and the indexed
+hero chart uses a **baseline of 100 rather than 0**, since in an index 100 *is* the zero.
+The zero-baseline rule still holds for every rate series and bar.
+
+Published as a Claude artifact; the file here is the source of truth for it.
+
 ### `dashboard_v2_design_system.md`
 The token set the V2 is built from — colours, type scale, spacing grid, chart rules —
 so that consistency is a decision made once rather than a judgement repeated per
