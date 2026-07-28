@@ -93,6 +93,20 @@ redesign shouldn't fix a sin that isn't there. The review that produced this fil
 the time series and the filters, not all 46 ledger items, so it notes that a full
 ledger-vs-workbook pass is still worth doing before the workshop.
 
+### `dashboard_v2_design_system.md`
+The token set the V2 is built from — colours, type scale, spacing grid, chart rules —
+so that consistency is a decision made once rather than a judgement repeated per
+sheet. Turns the direction in `uxers_guidance.md`'s accessibility block into numbers:
+exactly 3 greys with measured contrast, an 8px spacing grid where the 8-vs-24
+intra/inter-group gap *is* the proximity law, a 9pt type floor, and a banned-forms
+list (pie, 3D, bubble, dual axis).
+
+Contains one **open decision**: the guidance's recommended green+orange highlight pair
+was tested with a CVD simulator and failed (ΔE 3,2 under protanopia, against a target
+of 8) — both hues sit on the red-green confusion axis. The document adopts blue+orange
+(ΔE 24,7) provisionally and flags that this contradicts a guidance document that
+normally wins on conflicts. Palettes ship as `tableau/Preferences.tps`.
+
 ### `dashboard_v1_spec.html`
 Styled, browsable companion to `dashboard_v1_spec.md` — same content, condensed
 (drops the full sheet-by-sheet tables in favor of a shorter build-order panel),
@@ -127,9 +141,10 @@ Region A embeds inline copies of the three fictional SVG marks in `assets/logos/
 
 ## Not yet created
 
-- `dashboard_v2_spec.md` — the "depois": documents the redesign once the UX
-  co-presenters have gone through the workshop. Mentioned as a next step in
-  `dashboard_v1_spec.md` section 10.
+- `dashboard_v2_spec.md` — the "depois": the per-tab build spec for V2. Persona and tab
+  architecture are settled (SES-RS analyst building a federal funding case; Panorama →
+  Território → Capacidade → Custo); the design tokens it will reference already exist in
+  `dashboard_v2_design_system.md`.
 ## Deliberately not created
 
 - `assets/v1/` (i.e. `docs/assets/v1/`) — screenshots, load-time measurements and a
