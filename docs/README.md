@@ -103,6 +103,8 @@ Region A embeds inline copies of the three fictional SVG marks in `assets/logos/
 - `dashboard_v2_spec.md` — the "depois": documents the redesign once the UX
   co-presenters have gone through the workshop. Mentioned as a next step in
   `dashboard_v1_spec.md` section 10.
-- `assets/v1/` — screenshots, load-time measurements, and a screen recording of the
-  actual V1 Tableau workbook, captured per `dashboard_v1_spec.md` section 9. Not
-  created until `tableau/dashboard_v1.twb` exists (see `tableau/README.md`).
+- `assets/v1/` (i.e. `docs/assets/v1/`) — screenshots, load-time measurements, and a
+  screen recording of the actual V1 Tableau workbook, captured per `dashboard_v1_spec.md`
+  section 9. **No longer blocked**: `tableau/dashboard_v1.twb` now holds the assembled
+  1200×2600 dashboard, so the capture pass can happen whenever the workbook is opened
+  (see `tableau/README.md`).

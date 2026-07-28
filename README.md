@@ -170,6 +170,14 @@ Dataviz Clarity, CC BY-NC-ND 4.0) — the PDF lives in the gitignored `reference
 - [x] Spec for the intentionally poor first-version dashboard (`docs/dashboard_v1_spec.md`),
   refined against the UX co-presenters' own priority pass (`docs/uxers_guidance.md`)
 - [x] Mid/high-fidelity wireframe mockup with per-region diagnostic (`docs/dashboard_v1_wireframe.html`)
-- [ ] Build V1 in Tableau (single data source, three tables related — not joined — on
-  `id_estabelecimento_cnes` + `ano_mes`) + capture "before" artefacts
+- [x] Build V1 in Tableau (`tableau/dashboard_v1.twb`) — single data source, three tables
+  related (not joined) on `id_estabelecimento_cnes` + `ano_mes`; 22 worksheets assembled
+  onto one fixed 1200×2600 dashboard, with all 11 region-I filters placed across their
+  six spec'd blocks
+- [ ] Scope each region-I filter block to the sheets it controls (`docs/dashboard_v1_spec.md`
+  section 6, "controla" column). All 11 filters currently apply to every worksheet using
+  the data source, which flattens the proximity sin from "each filter is far from the one
+  thing it drives" to "they're all far from everything"
+- [ ] Capture the "before" artefacts — full-page and first-fold screenshots, load and
+  filter-response timings, usability screen recording (`docs/dashboard_v1_spec.md` section 9)
 - [ ] Principle-by-principle redesign (TUG talk)
