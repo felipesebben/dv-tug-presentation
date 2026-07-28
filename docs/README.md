@@ -93,6 +93,56 @@ redesign shouldn't fix a sin that isn't there. The review that produced this fil
 the time series and the filters, not all 46 ledger items, so it notes that a full
 ledger-vs-workbook pass is still worth doing before the workshop.
 
+### `dashboard_v2_spec.md`
+The build spec for the corrected dashboard ("V2"), and the counterpart to
+`dashboard_v1_spec.md` — same section structure so the two read side by side. Contents:
+the persona (an SES-RS analyst assembling a federal funding case, which is what decides
+every cut below it), the one sentence each tab has to prove, a four-tab architecture at
+1200×800 so nothing scrolls, and a sheet-by-sheet spec with **real anchor numbers**
+verified against the refined tables — KPI values, the indexed capacity/demand series, the
+municipal ranking, bed counts by type, cost by complexity.
+
+Its section 6 is the workshop script: V1 sin → V2 correction, mapped item by item. The
+last row is the one with no ledger number — the wrong denominator — and it's the point of
+the whole talk: no amount of design catches it.
+
+Ends with a build order that puts the palette and workbook-level formatting *before* the
+first sheet, which is what stops V1's inconsistency from reaccumulating.
+
+### `dashboard_v2_wireframe.html`
+Mid/high-fidelity **visual mockup** of V2 and the counterpart to
+`dashboard_v1_wireframe.html` — the two are meant to be shown side by side. Four
+navigable tabs rendered inside a true 1200×800 frame, so "fits on one screen" is visible
+rather than claimed. Unlike the V1 wireframe, **every number and series is real**, read
+from `data/refined/` — no synthetic fill.
+
+The KPI tiles are the part worth studying: each carries a year-over-year delta *and* a
+60-month sparkline, with the context chosen per indicator rather than repeated for
+symmetry. Leitos SUS is the case that justifies the pattern — its +0,3% delta reads as
+"nothing happened" until the sparkline shows the 2021 peak and rollback.
+
+Two deliberate departures, both annotated in the page itself: the dashboard canvas is
+**fixed light** and does not follow the viewer's theme (its palette was contrast-validated
+against a white card, so theming it would invalidate the measurement), and the indexed
+hero chart uses a **baseline of 100 rather than 0**, since in an index 100 *is* the zero.
+The zero-baseline rule still holds for every rate series and bar.
+
+Published as a Claude artifact; the file here is the source of truth for it.
+
+### `dashboard_v2_design_system.md`
+The token set the V2 is built from — colours, type scale, spacing grid, chart rules —
+so that consistency is a decision made once rather than a judgement repeated per
+sheet. Turns the direction in `uxers_guidance.md`'s accessibility block into numbers:
+exactly 3 greys with measured contrast, an 8px spacing grid where the 8-vs-24
+intra/inter-group gap *is* the proximity law, a 9pt type floor, and a banned-forms
+list (pie, 3D, bubble, dual axis).
+
+Contains one **open decision**: the guidance's recommended green+orange highlight pair
+was tested with a CVD simulator and failed (ΔE 3,2 under protanopia, against a target
+of 8) — both hues sit on the red-green confusion axis. The document adopts blue+orange
+(ΔE 24,7) provisionally and flags that this contradicts a guidance document that
+normally wins on conflicts. Palettes ship as `tableau/Preferences.tps`.
+
 ### `dashboard_v1_spec.html`
 Styled, browsable companion to `dashboard_v1_spec.md` — same content, condensed
 (drops the full sheet-by-sheet tables in favor of a shorter build-order panel),
@@ -127,9 +177,8 @@ Region A embeds inline copies of the three fictional SVG marks in `assets/logos/
 
 ## Not yet created
 
-- `dashboard_v2_spec.md` — the "depois": documents the redesign once the UX
-  co-presenters have gone through the workshop. Mentioned as a next step in
-  `dashboard_v1_spec.md` section 10.
+- Nothing pending. The next artefact is the workbook itself,
+  `tableau/dashboard_v2.twb`, which lives in `tableau/`, not here.
 ## Deliberately not created
 
 - `assets/v1/` (i.e. `docs/assets/v1/`) — screenshots, load-time measurements and a

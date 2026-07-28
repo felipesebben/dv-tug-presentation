@@ -15,8 +15,14 @@ which holds the *specs* for what to build, not the built thing itself.
   it from Tableau (*File → Export Packaged Workbook*) whenever you need a fresh
   portable copy — don't hand-maintain it, and don't commit it (same reasoning as
   `data/` and `references/`: it's a large generated binary, not source).
-- `dashboard_v2.twb` will show up here once the redesign starts (see
-  `docs/dashboard_v1_spec.md` section 10).
+- **`Preferences.tps`** (tracked) — the V2 custom colour palettes. This file is *not*
+  read from here: copy it to `Documents/My Tableau Repository/Preferences.tps`
+  (pt-BR: `Documentos/Meu repositório do Tableau/Preferences.tps`) and restart Tableau,
+  after which the palettes appear by name under *Marks → Color → Edit Colors*. It lives
+  in the repo so the palette is versioned alongside the reasoning in
+  `docs/dashboard_v2_design_system.md` instead of living only in one person's Tableau
+  install. Every value in it was validated with a CVD simulator.
+- `dashboard_v2.twb` will show up here once the redesign starts.
 
 ## Connection type: always Extract
 

@@ -1,0 +1,803 @@
+<title>Dashboard V2 — wireframe do "depois"</title>
+<style>
+  :root {
+    --chrome-bg:#eceef2; --chrome-card:#ffffff; --chrome-ink:#171c24;
+    --chrome-muted:#5a6270; --chrome-faint:#858d9b; --chrome-line:#dcdfe6;
+    --chrome-accent:#3d5a80; --chrome-accent-soft:rgba(61,90,128,.10);
+    --shadow:0 1px 2px rgba(23,28,36,.05), 0 10px 30px rgba(23,28,36,.07);
+    --serif:Georgia,"Iowan Old Style","Times New Roman",serif;
+    --sans:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --mono:"Cascadia Code",ui-monospace,Consolas,"SF Mono",Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      --chrome-bg:#0f1216; --chrome-card:#171b21; --chrome-ink:#e7eaef;
+      --chrome-muted:#98a1ae; --chrome-faint:#78818f; --chrome-line:#262b33;
+      --chrome-accent:#7fa3cc; --chrome-accent-soft:rgba(127,163,204,.13);
+      --shadow:0 1px 2px rgba(0,0,0,.32), 0 12px 34px rgba(0,0,0,.38);
+    }
+  }
+  :root[data-theme="dark"] {
+    --chrome-bg:#0f1216; --chrome-card:#171b21; --chrome-ink:#e7eaef;
+    --chrome-muted:#98a1ae; --chrome-faint:#78818f; --chrome-line:#262b33;
+    --chrome-accent:#7fa3cc; --chrome-accent-soft:rgba(127,163,204,.13);
+    --shadow:0 1px 2px rgba(0,0,0,.32), 0 12px 34px rgba(0,0,0,.38);
+  }
+
+  * { box-sizing:border-box; }
+  body {
+    margin:0; background:var(--chrome-bg); color:var(--chrome-ink);
+    font-family:var(--sans); font-size:16px; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .page { max-width:1264px; margin:0 auto; padding:56px 32px 80px;
+          display:flex; flex-direction:column; gap:40px; }
+
+  /* ---------- document frame ---------- */
+  .eyebrow { font-size:13px; letter-spacing:.13em; text-transform:uppercase;
+             color:var(--chrome-accent); font-weight:600; margin:0 0 14px; }
+  h1 { font-family:var(--serif); font-weight:400; font-size:clamp(30px,4.2vw,46px);
+       line-height:1.12; margin:0 0 18px; letter-spacing:-.01em; text-wrap:balance; }
+  h1 em { font-style:italic; color:var(--chrome-accent); }
+  .standfirst { font-size:18px; line-height:1.65; color:var(--chrome-muted);
+                max-width:64ch; margin:0; }
+  .metarow { display:flex; flex-wrap:wrap; gap:8px; margin-top:24px; }
+  .chip { font-size:13px; padding:5px 11px; border-radius:3px;
+          background:var(--chrome-accent-soft); color:var(--chrome-accent);
+          font-weight:600; }
+  .chip b { font-weight:700; }
+
+  .intro { background:var(--chrome-card); border:1px solid var(--chrome-line);
+           border-radius:4px; padding:26px 30px; display:flex;
+           flex-direction:column; gap:14px; box-shadow:var(--shadow); }
+  .intro h2 { font-family:var(--serif); font-weight:400; font-size:21px;
+              margin:0; letter-spacing:-.005em; }
+  .intro p { margin:0; font-size:15px; line-height:1.7; color:var(--chrome-muted);
+             max-width:78ch; }
+  .intro strong { color:var(--chrome-ink); font-weight:600; }
+  code { font-family:var(--mono); font-size:.9em;
+         background:var(--chrome-accent-soft); padding:1px 5px; border-radius:3px; }
+
+  /* ---------- canvas shell ---------- */
+  .shellhead { display:flex; align-items:baseline; justify-content:space-between;
+               gap:18px; flex-wrap:wrap; margin-bottom:-22px; }
+  .shellhead h2 { font-family:var(--serif); font-weight:400; font-size:22px; margin:0; }
+  .shellhead .note { font-size:13px; color:var(--chrome-faint); }
+  .scroller { overflow-x:auto; overflow-y:hidden; padding-bottom:6px; }
+
+  /* The dashboard canvas is deliberately NOT theme-aware. It is a faithful mock of a
+     light Tableau dashboard, and its palette was validated for contrast against a white
+     card on a #f4f4f2 plane. Theming it would invalidate the measurements. */
+  .canvas {
+    --plano:#f4f4f2; --card:#ffffff; --tinta:#111110;
+    --serie:#2a78d6; --acento:#eb6834; --marca:#8c8c89;
+    --grade:#e4e4e1; --txt2:#5c5c5a;
+    width:1200px; height:800px; flex:none;
+    background:var(--plano); color:var(--tinta);
+    font-family:var(--sans); font-size:14px; line-height:1.45;
+    border:1px solid var(--chrome-line); border-radius:4px; overflow:hidden;
+    display:flex; flex-direction:column; box-shadow:var(--shadow);
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* canvas header */
+  .cvhead { background:var(--card); padding:14px 24px 0;
+            display:flex; justify-content:space-between; align-items:flex-start; }
+  .cvtitle { font-size:17px; font-weight:600; margin:0 0 2px; letter-spacing:-.005em; }
+  .cvsrc { font-size:14px; color:var(--txt2); margin:0; }
+  .cvtabs { display:flex; gap:4px; align-self:flex-end; }
+  .cvtab { font:inherit; font-size:14px; padding:8px 16px; border:0; cursor:pointer;
+           background:transparent; color:var(--txt2); border-bottom:3px solid transparent;
+           border-radius:3px 3px 0 0; }
+  .cvtab:hover { background:var(--plano); }
+  .cvtab[aria-selected="true"] { color:var(--tinta); font-weight:600;
+                                 border-bottom-color:var(--acento); }
+  .cvtab:focus-visible { outline:2px solid var(--serie); outline-offset:-2px; }
+
+  /* canvas filter row */
+  .cvfilters { background:var(--card); border-bottom:1px solid var(--grade);
+               padding:10px 24px 14px; display:flex; gap:8px; align-items:center; }
+  .flt { font-size:14px; padding:6px 12px; border:1px solid #d6d6d3;
+         border-radius:3px; background:var(--card); color:var(--tinta); }
+  .flt span { color:var(--txt2); }
+  .fltmore { font-size:14px; color:var(--serie); background:none; border:0;
+             padding:6px 4px; cursor:pointer; }
+  .fltmore:focus-visible { outline:2px solid var(--serie); outline-offset:2px; }
+  .cvfilters .spacer { margin-left:auto; font-size:14px; color:var(--txt2); }
+
+  /* canvas body */
+  .cvbody { flex:1; padding:16px 24px; display:flex; flex-direction:column;
+            gap:8px; min-height:0; }
+  .row { display:flex; gap:8px; min-height:0; }
+  .card { background:var(--card); border-radius:3px; padding:16px;
+          display:flex; flex-direction:column; min-width:0; }
+  .cardhead { margin-bottom:10px; }
+  .cardtitle { font-size:15px; font-weight:600; margin:0; }
+  .cardsub { font-size:14px; color:var(--txt2); margin:2px 0 0; }
+  .cardnote { font-size:14px; color:var(--txt2); margin:8px 0 0; }
+  .cardnote b { color:var(--tinta); font-weight:600; }
+
+  /* KPI tiles */
+  .kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .kpi { background:var(--card); border-radius:3px; padding:14px 16px 12px;
+         display:flex; flex-direction:column; gap:2px; }
+  .kpi .lbl { font-size:14px; color:var(--txt2); }
+  .kpi .valrow { display:flex; align-items:baseline; gap:10px; }
+  .kpi .val { font-size:30px; font-weight:700; letter-spacing:-.02em; line-height:1.1; }
+  .kpi .dlt { font-size:14px; color:var(--txt2); white-space:nowrap; }
+  .kpi .dlt b { color:var(--tinta); font-weight:600; }
+  .kpi.hero .val { color:var(--acento); }
+  .kpi .spark { margin-top:6px; }
+  .kpi .ctx { font-size:14px; color:var(--txt2); margin-top:4px; }
+
+  .caveat { background:var(--card); border-top:1px solid var(--grade);
+            padding:9px 24px; font-size:14px; color:var(--txt2); display:flex;
+            gap:8px; align-items:center; }
+  .caveat b { color:var(--tinta); font-weight:600; }
+
+  /* legend */
+  .lgd { display:flex; gap:14px; flex-wrap:wrap; font-size:14px;
+         color:var(--txt2); margin-top:8px; }
+  .lgd i { width:11px; height:11px; border-radius:2px; display:inline-block;
+           margin-right:5px; vertical-align:-1px; }
+
+  /* ---------- notes below canvas ---------- */
+  .notes { display:flex; flex-direction:column; gap:18px; }
+  .notes h3 { font-family:var(--serif); font-weight:400; font-size:20px; margin:0; }
+  .ncard { background:var(--chrome-card); border:1px solid var(--chrome-line);
+           border-left:3px solid var(--chrome-accent); border-radius:4px;
+           padding:20px 24px; }
+  .ncard h4 { margin:0 0 8px; font-size:15px; font-weight:600; }
+  .ncard p { margin:0 0 10px; font-size:15px; line-height:1.7;
+             color:var(--chrome-muted); max-width:80ch; }
+  .ncard p:last-child { margin-bottom:0; }
+  .ncard strong { color:var(--chrome-ink); font-weight:600; }
+  .tablewrap { overflow-x:auto; }
+  table { border-collapse:collapse; font-size:14px; width:100%; min-width:460px;
+          font-variant-numeric:tabular-nums; }
+  th,td { text-align:left; padding:7px 12px 7px 0; border-bottom:1px solid var(--chrome-line); }
+  th { font-size:13px; letter-spacing:.05em; text-transform:uppercase;
+       color:var(--chrome-faint); font-weight:600; }
+  td.num,th.num { text-align:right; }
+
+  footer { border-top:1px solid var(--chrome-line); padding-top:22px;
+           font-size:14px; color:var(--chrome-faint); }
+  footer a { color:var(--chrome-accent); }
+
+  @media (prefers-reduced-motion:reduce) { * { transition:none !important; } }
+</style>
+
+<div class="page">
+
+  <header>
+    <p class="eyebrow">Tableau User Group · wireframe do depois</p>
+    <h1>Ocupação hospitalar SUS no RS — a versão que <em>responde à pergunta</em></h1>
+    <p class="standfirst">
+      Mock de alta fidelidade da V2. Quatro abas, cada uma provando uma frase, num quadro de
+      1200 × 800 que cabe inteiro numa tela — contra os 2.600 px de rolagem da V1. Todos os
+      números vêm das tabelas refinadas do projeto; nada aqui é sintético.
+    </p>
+    <div class="metarow">
+      <span class="chip">SIH-SUS × CNES</span>
+      <span class="chip">RS · 2019–2023</span>
+      <span class="chip">taxa SUS ponderada · <b>55,9%</b></span>
+      <span class="chip">4 abas · 1200 × 800</span>
+    </div>
+  </header>
+
+  <section class="intro">
+    <h2>O que olhar</h2>
+    <p>
+      Os <strong>KPIs carregam contexto</strong>, que é o pedido central deste wireframe: cada
+      tile traz a variação contra o ano anterior <em>e</em> uma sparkline dos 60 meses, porque
+      o número sozinho responde "quanto", nunca "e daí". O caso mais claro é
+      <strong>Leitos SUS</strong>: a variação contra 2019 é de +0,3%, o que parece dizer que
+      nada aconteceu — a sparkline mostra o pico de 23.078 leitos em 2021 e a volta. Sem ela, o
+      tile mentiria por omissão.
+    </p>
+    <p>
+      A tela é <strong>fixa em modo claro de propósito</strong>. As cores foram validadas em
+      simulador de daltonismo contra um card branco sobre plano <code>#f4f4f2</code>; trocar o
+      tema invalidaria a medição. A moldura desta página acompanha o tema; o dashboard, não.
+    </p>
+    <p>
+      O mapa da aba <strong>Território</strong> aparece aqui como grade — cada quadrado é um
+      dos 225 municípios, com a taxa real, ordenados. No Tableau vira coroplético; a grade
+      evita fingir geografia num wireframe.
+    </p>
+  </section>
+
+  <div class="shellhead">
+    <h2>O dashboard</h2>
+    <p class="note">As abas abaixo funcionam. Quadro em escala real de 1200 × 800 px.</p>
+  </div>
+
+  <div class="scroller">
+    <div class="canvas">
+      <div class="cvhead">
+        <div>
+          <p class="cvtitle">Ocupação hospitalar SUS · Rio Grande do Sul</p>
+          <p class="cvsrc">SIH-SUS + CNES (DATASUS) · 2019–2023 · atualizado em 12/2023</p>
+        </div>
+        <div class="cvtabs" role="tablist" aria-label="Abas do dashboard">
+          <button class="cvtab" role="tab" id="tab-0" aria-selected="true"  aria-controls="panel">Panorama</button>
+          <button class="cvtab" role="tab" id="tab-1" aria-selected="false" aria-controls="panel">Território</button>
+          <button class="cvtab" role="tab" id="tab-2" aria-selected="false" aria-controls="panel">Capacidade</button>
+          <button class="cvtab" role="tab" id="tab-3" aria-selected="false" aria-controls="panel">Custo</button>
+        </div>
+      </div>
+      <div class="cvfilters" id="filters"></div>
+      <div class="cvbody" id="panel" role="tabpanel" aria-labelledby="tab-0"></div>
+      <div class="caveat">
+        <b>Taxa de ocupação</b> = dias de permanência ÷ (leitos SUS × dias do mês).
+        Aproximação — pode passar de 100% pela rotatividade de leito. Dado administrativo, não clínico.
+      </div>
+    </div>
+  </div>
+
+  <section class="notes">
+    <h3>Decisões de projeto que este quadro implementa</h3>
+
+    <div class="ncard">
+      <h4>KPI com contexto — o que cada indicador tenta responder</h4>
+      <p>
+        Nenhum tile carrega só um número. A variação responde "mudou?", a sparkline responde
+        "como chegou aqui?", e a legenda embaixo responde "isso é muito?". Os quatro
+        indicadores respondem perguntas diferentes, então o contexto de cada um é escolhido,
+        não repetido por simetria:
+      </p>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr><th>Indicador</th><th>Pergunta que responde</th><th>Por que este contexto</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><b>Taxa de ocupação SUS</b></td><td>A rede está sob pressão?</td>
+                <td>Variação em <b>p.p.</b>, não em %, porque é uma taxa. Sparkline mostra que 2023 é o topo da série.</td></tr>
+            <tr><td><b>Leitos SUS</b></td><td>Temos capacidade?</td>
+                <td>A variação sozinha (+0,3%) esconde o pico de 2021. A sparkline é o dado, não o enfeite.</td></tr>
+            <tr><td><b>Dias de permanência</b></td><td>Qual o tamanho da demanda?</td>
+                <td>É a medida que o denominador da taxa persegue — sobe enquanto a capacidade fica parada.</td></tr>
+            <tr><td><b>Internações</b></td><td>Quantos pacientes?</td>
+                <td>Separa volume de duração: mais gente, não gente ficando mais tempo (permanência caiu 6,02 → 5,95 dias).</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top:12px">
+        As variações usam <strong>seta e sinal</strong>, nunca cor sozinha — nem verde/vermelho.
+        Introduzir um par semântico de cor aqui gastaria o orçamento de 3–5 cores do sistema e
+        reintroduziria justamente o par que falhou no teste de daltonismo.
+      </p>
+    </div>
+
+    <div class="ncard">
+      <h4>O gráfico-tesoura, e a única exceção ao eixo zerado</h4>
+      <p>
+        O herói da aba Panorama indexa capacidade e demanda a 2019 = 100. O argumento do pleito
+        não está no nível de nenhuma das duas séries — está na <strong>distância entre
+        elas</strong>, e essa distância só existe num gráfico que a V1 não tem.
+      </p>
+      <p>
+        O design system manda começar todo eixo em zero. Aqui a linha de base é <strong>100, não
+        0</strong>, e isso é deliberado: num índice, 100 <em>é</em> o zero — é o ponto onde "nada
+        mudou". Um eixo de zero comprimiria 88–106 nos 6% superiores da altura e apagaria o
+        efeito. A regra continua valendo para as séries de taxa e para toda barra; a exceção é
+        do índice, está anotada na tela, e a linha de referência é desenhada.
+      </p>
+    </div>
+
+    <div class="ncard">
+      <h4>Cor: cinza é o padrão, laranja é o argumento</h4>
+      <p>
+        O azul <code>#2a78d6</code> é a família do dado — série padrão, rampa do mapa, tons de
+        leito. O laranja <code>#eb6834</code> é a única cor sem função estrutural, então cada
+        aparição significa alguma coisa: a taxa entre os KPIs, a demanda na tesoura, os
+        municípios acima de 85%, a linha de UTI, a alta complexidade. Cinco aparições em quatro
+        abas.
+      </p>
+      <p>
+        O par verde + laranja que a orientação de UX pedia foi reprovado no simulador (ΔE 3,2 em
+        protanopia, contra alvo de 8). Azul + laranja mede 24,7 — e continua respeitando a
+        preocupação original, que era evitar azul + vermelho.
+      </p>
+    </div>
+
+    <div class="ncard">
+      <h4>O que foi cortado</h4>
+      <p>
+        Sem pizzas (a V1 tem três), sem segundo mapa competindo, sem tabelão, sem dispersão de
+        3,7 milhões de marcas, sem barra de 17 ícones. Perfil demográfico não virou aba: sexo e
+        raça/cor não informam alocação de leito, e sobreviveriam aqui só como decoração. Idade
+        ficou — como evidência de demanda futura dentro de Capacidade, que é onde ela muda uma
+        decisão.
+      </p>
+      <p>
+        <strong>Onze filtros viraram três por aba</strong>, sempre no mesmo lugar, aplicados à
+        aba inteira. O quarto e seguintes vivem atrás de "mais filtros".
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    Fonte: SIH-SUS (AIH reduzida) e CNES via Base dos Dados / DATASUS · recorte Rio Grande do
+    Sul, 2019–2023 · a base pública tem cerca de 6 meses de defasagem. Especificação completa em
+    <code>docs/dashboard_v2_spec.md</code>; tokens em <code>docs/dashboard_v2_design_system.md</code>.
+  </footer>
+</div>
+
+<script>
+const DATA={"mensal":[["2019-01",0.5472,21691,367943,59864],["2019-02",0.5899,21725,358810,59635],["2019-03",0.5409,21797,365500,60623],["2019-04",0.5817,21805,380488,62682],["2019-05",0.5793,21874,392811,66038],["2019-06",0.5929,21859,388827,65711],["2019-07",0.6132,21919,416633,68572],["2019-08",0.613,21829,414815,68633],["2019-09",0.614,21691,399516,66179],["2019-10",0.621,21664,417065,68939],["2019-11",0.5744,21663,373278,63040],["2019-12",0.5454,21654,366087,61652],["2020-01",0.5705,21595,381951,64143],["2020-02",0.5785,21677,363634,61972],["2020-03",0.5564,21733,374860,63929],["2020-04",0.4796,21884,314869,51290],["2020-05",0.4366,22147,299775,50512],["2020-06",0.447,22556,302458,51290],["2020-07",0.4662,22651,327368,53478],["2020-08",0.4625,22558,323442,52798],["2020-09",0.4816,22529,325490,52877],["2020-10",0.5221,22653,366630,59534],["2020-11",0.5252,22411,353108,57606],["2020-12",0.4949,22654,347566,56174],["2021-01",0.4982,22449,346714,57077],["2021-02",0.5359,22458,337010,54558],["2021-03",0.5302,23006,378102,56224],["2021-04",0.5346,23260,373073,55606],["2021-05",0.523,23411,379538,58159],["2021-06",0.5696,23548,402399,61323],["2021-07",0.5379,23491,391715,60974],["2021-08",0.5375,23177,386215,61878],["2021-09",0.5402,23187,375784,60725],["2021-10",0.5101,23089,365125,60328],["2021-11",0.5445,22958,375028,61168],["2021-12",0.522,22902,370626,61873],["2022-01",0.4961,22667,348613,58770],["2022-02",0.554,22630,351006,59290],["2022-03",0.5479,21615,367121,62268],["2022-04",0.5719,21642,371297,63668],["2022-05",0.5626,21669,377889,63922],["2022-06",0.5991,21924,394015,65621],["2022-07",0.5899,21791,398517,66624],["2022-08",0.6168,21873,418243,69243],["2022-09",0.6092,21841,399194,66789],["2022-10",0.6137,21874,416127,68769],["2022-11",0.597,21906,392317,66103],["2022-12",0.5777,21866,391585,66871],["2023-01",0.5689,21849,385297,64773],["2023-02",0.565,21893,346339,60068],["2023-03",0.5765,21899,391369,66519],["2023-04",0.5896,21895,387306,65771],["2023-05",0.591,21973,402580,69091],["2023-06",0.6182,21838,404998,67655],["2023-07",0.6288,21768,424327,69295],["2023-08",0.6285,21910,426877,70915],["2023-09",0.6151,21820,402623,67420],["2023-10",0.6264,21739,422154,68723],["2023-11",0.6213,21706,404561,68092],["2023-12",0.5725,21767,386339,66182]],"anual":[[2019,0.5843,21764,4641773,771568],[2020,0.501,22254,4081151,675603],[2021,0.5319,23078,4481329,709893],[2022,0.5777,21942,4625924,777938],[2023,0.6003,21838,4784770,804504]],"topMun":[["Porto Alegre",281,0.8064],["Canoas",273,0.6508],["São Leopoldo",212,0.6576],["Rio Grande",211,0.6446],["Sapucaia do Sul",209,0.7339],["Santa Maria",197,0.7371],["São Jerônimo",192,0.5355],["Erechim",182,0.7232],["Esteio",171,0.6465],["São Gabriel",168,0.5212],["Viamão",168,0.673],["Pelotas",165,0.7441],["Alegrete",159,0.6083],["Uruguaiana",157,0.5617],["Santo Ângelo",153,0.6195]],"histBins":[24,33,31,35,37,20,20,16,8,1],"medianaMun":0.3717,"nMun":225,"maxMun":0.9091,"tipos":{"clinico":{"2019":8857,"2020":9390,"2021":9362,"2022":9333,"2023":9382},"cirurgico":{"2019":4373,"2020":4178,"2021":3914,"2022":3979,"2023":4028},"outras especialidades":{"2019":2722,"2020":2761,"2021":2726,"2022":2683,"2023":2518},"pediatricos":{"2019":2255,"2020":2138,"2021":1979,"2022":1960,"2023":1984},"complementar":{"2019":2168,"2020":2597,"2021":3743,"2022":2574,"2023":2404},"obstetricos":{"2019":1971,"2020":1881,"2021":1819,"2022":1793,"2023":1735},"hospital dia":{"2019":298,"2020":310,"2021":326,"2022":332,"2023":331}},"custo":[[2019,771568,1131.6,1466.65,639.08,6.02],[2020,675603,1186.7,1756.45,689.11,6.04],[2021,709893,1567.3,2207.87,731.46,6.31],[2022,777938,1298.3,1668.85,679.86,5.95],[2023,804504,1361.3,1692.09,688.2,5.95]],"complex":[["Méida Complexidade",717574,868.0,1209.59],["Alta Complexidade",86930,493.3,5674.93]],"idade":[[2019,45.4,34.1],[2020,46.7,35.0],[2021,46.9,35.5],[2022,46.9,37.0],[2023,46.9,36.7]]};
+
+/* ---------- tokens (mirror of the CSS canvas scope) ---------- */
+const C = { serie:"#2a78d6", acento:"#eb6834", marca:"#8c8c89",
+            grade:"#e4e4e1", txt2:"#5c5c5a", tinta:"#111110", card:"#ffffff" };
+const RAMP = ["#cde2fb","#9ec5f4","#6da7ec","#3987e5","#256abf","#184f95","#0d366b"];
+const LEITO = ["#86b6ef","#3987e5","#256abf","#184f95"];
+
+/* ---------- tiny svg helpers ---------- */
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const nf  = (v,d=0) => v.toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const pct = (v,d=1) => nf(v*100,d)+"%";
+
+function svg(w,h,inner,extra=""){
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="100%" role="img" ${extra}
+          preserveAspectRatio="none" style="display:block">${inner}</svg>`;
+}
+function path(pts, close){
+  return pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")+(close||"");
+}
+function scaler(dom, rng){
+  const [d0,d1]=dom, [r0,r1]=rng, k=(r1-r0)/((d1-d0)||1);
+  return v => r0 + (v-d0)*k;
+}
+function gridlines(x0,x1,ys,fmt){
+  return ys.map(([v,y])=>
+    `<line x1="${x0}" x2="${x1}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}"
+       stroke="${C.grade}" stroke-width="1"/>
+     <text x="${x0-8}" y="${(y+4).toFixed(1)}" text-anchor="end" font-size="13"
+       fill="${C.txt2}">${fmt(v)}</text>`).join("");
+}
+
+/* ---------- sparkline for KPI tiles ---------- */
+function spark(vals, color){
+  const w=210,h=38,pad=3;
+  const lo=Math.min(...vals), hi=Math.max(...vals);
+  const sx=scaler([0,vals.length-1],[pad,w-pad]);
+  const sy=scaler([lo,hi],[h-pad-1,pad+1]);
+  const pts=vals.map((v,i)=>[sx(i),sy(v)]);
+  const area=path(pts)+` L${(w-pad).toFixed(1)},${h-pad} L${pad},${h-pad} Z`;
+  const last=pts[pts.length-1];
+  return svg(w,h,
+    `<path d="${area}" fill="${color}" opacity=".12"/>
+     <path d="${path(pts)}" fill="none" stroke="${color}" stroke-width="2"
+       stroke-linejoin="round" stroke-linecap="round"/>
+     <circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="4"
+       fill="${color}" stroke="${C.card}" stroke-width="2"/>`,
+    `aria-label="Série de 60 meses" style="display:block;height:38px"`);
+}
+
+/* ---------- KPI tile ---------- */
+function kpi({lbl,val,dlt,dltNote,ctx,vals,color,hero}){
+  const arrow = dlt>0 ? "▲" : dlt<0 ? "▼" : "→";
+  return `<div class="kpi${hero?" hero":""}">
+    <span class="lbl">${esc(lbl)}</span>
+    <div class="valrow"><span class="val">${val}</span>
+      <span class="dlt">${arrow} <b>${dltNote}</b></span></div>
+    <div class="spark">${spark(vals,color)}</div>
+    <span class="ctx">${ctx}</span>
+  </div>`;
+}
+
+/* ================= TAB 1 · PANORAMA ================= */
+function panorama(){
+  const M=DATA.mensal, A=DATA.anual;
+  const y23=A[4], y22=A[3], y19=A[0];
+
+  const tiles=[
+    kpi({lbl:"Taxa de ocupação SUS", val:pct(y23[1]), dlt:+1, hero:true,
+         dltNote:"+2,3 p.p. vs 2022", color:C.acento,
+         ctx:"Maior da série. Em 2019: 58,4%.",
+         vals:M.map(r=>r[1])}),
+    kpi({lbl:"Leitos SUS", val:nf(y23[2]), dlt:+1,
+         dltNote:"+0,3% vs 2019", color:C.serie,
+         ctx:"Pico de 23.078 em 2021 — e a volta.",
+         vals:M.map(r=>r[2])}),
+    kpi({lbl:"Dias de permanência", val:"4,78 mi", dlt:+1,
+         dltNote:"+3,1% vs 2019", color:C.serie,
+         ctx:"Maior da série. 2020: 4,08 mi.",
+         vals:M.map(r=>r[3])}),
+    kpi({lbl:"Internações", val:"804.504", dlt:+1,
+         dltNote:"+4,3% vs 2019", color:C.serie,
+         ctx:"Permanência média caiu 6,02 → 5,95 dias.",
+         vals:M.map(r=>r[4])})
+  ].join("");
+
+  /* hero: indexed capacity vs demand, 12-month trailing mean, base = 2019 mean.
+     Smoothed because the raw monthly series carries strong seasonality that hides the
+     trend; at 12 months the endpoint equals the 2023 annual index exactly (100,3 / 103,1). */
+  const base19L=A[0][2], base19D=A[0][3]/12;
+  const roll=(get)=>M.map((_,i)=> i<11 ? null :
+      M.slice(i-11,i+1).reduce((s,r)=>s+get(r),0)/12);
+  const cap=roll(r=>r[2]).map(v=>v===null?null:100*v/base19L);
+  const dem=roll(r=>r[3]).map(v=>v===null?null:100*v/base19D);
+  const W=1114,H=250,L=44,R=84,T=16,B=26;
+  const sx=scaler([0,59],[L,W-R]);
+  const sy=scaler([84,110],[H-B,T]);
+  const gl=[90,100,110].map(v=>[v,sy(v)]);
+  const mk=a=>a.map((v,i)=>v===null?null:[sx(i),sy(v)]).filter(Boolean);
+  const capP=mk(cap), demP=mk(dem);
+  const xt=[11,23,35,47,59].map(i=>
+    `<text x="${sx(i).toFixed(1)}" y="${H-6}" font-size="13" fill="${C.txt2}"
+      text-anchor="middle">${2019+Math.round((i-11)/12)}</text>`).join("");
+  const covid=sx(14);
+  const hero=svg(W,H,
+    gridlines(L,W-R,gl,v=>v)+
+    `<line x1="${L}" x2="${W-R}" y1="${sy(100).toFixed(1)}" y2="${sy(100).toFixed(1)}"
+       stroke="${C.txt2}" stroke-width="1.5" stroke-dasharray="4 3"/>
+     <text x="${W-R+6}" y="${(sy(100)+4).toFixed(1)}" font-size="13" fill="${C.txt2}">2019 = 100</text>
+     <line x1="${covid.toFixed(1)}" x2="${covid.toFixed(1)}" y1="${T}" y2="${H-B}"
+       stroke="${C.grade}" stroke-width="1"/>
+     <text x="${(covid+5).toFixed(1)}" y="${T+12}" font-size="13" fill="${C.txt2}">mar/2020</text>
+     <path d="${path(capP)}" fill="none" stroke="${C.serie}" stroke-width="2"
+       stroke-linejoin="round"/>
+     <path d="${path(demP)}" fill="none" stroke="${C.acento}" stroke-width="2"
+       stroke-linejoin="round"/>
+     <circle cx="${capP.at(-1)[0].toFixed(1)}" cy="${capP.at(-1)[1].toFixed(1)}" r="4" fill="${C.serie}"/>
+     <circle cx="${demP.at(-1)[0].toFixed(1)}" cy="${demP.at(-1)[1].toFixed(1)}" r="4" fill="${C.acento}"/>
+     <text x="${(W-R+8)}" y="${(capP.at(-1)[1]-3).toFixed(1)}" font-size="13"
+       fill="${C.serie}" font-weight="600">Capacidade</text>
+     <text x="${(W-R+8)}" y="${(capP.at(-1)[1]+12).toFixed(1)}" font-size="13" fill="${C.txt2}">100,3</text>
+     <text x="${(W-R+8)}" y="${(demP.at(-1)[1]-3).toFixed(1)}" font-size="13"
+       fill="${C.acento}" font-weight="600">Demanda</text>
+     <text x="${(W-R+8)}" y="${(demP.at(-1)[1]+12).toFixed(1)}" font-size="13" fill="${C.txt2}">103,1</text>`
+    +xt);
+
+  /* support 1: monthly rate, zero-based */
+  const w2=520,h2=176,l2=42,r2=12,t2=12,b2=24;
+  const s2x=scaler([0,59],[l2,w2-r2]), s2y=scaler([0,0.7],[h2-b2,t2]);
+  const p2=M.map((r,i)=>[s2x(i),s2y(r[1])]);
+  const lo=M.reduce((a,r)=>r[1]<a[1]?r:a), hi=M.reduce((a,r)=>r[1]>a[1]?r:a);
+  const loI=M.indexOf(lo), hiI=M.indexOf(hi);
+  const rate=svg(w2,h2,
+    gridlines(l2,w2-r2,[0,.2,.4,.6].map(v=>[v,s2y(v)]),v=>nf(v*100)+"%")+
+    `<path d="${path(p2)+` L${(w2-r2).toFixed(1)},${h2-b2} L${l2},${h2-b2} Z`}"
+       fill="${C.serie}" opacity=".10"/>
+     <path d="${path(p2)}" fill="none" stroke="${C.serie}" stroke-width="2"/>
+     <circle cx="${s2x(loI).toFixed(1)}" cy="${s2y(lo[1]).toFixed(1)}" r="4"
+       fill="${C.card}" stroke="${C.serie}" stroke-width="2"/>
+     <text x="${(s2x(loI)+7).toFixed(1)}" y="${(s2y(lo[1])+14).toFixed(1)}"
+       font-size="13" fill="${C.txt2}">mín 43,7% · mai/2020</text>
+     <circle cx="${s2x(hiI).toFixed(1)}" cy="${s2y(hi[1]).toFixed(1)}" r="4"
+       fill="${C.card}" stroke="${C.serie}" stroke-width="2"/>
+     <text x="${(s2x(hiI)-6).toFixed(1)}" y="${(s2y(hi[1])-8).toFixed(1)}" text-anchor="end"
+       font-size="13" fill="${C.txt2}">máx 62,9% · jul/2023</text>`+
+    [0,24,48].map(i=>`<text x="${s2x(i).toFixed(1)}" y="${h2-5}" font-size="13"
+       fill="${C.txt2}" text-anchor="middle">${2019+i/12}</text>`).join(""));
+
+  /* support 2: volume vs duration */
+  const cst=DATA.custo, w3=520,h3=176,l3=42,r3=12,t3=16,b3=24;
+  const s3x=scaler([0,4],[l3+30,w3-r3-30]);
+  const s3yI=scaler([600000,850000],[h3-b3,t3]);
+  const iP=cst.map((r,i)=>[s3x(i),s3yI(r[1])]);
+  const dur=svg(w3,h3,
+    gridlines(l3,w3-r3,[650000,750000,850000].map(v=>[v,s3yI(v)]),v=>nf(v/1000)+" mil")+
+    cst.map((r,i)=>{
+      const x=s3x(i), bw=34;
+      return `<rect x="${(x-bw/2).toFixed(1)}" y="${s3yI(r[1]).toFixed(1)}" width="${bw}"
+        height="${(h3-b3-s3yI(r[1])).toFixed(1)}" fill="${i===4?C.acento:C.marca}" rx="3"/>
+        <text x="${x.toFixed(1)}" y="${h3-5}" font-size="13" fill="${C.txt2}"
+          text-anchor="middle">${r[0]}</text>`;
+    }).join("")+
+    `<text x="${s3x(4).toFixed(1)}" y="${(s3yI(cst[4][1])-8).toFixed(1)}" text-anchor="middle"
+       font-size="13" font-weight="600" fill="${C.tinta}">804.504</text>`);
+
+  return `<div class="kpis">${tiles}</div>
+  <div class="row" style="flex:1.15">
+    <div class="card" style="flex:1">
+      <div class="cardhead">
+        <p class="cardtitle">Capacidade e demanda, indexadas a 2019 = 100</p>
+        <p class="cardsub">Média móvel de 12 meses. A demanda passou por cima de uma capacidade que ficou parada — a distância entre as linhas é o pleito.</p>
+      </div>
+      <div style="flex:1;min-height:0">${hero}</div>
+    </div>
+  </div>
+  <div class="row" style="flex:.95">
+    <div class="card" style="flex:1">
+      <div class="cardhead">
+        <p class="cardtitle">Taxa de ocupação SUS, mensal</p>
+        <p class="cardsub">Eixo de zero. A queda de 2020 é real: eletivas suspensas.</p>
+      </div>
+      <div style="flex:1;min-height:0">${rate}</div>
+    </div>
+    <div class="card" style="flex:1">
+      <div class="cardhead">
+        <p class="cardtitle">Internações por ano</p>
+        <p class="cardsub">A pressão vem de mais gente, não de gente ficando mais tempo.</p>
+      </div>
+      <div style="flex:1;min-height:0">${dur}</div>
+      <p class="cardnote">Permanência média: <b>6,02 dias em 2019</b> → <b>5,95 em 2023</b>.</p>
+    </div>
+  </div>`;
+}
+
+/* ================= TAB 2 · TERRITÓRIO ================= */
+function territorio(){
+  const mun=DATA.topMun;
+  /* schematic grid: one cell per municipality, ordered by rate */
+  const bins=DATA.histBins, cells=[];
+  bins.forEach((n,b)=>{ for(let i=0;i<n;i++) cells.push((b+0.5)/10); });
+  const cols=25, cw=17, ch=17, gap=3;
+  const grid=cells.map((v,i)=>{
+    const x=(i%cols)*(cw+gap), y=Math.floor(i/cols)*(ch+gap);
+    const c=RAMP[Math.min(Math.floor(v*RAMP.length),RAMP.length-1)];
+    return `<rect x="${x}" y="${y}" width="${cw}" height="${ch}" rx="2" fill="${c}"/>`;
+  }).join("");
+  const gw=cols*(cw+gap), gh=Math.ceil(cells.length/cols)*(ch+gap);
+
+  const legend=RAMP.map((c,i)=>
+    `<span style="display:inline-flex;align-items:center;gap:5px">
+       <i style="background:${c}"></i>${i===0?"baixa":i===RAMP.length-1?"alta":""}</span>`).join("");
+
+  /* ranked bars */
+  const w=520,h=270,l=124,r=44,t=8;
+  const bh=(h-t-10)/mun.length;
+  const sx=scaler([0,0.95],[l,w-r]);
+  const bars=mun.map((m,i)=>{
+    const y=t+i*bh, hot=m[2]>0.85;
+    return `<text x="${l-8}" y="${(y+bh/2+4).toFixed(1)}" text-anchor="end" font-size="13"
+      fill="${C.txt2}">${esc(m[0])}</text>
+      <rect x="${l}" y="${(y+2).toFixed(1)}" width="${(sx(m[2])-l).toFixed(1)}"
+        height="${(bh-4).toFixed(1)}" fill="${hot?C.acento:C.marca}" rx="2"/>
+      <text x="${(sx(m[2])+6).toFixed(1)}" y="${(y+bh/2+4).toFixed(1)}" font-size="13"
+        fill="${hot?C.tinta:C.txt2}" font-weight="${hot?600:400}">${pct(m[2])}</text>`;
+  }).join("");
+
+  /* histogram */
+  const w2=520,h2=150,l2=36,r2=10,t2=10,b2=26;
+  const mx=Math.max(...bins);
+  const bw=(w2-l2-r2)/bins.length;
+  const hist=bins.map((n,i)=>{
+    const bh2=(h2-t2-b2)*n/mx;
+    const isMed=DATA.medianaMun>=i/10 && DATA.medianaMun<(i+1)/10;
+    return `<rect x="${(l2+i*bw+2).toFixed(1)}" y="${(h2-b2-bh2).toFixed(1)}"
+      width="${(bw-4).toFixed(1)}" height="${bh2.toFixed(1)}"
+      fill="${isMed?C.acento:C.marca}" rx="2"/>
+      <text x="${(l2+i*bw+bw/2).toFixed(1)}" y="${h2-8}" font-size="13" fill="${C.txt2}"
+        text-anchor="middle">${i*10}</text>`;
+  }).join("");
+
+  return `<div class="row" style="flex:1.1">
+    <div class="card" style="flex:1">
+      <div class="cardhead">
+        <p class="cardtitle">Taxa de ocupação SUS por município · 2023</p>
+        <p class="cardsub">Cada quadrado é um dos ${DATA.nMun} municípios, ordenado por taxa. No Tableau, um mapa coroplético de um hue só.</p>
+      </div>
+      <div style="flex:1;min-height:0;display:flex;align-items:center">
+        ${svg(gw,gh,grid,`style="display:block;max-height:150px"`)}
+      </div>
+      <div class="lgd">${legend}
+        <span style="margin-left:auto">mediana <b style="color:${C.tinta}">37,2%</b> · máx <b style="color:${C.tinta}">90,9%</b></span>
+      </div>
+    </div>
+  </div>
+  <div class="row" style="flex:1.5">
+    <div class="card" style="flex:1">
+      <div class="cardhead">
+        <p class="cardtitle">Os 15 municípios com mais leitos SUS</p>
+        <p class="cardsub">Ordenados por taxa. Laranja: acima de 85%.</p>
+      </div>
+      <div style="flex:1;min-height:0">${svg(w,h,bars)}</div>
+    </div>
+    <div class="card" style="flex:1">
+      <div class="cardhead">
+        <p class="cardtitle">Distribuição dos ${DATA.nMun} municípios</p>
+        <p class="cardsub">Faixa de taxa (%). A barra laranja contém a mediana.</p>
+      </div>
+      <div style="flex:1;min-height:0">${svg(w2,h2,hist)}</div>
+      <p class="cardnote">A folga do interior <b>não é transferível</b>: capacidade ociosa
+        num município de 8 leitos não absorve a demanda de Porto Alegre.</p>
+    </div>
+  </div>`;
+}
+
+/* ================= TAB 3 · CAPACIDADE ================= */
+function capacidade(){
+  const T=DATA.tipos, anos=[2019,2020,2021,2022,2023];
+  const keep=[["clinico","Clínico"],["cirurgico","Cirúrgico"],
+              ["complementar","Complementar (UTI)"],["pediatricos","Pediátrico"]];
+  const outros=anos.map(a =>
+    T["outras especialidades"][a]+T["obstetricos"][a]+T["hospital dia"][a]);
+
+  const W=1114,H=300,L=52,R=140,Tp=14,B=26;
+  const sx=scaler([0,4],[L,W-R]);
+  const sy=scaler([0,10000],[H-B,Tp]);
+  const series=[
+    ...keep.map(([k,label],i)=>({label, vals:anos.map(a=>T[k][a]),
+      color: k==="complementar" ? C.acento : LEITO[i], accent:k==="complementar"})),
+    {label:"Outros", vals:outros, color:C.marca}
+  ];
+  const lines=series.map(s=>{
+    const pts=s.vals.map((v,i)=>[sx(i),sy(v)]);
+    const end=pts[4];
+    return `<path d="${path(pts)}" fill="none" stroke="${s.color}"
+      stroke-width="${s.accent?2.5:2}" stroke-linejoin="round"/>
+      <circle cx="${end[0].toFixed(1)}" cy="${end[1].toFixed(1)}" r="3.5" fill="${s.color}"/>
+      <text x="${(W-R+8)}" y="${(end[1]+4).toFixed(1)}" font-size="13" fill="${C.txt2}"
+        font-weight="${s.accent?600:400}">${esc(s.label)} <tspan fill="${C.tinta}">${nf(s.vals[4])}</tspan></text>`;
+  }).join("");
+  const peak=[sx(2),sy(T.complementar[2021])];
+  const chart=svg(W,H,
+    gridlines(L,W-R,[0,2500,5000,7500,10000].map(v=>[v,sy(v)]),v=>nf(v))+
+    lines+
+    `<circle cx="${peak[0].toFixed(1)}" cy="${peak[1].toFixed(1)}" r="5" fill="none"
+       stroke="${C.acento}" stroke-width="2"/>
+     <text x="${(peak[0]+10).toFixed(1)}" y="${(peak[1]-8).toFixed(1)}" font-size="13"
+       fill="${C.tinta}" font-weight="600">pico 3.743 · desfeito até 2023</text>`+
+    anos.map((a,i)=>`<text x="${sx(i).toFixed(1)}" y="${H-6}" font-size="13"
+       fill="${C.txt2}" text-anchor="middle">${a}</text>`).join(""));
+
+  const I=DATA.idade;
+  const w2=520,h2=150,l2=44,r2=16,t2=14,b2=26;
+  const s2x=scaler([0,4],[l2+24,w2-r2-24]);
+  const s2y=scaler([33,38],[h2-b2,t2]);
+  const pts=I.map((r,i)=>[s2x(i),s2y(r[2])]);
+  const age=svg(w2,h2,
+    gridlines(l2,w2-r2,[34,36,38].map(v=>[v,s2y(v)]),v=>nf(v)+"%")+
+    `<path d="${path(pts)}" fill="none" stroke="${C.serie}" stroke-width="2"/>`+
+    pts.map((p,i)=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3.5"
+       fill="${i===4?C.acento:C.serie}"/>`).join("")+
+    I.map((r,i)=>`<text x="${s2x(i).toFixed(1)}" y="${h2-8}" font-size="13"
+       fill="${C.txt2}" text-anchor="middle">${r[0]}</text>`).join(""));
+
+  return `<div class="row" style="flex:1.7">
+    <div class="card" style="flex:1">
+      <div class="cardhead">
+        <p class="cardtitle">Leitos SUS por tipo · média mensal</p>
+        <p class="cardsub">A expansão da pandemia foi quase toda de UTI, e foi desfeita.</p>
+      </div>
+      <div style="flex:1;min-height:0">${chart}</div>
+    </div>
+  </div>
+  <div class="row" style="flex:1">
+    <div class="card" style="flex:1">
+      <div class="cardhead">
+        <p class="cardtitle">Pacientes com 60 anos ou mais</p>
+        <p class="cardsub">% das internações. Evidência de demanda futura.</p>
+      </div>
+      <div style="flex:1;min-height:0">${age}</div>
+    </div>
+    <div class="card" style="flex:1">
+      <div class="cardhead"><p class="cardtitle">O que encolheu de forma permanente</p></div>
+      <div class="tablewrap" style="flex:1">
+        <table style="min-width:0">
+          <thead><tr><th>Tipo</th><th class="num">2019</th><th class="num">2023</th><th class="num">Δ</th></tr></thead>
+          <tbody>
+            <tr><td>Complementar (UTI)</td><td class="num">2.168</td><td class="num">2.404</td><td class="num">+10,9%</td></tr>
+            <tr><td>Pediátrico</td><td class="num">2.255</td><td class="num">1.984</td><td class="num">−12,0%</td></tr>
+            <tr><td>Obstétrico</td><td class="num">1.971</td><td class="num">1.735</td><td class="num">−12,0%</td></tr>
+            <tr><td>Cirúrgico</td><td class="num">4.373</td><td class="num">4.028</td><td class="num">−7,9%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="cardnote">77,1% dos leitos cadastrados no RS são SUS — é o denominador da taxa.</p>
+    </div>
+  </div>`;
+}
+
+/* ================= TAB 4 · CUSTO ================= */
+function custo(){
+  const K=DATA.custo;
+  const W=1114,H=250,L=52,R=110,T=16,B=26;
+  const sx=scaler([0,4],[L+40,W-R-40]);
+  const sy=scaler([90,145],[H-B,T]);
+  const idxG=K.map((r,i)=>[sx(i),sy(100*r[2]/K[0][2])]);
+  const idxN=K.map((r,i)=>[sx(i),sy(100*r[1]/K[0][1])]);
+  const chart=svg(W,H,
+    gridlines(L,W-R,[100,120,140].map(v=>[v,sy(v)]),v=>v)+
+    `<line x1="${L}" x2="${W-R}" y1="${sy(100).toFixed(1)}" y2="${sy(100).toFixed(1)}"
+       stroke="${C.txt2}" stroke-width="1.5" stroke-dasharray="4 3"/>
+     <text x="${W-R+6}" y="${(sy(100)+4).toFixed(1)}" font-size="13" fill="${C.txt2}">2019 = 100</text>
+     <path d="${path(idxG)}" fill="none" stroke="${C.acento}" stroke-width="2"/>
+     <path d="${path(idxN)}" fill="none" stroke="${C.serie}" stroke-width="2"/>
+     <text x="${W-R+6}" y="${(idxG[4][1]-4).toFixed(1)}" font-size="13" fill="${C.acento}"
+       font-weight="600">Gasto 120,3</text>
+     <text x="${W-R+6}" y="${(idxN[4][1]+14).toFixed(1)}" font-size="13" fill="${C.serie}"
+       font-weight="600">Internações 104,3</text>`+
+    K.map((r,i)=>`<circle cx="${sx(i).toFixed(1)}" cy="${sy(100*r[2]/K[0][2]).toFixed(1)}"
+       r="3.5" fill="${C.acento}"/>
+       <circle cx="${sx(i).toFixed(1)}" cy="${sy(100*r[1]/K[0][1]).toFixed(1)}"
+       r="3.5" fill="${C.serie}"/>
+       <text x="${sx(i).toFixed(1)}" y="${H-6}" font-size="13" fill="${C.txt2}"
+       text-anchor="middle">${r[0]}</text>`).join("")+
+    `<text x="${sx(2).toFixed(1)}" y="${(sy(138.5)).toFixed(1)}" font-size="13"
+       fill="${C.tinta}" text-anchor="middle" font-weight="600">2021: +38% de gasto com menos internações</text>`);
+
+  /* 100% stacked: volume vs spend */
+  const cx=DATA.complex, nT=cx[0][1]+cx[1][1], gT=cx[0][2]+cx[1][2];
+  const w2=520,h2=150,l2=96,r2=16;
+  const bar=(y,label,fracHigh,txtHigh,txtMed)=>{
+    const x0=l2, wTot=w2-l2-r2, wHigh=wTot*fracHigh;
+    return `<text x="${l2-10}" y="${y+24}" text-anchor="end" font-size="14"
+      fill="${C.txt2}">${label}</text>
+      <rect x="${x0}" y="${y}" width="${(wTot-wHigh-2).toFixed(1)}" height="38"
+        fill="${C.marca}" rx="2"/>
+      <rect x="${(x0+wTot-wHigh).toFixed(1)}" y="${y}" width="${wHigh.toFixed(1)}" height="38"
+        fill="${C.acento}" rx="2"/>
+      <text x="${(x0+8)}" y="${y+24}" font-size="14" fill="#ffffff" font-weight="600">${txtMed}</text>
+      <text x="${(x0+wTot-wHigh-8).toFixed(1)}" y="${y+24}" text-anchor="end" font-size="14"
+        fill="${C.tinta}" font-weight="600">${txtHigh}</text>`;
+  };
+  const stack=svg(w2,h2,
+    bar(14,"Internações",cx[1][1]/nT,"10,8%","89,2%")+
+    bar(76,"Gasto",cx[1][2]/gT,"36,3%","63,8%"));
+
+  return `<div class="row" style="flex:1.15">
+    <div class="card" style="flex:1">
+      <div class="cardhead">
+        <p class="cardtitle">Gasto e internações, indexados a 2019 = 100</p>
+        <p class="cardsub">O gasto cresceu mais rápido que o volume — e o descolamento é a alta complexidade.</p>
+      </div>
+      <div style="flex:1;min-height:0">${chart}</div>
+    </div>
+  </div>
+  <div class="row" style="flex:.95">
+    <div class="card" style="flex:1.15">
+      <div class="cardhead">
+        <p class="cardtitle">Onde o recurso vai · 2023</p>
+        <p class="cardsub">Alta complexidade em laranja. O descasamento entre as duas barras é o gráfico.</p>
+      </div>
+      <div style="flex:1;min-height:0">${stack}</div>
+      <p class="cardnote"><b>10,8%</b> das internações consomem <b>36,3%</b> do gasto —
+        R$ 5.675 contra R$ 1.210 por internação.</p>
+    </div>
+    <div class="card" style="flex:1">
+      <div class="cardhead">
+        <p class="cardtitle">Valor da AIH · média × mediana</p>
+        <p class="cardsub">A distribuição é assimétrica: use a mediana.</p>
+      </div>
+      <div class="tablewrap" style="flex:1">
+        <table style="min-width:0">
+          <thead><tr><th>Ano</th><th class="num">Gasto</th><th class="num">Média</th><th class="num">Mediana</th></tr></thead>
+          <tbody>${K.map(r=>`<tr><td>${r[0]}</td><td class="num">R$ ${nf(r[2],1)} mi</td>
+            <td class="num">${nf(r[3],0)}</td><td class="num">${nf(r[4],0)}</td></tr>`).join("")}</tbody>
+        </table>
+      </div>
+      <p class="cardnote">Média <b>R$ 1.692</b> contra mediana <b>R$ 688</b> em 2023 — a média
+        descreve mal a internação típica.</p>
+    </div>
+  </div>`;
+}
+
+/* ---------- filters per tab ---------- */
+const FILTERS=[
+  ["Ano","Todos"],["Macrorregião","Todas"],["Tipo de internação","Todos"]
+];
+const THIRD=["Tipo de internação","Município","Tipo de leito","Complexidade"];
+
+function renderFilters(i){
+  const f=[["Ano","2019–2023"],["Macrorregião","Todas"],[THIRD[i],"Todos"]];
+  document.getElementById("filters").innerHTML =
+    f.map(([k,v])=>`<span class="flt"><span>${esc(k)}:</span> ${esc(v)} ▾</span>`).join("")+
+    `<button class="fltmore" type="button">+ mais filtros</button>`+
+    `<span class="spacer">3 filtros · aplicam a esta aba</span>`;
+}
+
+const TABS=[panorama,territorio,capacidade,custo];
+function show(i){
+  document.querySelectorAll(".cvtab").forEach((b,j)=>
+    b.setAttribute("aria-selected", j===i ? "true" : "false"));
+  document.getElementById("panel").setAttribute("aria-labelledby","tab-"+i);
+  document.getElementById("panel").innerHTML = TABS[i]();
+  renderFilters(i);
+}
+document.querySelectorAll(".cvtab").forEach((b,i)=>{
+  b.addEventListener("click",()=>show(i));
+  b.addEventListener("keydown",e=>{
+    if(e.key!=="ArrowRight" && e.key!=="ArrowLeft") return;
+    e.preventDefault();
+    const n=(i+(e.key==="ArrowRight"?1:3))%4;
+    document.getElementById("tab-"+n).focus(); show(n);
+  });
+});
+show(0);
+</script>
