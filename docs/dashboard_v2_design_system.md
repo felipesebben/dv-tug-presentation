@@ -30,10 +30,12 @@ normal o par é ótimo (31,0) — é justamente o caso que passa despercebido em
 visual.
 
 **Isto contradiz a orientação dos UXers**, que pela regra do projeto vence em conflito.
-Mas a regra de prioridade é editorial, e aqui há medição. **Decisão pendente do Felipe**
-— até lá o restante deste documento adota **azul + laranja**, que passa com folga e não
-é o par azul-vermelho que os UXers queriam evitar. A recomendação original deles
-(evitar azul+vermelho) continua respeitada.
+Mas a regra de prioridade é editorial, e aqui há medição.
+
+**Decidido: azul + laranja.** Passa com folga (24,7), e não é o par azul-vermelho que os
+UXers queriam evitar — a preocupação original deles segue respeitada. O verde sai do
+sistema por completo: mantê-lo como cor terciária reintroduziria o mesmo par pela porta
+dos fundos assim que duas séries coincidissem numa tela.
 
 > Vale como momento de palco: a dupla recomendou um par por intuição, e a simulação
 > reprovou. "Rode o verificador, não confie no olho" é uma lição mais forte vinda de um
@@ -46,12 +48,21 @@ Mas a regra de prioridade é editorial, e aqui há medição. **Decisão pendent
 Proporção alvo dos UXers: **20% destaque · 30% cinzas · 70% branco/preto**. Na prática:
 cinza é o padrão, cor é exceção, e cor só aparece onde há um argumento.
 
-### Destaque (2 cores, nunca mais)
+### Duas cores, com papéis diferentes — nunca uma terceira
 
 | papel | hex | contraste vs card | uso |
 |---|---|---|---|
-| `--destaque` | `#2a78d6` | 4,42 | a série ou barra que sustenta o argumento |
-| `--destaque-2` | `#eb6834` | 3,20 | apenas quando duas séries precisam coexistir (capacidade × demanda) |
+| `--serie` | `#2a78d6` | 4,42 | a cor do dado: série principal, e a família de onde saem a rampa do mapa e a dos leitos |
+| `--acento` | `#eb6834` | 3,20 | **só o que sustenta o argumento** — a barra destacada, o ano corrente, a segunda série do gráfico-tesoura |
+
+A divisão de papéis importa mais que os hexes. O azul é a **família do dado** — mapa
+sequencial, tons de leito, série padrão — e por isso aparece muito. Se ele fosse também a
+cor de destaque, estaria fazendo dois trabalhos e deixaria de significar "olhe aqui".
+
+O laranja aparece **pouco, de propósito**: é a única cor do sistema que não tem função
+estrutural, então toda vez que ela aparece, ela quer dizer alguma coisa. Uma barra laranja
+numa série cinza carrega mais informação que doze barras coloridas — é o princípio do
+ponto focal implementado por escassez, não por saturação.
 
 ### Cinzas (exatamente 3 — o teto dos UXers)
 
@@ -163,7 +174,7 @@ que a categoria tenha ordem natural (mês, faixa etária). Tabela com colunas or
 (controle do usuário, Nielsen).
 
 **Destaque**: barras em `--marca-neutra`; só o que sustenta o argumento recebe
-`--destaque`. Uma barra colorida numa série cinza carrega mais significado que doze
+`--acento`. Uma barra colorida numa série cinza carrega mais significado que doze
 barras coloridas.
 
 **Rótulos diretos** no fim da linha ou na barra destacada, em vez de legenda, quando há

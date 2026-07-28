@@ -445,10 +445,23 @@ numerador continuaria entrando na soma.
 | 2022 | 21.942 | 4,63 M | 57,8% |
 | 2023 | 21.838 | 4,78 M | **60,0%** |
 
-A leitura que a V2 precisa deixar óbvia: a capacidade SUS **cresceu na pandemia e voltou
-para baixo do patamar de 2019**, enquanto a demanda caiu em 2020 e voltou **acima** dele.
-2023 é o ano mais pressionado da série. A ocupação **caiu** durante a COVID — o contrário
-do que a plateia espera — porque procedimentos eletivos foram suspensos.
+Indexando 2019 = 100:
+
+| ano | capacidade (leitos SUS) | demanda (dias de permanência) |
+|---|---|---|
+| 2019 | 100,0 | 100,0 |
+| 2020 | 102,3 | 87,9 |
+| 2021 | **106,0** | 96,5 |
+| 2022 | 100,8 | 99,7 |
+| 2023 | **100,3** | **103,1** |
+
+A leitura que a V2 precisa deixar óbvia: a capacidade SUS cresceu até +6,0% na pandemia e
+**voltou ao patamar de 2019** (+0,3%), enquanto a demanda caiu a 87,9 em 2020 e voltou
+**3,1% acima** dele. Não é que a capacidade tenha encolhido — é que ela ficou parada
+enquanto a demanda passou por cima. 2023 é o ano mais pressionado da série.
+
+A ocupação **caiu** durante a COVID — o contrário do que a plateia espera — porque
+procedimentos eletivos foram suspensos.
 
 ### Ocupação acima de 100%
 

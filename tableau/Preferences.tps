@@ -13,6 +13,14 @@
   Every value here was validated with a CVD simulator, not chosen by eye. The
   blue/orange highlight pair scores 24.7 dE under protanopia; the green/orange pair
   originally suggested in docs/uxers_guidance.md scores 3.2 and was rejected.
+
+  The two colours have different jobs, and the split matters more than the hexes:
+      blue   #2a78d6  the data family - default series, and the parent hue of both
+                      ramps below. Appears often.
+      orange #eb6834  the accent. Reserved for whatever carries the argument, and
+                      used sparingly enough that its presence is itself information.
+  Green is absent by design: keeping it as a third colour would reintroduce the
+  failing green/orange pair the moment two series shared a view.
 -->
 
 <workbook>

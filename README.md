@@ -184,8 +184,9 @@ Dataviz Clarity, CC BY-NC-ND 4.0) — the PDF lives in the gitignored `reference
   30,8% → 55,9%), with numerator and denominator exported separately so it stays correct
   at every drill level; design system + validated Tableau palettes
   (`docs/dashboard_v2_design_system.md`, `tableau/Preferences.tps`)
-- [ ] V2 build spec per tab (`docs/dashboard_v2_spec.md`) — persona and tab architecture
-  settled, sheet-level spec still to write
+- [x] V2 build spec (`docs/dashboard_v2_spec.md`) — persona, four-tab architecture at
+  1200×800, sheet-by-sheet spec with verified anchor numbers, and the V1-sin → V2-fix
+  map that doubles as the workshop script
 - [ ] Build V2 in Tableau (`tableau/dashboard_v2.twb`)
 
 *Capturing the "before" artefacts (screenshots, timings, usability recording) was dropped

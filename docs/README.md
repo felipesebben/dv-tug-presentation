@@ -93,6 +93,22 @@ redesign shouldn't fix a sin that isn't there. The review that produced this fil
 the time series and the filters, not all 46 ledger items, so it notes that a full
 ledger-vs-workbook pass is still worth doing before the workshop.
 
+### `dashboard_v2_spec.md`
+The build spec for the corrected dashboard ("V2"), and the counterpart to
+`dashboard_v1_spec.md` — same section structure so the two read side by side. Contents:
+the persona (an SES-RS analyst assembling a federal funding case, which is what decides
+every cut below it), the one sentence each tab has to prove, a four-tab architecture at
+1200×800 so nothing scrolls, and a sheet-by-sheet spec with **real anchor numbers**
+verified against the refined tables — KPI values, the indexed capacity/demand series, the
+municipal ranking, bed counts by type, cost by complexity.
+
+Its section 6 is the workshop script: V1 sin → V2 correction, mapped item by item. The
+last row is the one with no ledger number — the wrong denominator — and it's the point of
+the whole talk: no amount of design catches it.
+
+Ends with a build order that puts the palette and workbook-level formatting *before* the
+first sheet, which is what stops V1's inconsistency from reaccumulating.
+
 ### `dashboard_v2_design_system.md`
 The token set the V2 is built from — colours, type scale, spacing grid, chart rules —
 so that consistency is a decision made once rather than a judgement repeated per
@@ -141,10 +157,8 @@ Region A embeds inline copies of the three fictional SVG marks in `assets/logos/
 
 ## Not yet created
 
-- `dashboard_v2_spec.md` — the "depois": the per-tab build spec for V2. Persona and tab
-  architecture are settled (SES-RS analyst building a federal funding case; Panorama →
-  Território → Capacidade → Custo); the design tokens it will reference already exist in
-  `dashboard_v2_design_system.md`.
+- Nothing pending. The next artefact is the workbook itself,
+  `tableau/dashboard_v2.twb`, which lives in `tableau/`, not here.
 ## Deliberately not created
 
 - `assets/v1/` (i.e. `docs/assets/v1/`) — screenshots, load-time measurements and a
