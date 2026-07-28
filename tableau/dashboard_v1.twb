@@ -3832,7 +3832,7 @@
               </zone>
               <zone h='11231' id='46' param='horz' type-v2='layout-flow' w='30417' x='37916' y='27924'>
                 <zone fixed-size='157' h='11231' id='50' is-fixed='true' name='Pie | Sex' show-title='false' w='13750' x='37916' y='27924'>
-                  <layout-cache cell-count-h='1' minwidth='100' type-h='cell' type-w='scalable' />
+                  <layout-cache minwidth='100' type-h='cell' type-w='scalable' />
                   <zone-style>
                     <format attr='border-color' value='#000000' />
                     <format attr='border-style' value='none' />
@@ -3842,7 +3842,7 @@
                   </zone-style>
                 </zone>
                 <zone h='11231' id='48' name='Pie | Sex | Legend' show-title='false' w='16667' x='51666' y='27924'>
-                  <layout-cache fixed-size-h='40' minwidth='100' type-h='fixed' type-w='scalable' />
+                  <layout-cache minwidth='100' type-h='fixed' type-w='scalable' />
                   <zone-style>
                     <format attr='border-color' value='#000000' />
                     <format attr='border-style' value='none' />
