@@ -12,6 +12,9 @@ For someone new to the project, the natural read order is: `data_briefing.md` �
 `dashboard_v1_wireframe.html`) for the visual version. Read `metrics_dictionary.md`
 whenever you need to know what a number on the dashboard actually measures.
 
+If you're about to open or change the actual workbook, read `dashboard_v1_as_built.md`
+first — the spec describes the design, that file describes what got built.
+
 ## Files
 
 ### `data_briefing.md`
@@ -67,8 +70,28 @@ per-region principle map tagging each region's primary/secondary sins by block
 (FD/UX/A11) with citations back to `uxers_guidance.md` (`[UXers]`) or the Aurélien
 deck (`[p.NN]`), sheet-by-sheet Tableau build instructions, a 46-item sin ledger
 (38 from Aurélien + 8 from the UXers refinement) meant to be checked off live during
-the redesign workshop, the suggested build order (including the Tableau
-Relationships-not-Joins data-source setup), and how to capture "before" artefacts.
+the redesign workshop, and the suggested build order (including the Tableau
+Relationships-not-Joins data-source setup). Section 9 ("before" artefacts) is retained
+only as a record that it was dropped from scope.
+
+**Caveat:** this is the *design* document. V1 has been built, and the workbook diverges
+from it in a few places — read `dashboard_v1_as_built.md` alongside it. The spec keeps
+its reasoning intact because that reasoning is the redesign material.
+
+### `dashboard_v1_as_built.md`
+Record of what `tableau/dashboard_v1.twb` **actually contains**, verified by reading the
+workbook XML rather than by looking at it. Written because the spec is a design document
+that the build intentionally diverged from, and a fresh reader would otherwise assume
+every spec'd sin exists in the workbook. Contents: the five deviations (automatic Y axis
+instead of the spec'd 0,26–0,34 truncation; a dual synchronized axis on the time series;
+approximate filter scoping with 3 of 11 filters left global; 21 sheets not 22; "before"
+artefacts dropped from scope), the per-filter scope table as built, confirmation that the
+line-chart calculations are correct, and one known defect (the sex/ethnicity pie legends
+don't receive their pies' filters, so their percentages disagree once filtered). Also
+flags that **sin-ledger item 32 ("eixo truncado") is not realized in the build** — the
+redesign shouldn't fix a sin that isn't there. The review that produced this file covered
+the time series and the filters, not all 46 ledger items, so it notes that a full
+ledger-vs-workbook pass is still worth doing before the workshop.
 
 ### `dashboard_v1_spec.html`
 Styled, browsable companion to `dashboard_v1_spec.md` — same content, condensed
@@ -89,6 +112,10 @@ region and shows its principle(s)/citation/fix in a bottom drawer — condensed 
 `dashboard_v1_spec.md` section 5. Published as a Claude artifact for quick review;
 the file in this repo is the source of truth for that artifact.
 
+Note that it renders the **design intent**, not the built workbook — its time series shows
+the truncated 0,26–0,34 Y axis that V1 ended up not having. Left as-is on purpose: it is a
+mockup of the spec, and the spec's argument is what the redesign works from.
+
 Three regions were deliberately made **more plausible** (caricature gets dismissed; a
 mistake the audience recognizes from their own work lands harder): **N** is a full-height
 left rail plus a content-column appbar rather than a floating strip of buttons; **A** uses
@@ -103,6 +130,9 @@ Region A embeds inline copies of the three fictional SVG marks in `assets/logos/
 - `dashboard_v2_spec.md` — the "depois": documents the redesign once the UX
   co-presenters have gone through the workshop. Mentioned as a next step in
   `dashboard_v1_spec.md` section 10.
-- `assets/v1/` — screenshots, load-time measurements, and a screen recording of the
-  actual V1 Tableau workbook, captured per `dashboard_v1_spec.md` section 9. Not
-  created until `tableau/dashboard_v1.twb` exists (see `tableau/README.md`).
+## Deliberately not created
+
+- `assets/v1/` (i.e. `docs/assets/v1/`) — screenshots, load-time measurements and a
+  usability screen recording of the V1 workbook. **Dropped from this repo's scope**: this
+  repo builds and documents the dashboards; the UX co-presenters own the presentation and
+  its materials. Don't add this folder back without that decision changing.

@@ -299,7 +299,12 @@ do exemplo dos UXers: o dado mais importante da tela, escondido pela ordenação
 |---|---|
 | **Fonte** | `occupancy` · **Colunas** `ano_mes` contínuo · **Linhas** `AVG(taxa_ocupacao)` |
 | **Detalhe** | `id_estabelecimento_cnes` → **287 linhas sobrepostas** |
-| **Eixo Y** | fixado em **0,26 – 0,34** |
+| **Eixo Y** | ~~fixado em 0,26 – 0,34~~ → **automático** na V1 construída |
+
+> **Como ficou de fato:** eixo Y automático (o truncamento não foi implementado) e **eixo
+> duplo sincronizado** — o espaguete de 287 hospitais num painel, `AVG(taxa_ocupacao)`
+> estadual grosso por cima no outro. Os cálculos abaixo continuam valendo; só a escala
+> mudou. Ver `docs/dashboard_v1_as_built.md` §3.
 
 Médias anuais reais:
 
@@ -314,6 +319,9 @@ Médias anuais reais:
 Série mensal (agregada em todos os hospitais): mínimo **23,13%** em **2020-05**, máximo
 **35,40%** em **2023-11**.
 
+> *(Análise da janela que **seria** usada — mantida como material de argumentação para o
+> redesign; na V1 construída o eixo é automático e nada é clipado.)*
+>
 > **O eixo truncado não só distorce — ele corta dado fora.** A janela 0,26–0,34 é *mais
 > estreita que a própria série*: **14 dos 60 meses** caem fora dela (5 abaixo de 26%,
 > 9 acima de 34%). Ou seja, 23% dos pontos são clipados pela escala. O mês mais baixo da

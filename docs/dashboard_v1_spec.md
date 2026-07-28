@@ -12,6 +12,14 @@ Referência dos princípios: *Learn Design Driven Data Visualization* — Aurél
 Dataviz Clarity, CC BY-NC-ND 4.0. O PDF fica em `references/` (fora do versionamento).
 As referências `[p.NN]` neste documento apontam para os slides do deck.
 
+> **Este é o documento de projeto, não o inventário do que existe.** A V1 foi construída e
+> diverge desta especificação em alguns pontos — com destaque para o **eixo Y da série
+> temporal, que ficou automático** em vez de fixado em 0,26–0,34, e para o **escopo dos
+> filtros**, aplicado de forma aproximada. O registro do artefato real é
+> **`docs/dashboard_v1_as_built.md`**; onde os dois discordarem, o *as-built* descreve o
+> workbook e este documento descreve a intenção. A argumentação daqui continua sendo o
+> material de redesign.
+
 ---
 
 ## Refinamento dos UXers — leia antes da seção 1
@@ -163,7 +171,7 @@ O empilhamento das demais regiões, dentro da coluna de conteúdo:
 │ PACIENTE  [Sexo ▾][Raça/cor ▾]  → controlam as ROSCAS D2/D3, MUITO acima            │ I·4
 ├─────────────────────────────────────────────────────────────────────────────────────┤
 │  SÉRIE TEMPORAL — taxa de ocupação mensal 2019-2023                                │ H
-│  (o insight de verdade, enterrado; eixo Y fixado em 0,26–0,34)                      │
+│  (o insight de verdade, enterrado; eixo Y automático → não construído)              │
 ├─────────────────────────────────────────────────────────────────────────────────────┤
 │ FILTROS GLOBAIS  [Município ▾ (228)][Hospital ▾ (287)]                              │ I·5
 │ → controlam TABELÃO (C), MAPAS (E) e BARRAS (F2) — todos muito acima                 │
@@ -416,8 +424,9 @@ Aurélien; `[UXers]` vêm de `docs/uxers_guidance.md`.
   apertar (ver seção 8).
 
 ### H — Série temporal (o herói enterrado) · bloco FD (hero — sem mudanças)
-- **Eixo truncado** [p.103]: o eixo Y fixado em 0,26-0,34 é a mentira central — transforma
-  uma variação real de ~7 p.p. em colapso e pico.
+- ~~**Eixo truncado** [p.103]: o eixo Y fixado em 0,26-0,34 é a mentira central — transforma
+  uma variação real de ~7 p.p. em colapso e pico.~~ **Não construído** — o eixo da V1 é
+  automático. Ver `docs/dashboard_v1_as_built.md` §3.
 - **Rolagem** [p.90] + **scroll depth** [UXers, personas]: o insight que responde à pergunta
   nº 1 do briefing está no rodapé.
 - **Destino comum** [p.31]: 287 linhas sobrepostas (espaguete) se movem juntas sem comunicar
@@ -668,10 +677,16 @@ Este é o gráfico que **responde à pergunta nº 1 do briefing**, e é o mais m
 | **Colunas** | `ano_mes` (mês contínuo) |
 | **Linhas** | `AVG(taxa_ocupacao)` |
 | **Detalhe** | `id_estabelecimento_cnes` → **287 linhas sobrepostas** (espaguete) |
-| **Eixo Y** | **Fixado em 0,26 – 0,34** (não começa em zero, e nem se aproxima) |
+| **Eixo Y** | ~~**Fixado em 0,26 – 0,34**~~ → **não construído**, o eixo da V1 é automático |
 | **Posição** | Abaixo da dobra, no final da página |
 
-O eixo truncado é a mentira central da V1. As médias anuais reais são:
+> **Divergência de construção.** O eixo truncado **não foi implementado** — ver
+> `docs/dashboard_v1_as_built.md` §3. O parágrafo abaixo descreve a intenção de projeto e o
+> raciocínio do pecado; ele não descreve o workbook. Na V1 construída a série aparece
+> inteira (23,13% em maio/2020 a 35,40% em nov/2023) e o gráfico ainda é um eixo duplo
+> sincronizado — espaguete de 287 hospitais atrás, média estadual grossa por cima.
+
+O eixo truncado seria a mentira central da V1. As médias anuais reais são:
 
 | Ano | Taxa média |
 |---|---|
@@ -688,7 +703,7 @@ só o eixo mente.
 Sem anotação de nenhum evento. A pandemia — o arco narrativo inteiro do recorte 2019-2023 —
 não aparece marcada em lugar nenhum.
 
-**Pecados**: eixo truncado sem justificativa [p.103]; o conteúdo mais importante abaixo da dobra [p.90]; livro cortado em 80 pedaços e embaralhado [p.84]; "common fate" mal usado — 287 linhas se movendo juntas não comunicam nada [p.31]; ausência de elemento de contexto/anotação [p.59].
+**Pecados**: ~~eixo truncado sem justificativa [p.103]~~ *(não construído)*; o conteúdo mais importante abaixo da dobra [p.90]; livro cortado em 80 pedaços e embaralhado [p.84]; "common fate" mal usado — 287 linhas se movendo juntas não comunicam nada [p.31]; ausência de elemento de contexto/anotação [p.59].
 
 ---
 
@@ -704,6 +719,13 @@ não aparece marcada em lugar nenhum.
 | 3 | faixa azulada | `Tipo de leito`, `Especialidade` | entre **F** e **G** | pizza D1 | **muito acima** |
 | 4 | caixa com borda | `Sexo`, `Raça/cor` | **abaixo da dobra**, antes de H | roscas D2/D3 | **muito acima** |
 | 5 | rodapé cinza | `Município`, `Hospital` | fim da página (região I) | tabelão C, mapas E, barras F2 | espalhados acima |
+
+> **Divergência de construção.** A coluna "controla" acima é a intenção. Na V1 construída o
+> escopo é **aproximado**: `Caráter` e `Hospital` ficaram **globais** (controlam tudo), e
+> `Motivo de saída` / `Faixa de valor` alcançam também o tabelão. O escopo real está em
+> `docs/dashboard_v1_as_built.md` §2. O pecado de proximidade continua válido em 8 dos 11
+> filtros — para demonstrar ao vivo, use `Município`, `Tipo de leito` ou `Sexo`, que têm
+> alvo único e distante.
 
 > **Por que não todos no rodapé.** Era assim na primeira versão, e é irreal: ninguém empilha
 > 10 filtros no pé da página de propósito. Um erro que ninguém comete não gera
@@ -799,7 +821,7 @@ Checklist para o workshop. A dupla de UX pode ir riscando ao vivo — cada linha
 | 29 | Rolagem | p.90 | 2600 px de altura | Caber numa tela |
 | 30 | Feito pra todo mundo | p.91 | Sem persona | Definir persona única |
 | 31 | Processo pulado | p.94, p.99 | Abriu o Tableau primeiro | Define → Design → Develop |
-| 32 | Eixo truncado | p.103 | Eixo Y 0,26-0,34 (H) | Eixo em zero, ou justificar |
+| 32 | ~~Eixo truncado~~ **não construído** | p.103 | Eixo Y da região H ficou automático | — (nada a corrigir na V2) |
 | 33 | Cor redundante | p.104 | Barras coloridas por barra | Cor só pra destacar |
 | 34 | Rótulo vertical | p.105 | Municípios a 90° (F2) | Barras horizontais |
 | 35 | Dispersão espremida | p.106 | (G) em 1200×180 | Proporção ~1:1 |
@@ -844,25 +866,23 @@ Se o tempo apertar, esta ordem garante uma demo completa mesmo parando na metade
 
 ---
 
-## 9. Registrar o "antes" para a apresentação
+## 9. Registrar o "antes" para a apresentação — *fora de escopo*
 
-Antes de qualquer redesign, capturar:
+Esta seção previa capturar prints da página inteira e da primeira dobra, cronometrar carga
+e resposta de filtro, e gravar um teste de usabilidade.
 
-- **Print da página inteira** (full-page, 1200×2600) — vira o slide de abertura
-- **Print da primeira dobra** — mostra o que o usuário realmente vê
-- **Tempo de carga** com cronômetro, e tempo de resposta ao aplicar um filtro de município
-  — números reais valem mais que "estava lento" [p.111]
-- **Gravação de tela** de alguém tentando responder *"a ocupação subiu ou caiu em 2020?"*
-  — o teste de usabilidade mais barato que existe, e o mais convincente no palco
-
-Guardar em `docs/assets/v1/` (a pasta `docs/` é versionada; `data/` não é).
+**Retirada do escopo deste repositório.** A divisão de trabalho é: aqui os dashboards são
+construídos e documentados; a dupla de UX cuida da apresentação e dos materiais dela,
+incluindo a captura do "antes". A pasta `docs/assets/v1/` não foi criada e não é esperada.
 
 ---
 
 ## 10. Próximos passos
 
-1. Construir a V1 no Tableau conforme esta especificação
-2. Capturar os artefatos da seção 9
+1. ~~Construir a V1 no Tableau conforme esta especificação~~ — **feito**, com as divergências
+   registradas em `docs/dashboard_v1_as_built.md`
+2. ~~Capturar os artefatos da seção 9~~ — fora de escopo (ver seção 9)
 3. Workshop de redesign com a dupla de UX, usando o placar da seção 7 (lista) e o mapa da
-   seção 5 (por região) como roteiro
+   seção 5 (por região) como roteiro — lendo o *as-built* junto, para não redesenhar contra
+   pecados que não foram construídos (item 32)
 4. Produzir a V2 e documentar o *depois* em `docs/dashboard_v2_spec.md`
