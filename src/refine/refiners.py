@@ -34,7 +34,33 @@ class BaseRefiner(ABC):
 
 
 class OccupancyRefiner(BaseRefiner):
-    """Finalizes the hospital/month occupancy table: adds a date column, rounds the rate."""
+    """Finalizes the hospital/month occupancy table.
+
+    Adds a date column and persists the *components* of the occupancy rate, not just the
+    rate itself. A pre-divided ratio cannot be re-aggregated: averaging one hospital-month
+    rate with another weights a 3-bed unit the same as a 1.127-bed one. Exporting
+    numerator and denominator separately lets Tableau compute
+    ``SUM(dias) / SUM(leito_dias)``, which stays correct at every drill level (month,
+    municipality, state) with no LOD expressions.
+
+    Two denominators are exported:
+
+    ``leito_dias_total``
+        All beds. Pairs with ``taxa_ocupacao`` and reproduces what V1 shows.
+
+    ``leito_dias_sus``
+        SUS beds only (77% of the total). This is the correct denominator: the numerator
+        is SIH-SUS patient-days, i.e. SUS admissions, so dividing by all beds measures SUS
+        demand against capacity SUS patients cannot occupy. State-level rate moves from
+        43,3% (all beds) to 55,9% (SUS-only).
+
+    38 of 15.994 hospital-months report zero SUS beds. Both ``dias_permanencia_sus`` and
+    ``leito_dias_sus`` are NULL on those rows so numerator and denominator drop out
+    together — nulling only the denominator would inflate the rate.
+
+    ``taxa_ocupacao`` is kept unchanged so the V1 workbook keeps working against the same
+    extract; V2 uses the ``_sus`` columns.
+    """
 
     @property
     def output_filename(self) -> str:
@@ -42,12 +68,14 @@ class OccupancyRefiner(BaseRefiner):
 
     def build_query(self) -> str:
         occupancy_path = (self.transformed_dir / "occupancy.parquet").as_posix()
+        dias_no_mes = "day(last_day(make_date(ano, mes, 1)))"
         return f"""
             SELECT
                 id_estabelecimento_cnes,
                 ano,
                 mes,
                 make_date(ano, mes, 1) AS ano_mes,
+                {dias_no_mes} AS dias_no_mes,
                 sigla_uf,
                 nome_municipio,
                 nome_uf,
@@ -56,7 +84,18 @@ class OccupancyRefiner(BaseRefiner):
                 total_dias_permanencia,
                 leitos_total,
                 leitos_sus,
-                ROUND(taxa_ocupacao, 4) AS taxa_ocupacao
+                leitos_total * {dias_no_mes} AS leito_dias_total,
+                CASE WHEN leitos_sus > 0
+                     THEN leitos_sus * {dias_no_mes}
+                END AS leito_dias_sus,
+                CASE WHEN leitos_sus > 0
+                     THEN total_dias_permanencia
+                END AS dias_permanencia_sus,
+                ROUND(taxa_ocupacao, 4) AS taxa_ocupacao,
+                CASE WHEN leitos_sus > 0
+                     THEN ROUND(
+                         total_dias_permanencia * 1.0 / (leitos_sus * {dias_no_mes}), 4)
+                END AS taxa_ocupacao_sus
             FROM read_parquet('{occupancy_path}')
         """
 

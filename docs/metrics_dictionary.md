@@ -378,13 +378,22 @@ taxa_ocupacao = total_dias_permanencia / (leitos_total × dias_no_mês)
 Calculada **por hospital/mês** (`src/transform/transformers.py`, `OccupancyCalculator`).
 O KPI do topo é `AVG` dessas 15.994 taxas.
 
-Três decisões embutidas que mudam o resultado:
+São **duas** decisões independentes — como agregar, e qual denominador — e a combinação
+delas gera quatro números diferentes para "a taxa de ocupação do RS":
 
-| decisão | valor resultante | comentário |
+| | denominador = `leitos_total` | denominador = `leitos_sus` |
 |---|---|---|
-| `AVG` das taxas por hospital (**o que o V1 mostra**) | **30,8%** | cada hospital pesa igual |
-| Ponderada por leito (`SUM(dias)/SUM(leitos×dias_mês)`) | **43,1%** | a taxa "do estado" de fato |
-| Denominador só com leitos SUS | **39,6%** | ver abaixo |
+| **`AVG` das taxas por hospital** | **30,8%** ← *o que a V1 mostra* | 39,6% |
+| **Ponderada** (`SUM(dias)/SUM(leito_dias)`) | 43,0% | **55,9%** ← *o que a V2 usa* |
+
+Da célula da V1 para a da V2 o número **quase dobra**, sem que um único dado mude — só a
+aritmética. É o exemplo mais forte do projeto de um erro que design nenhum conserta.
+
+A V2 usa a célula inferior direita, e as duas correções são independentes:
+
+- **Ponderar** porque uma razão já dividida não pode ser re-agregada: a média das médias
+  dá a um hospital de 3 leitos o mesmo peso que a um de 1.127.
+- **`leitos_sus`** porque o numerador é SIH-SUS — só internações SUS. Ver abaixo.
 
 ### O viés estrutural: numerador SUS, denominador total
 
@@ -399,6 +408,47 @@ capacidade total. Trocar o denominador por `leitos_sus` sobe a média de 30,8% p
 > e essa é uma escolha que times reais fazem sem perceber. Mas ela precisa estar
 > **documentada aqui** e virar tema no V2: é o melhor exemplo do projeto de um erro que
 > nenhuma quantidade de design conserta. Layout bonito não salva denominador errado.
+
+> **Decisão para a V2: `leitos_sus`, ponderada.** Taxa estadual **55,9%**. A tabela
+> `occupancy` agora exporta os componentes da razão, não só a razão — ver §4.1.
+
+### 4.1. Colunas de ocupação exportadas (a partir da V2)
+
+`OccupancyRefiner` persiste numerador e denominador separados, para que o Tableau calcule
+`SUM(dias_permanencia_sus) / SUM(leito_dias_sus)` — correto em **qualquer** nível de
+drill (mês, município, estado) sem LOD.
+
+| coluna | definição |
+|---|---|
+| `dias_no_mes` | dias corridos do mês de referência |
+| `leito_dias_total` | `leitos_total × dias_no_mes` |
+| `leito_dias_sus` | `leitos_sus × dias_no_mes` · **NULL** se `leitos_sus = 0` |
+| `dias_permanencia_sus` | `total_dias_permanencia` · **NULL** se `leitos_sus = 0` |
+| `taxa_ocupacao` | inalterada — a razão pré-dividida que a V1 consome |
+| `taxa_ocupacao_sus` | razão SUS por hospital/mês (diagnóstico; **não** somar nem tirar média) |
+
+**38 de 15.994** hospital-mês declaram zero leitos SUS. Numerador e denominador são NULL
+juntos nessas linhas, de propósito: anular só o denominador infla a taxa, porque o
+numerador continuaria entrando na soma.
+
+> **Regra de ouro da V2**: na taxa, nunca arraste `taxa_ocupacao_sus` para a viz. Use
+> `SUM(dias_permanencia_sus) / SUM(leito_dias_sus)`. A coluna de razão existe só para
+> inspecionar uma linha.
+
+### 4.2. Série anual da V2 (`leitos_sus`, ponderada)
+
+| ano | leitos SUS (méd/mês) | dias de permanência | taxa SUS |
+|---|---|---|---|
+| 2019 | 21.764 | 4,64 M | 58,4% |
+| 2020 | 22.254 | 4,08 M | 50,1% |
+| 2021 | 23.078 | 4,48 M | 53,2% |
+| 2022 | 21.942 | 4,63 M | 57,8% |
+| 2023 | 21.838 | 4,78 M | **60,0%** |
+
+A leitura que a V2 precisa deixar óbvia: a capacidade SUS **cresceu na pandemia e voltou
+para baixo do patamar de 2019**, enquanto a demanda caiu em 2020 e voltou **acima** dele.
+2023 é o ano mais pressionado da série. A ocupação **caiu** durante a COVID — o contrário
+do que a plateia espera — porque procedimentos eletivos foram suspensos.
 
 ### Ocupação acima de 100%
 
