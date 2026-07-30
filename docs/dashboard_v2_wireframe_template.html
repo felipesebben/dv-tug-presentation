@@ -1,0 +1,1568 @@
+<title>Dashboard V2 — wireframe do "depois"</title>
+<style>
+  :root {
+    --chrome-bg:#eceef2; --chrome-card:#ffffff; --chrome-ink:#171c24;
+    --chrome-muted:#5a6270; --chrome-faint:#858d9b; --chrome-line:#dcdfe6;
+    --chrome-accent:#3d5a80; --chrome-accent-soft:rgba(61,90,128,.10);
+    --shadow:0 1px 2px rgba(23,28,36,.05), 0 10px 30px rgba(23,28,36,.07);
+    --serif:Georgia,"Iowan Old Style","Times New Roman",serif;
+    --sans:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --mono:"Cascadia Code",ui-monospace,Consolas,"SF Mono",Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      --chrome-bg:#0f1216; --chrome-card:#171b21; --chrome-ink:#e7eaef;
+      --chrome-muted:#98a1ae; --chrome-faint:#78818f; --chrome-line:#262b33;
+      --chrome-accent:#7fa3cc; --chrome-accent-soft:rgba(127,163,204,.13);
+      --shadow:0 1px 2px rgba(0,0,0,.32), 0 12px 34px rgba(0,0,0,.38);
+    }
+  }
+  :root[data-theme="dark"] {
+    --chrome-bg:#0f1216; --chrome-card:#171b21; --chrome-ink:#e7eaef;
+    --chrome-muted:#98a1ae; --chrome-faint:#78818f; --chrome-line:#262b33;
+    --chrome-accent:#7fa3cc; --chrome-accent-soft:rgba(127,163,204,.13);
+    --shadow:0 1px 2px rgba(0,0,0,.32), 0 12px 34px rgba(0,0,0,.38);
+  }
+
+  * { box-sizing:border-box; }
+  body {
+    margin:0; background:var(--chrome-bg); color:var(--chrome-ink);
+    font-family:var(--sans); font-size:16px; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .page { max-width:1264px; margin:0 auto; padding:56px 32px 80px;
+          display:flex; flex-direction:column; gap:40px; }
+
+  /* ---------- document frame ---------- */
+  .eyebrow { font-size:13px; letter-spacing:.13em; text-transform:uppercase;
+             color:var(--chrome-accent); font-weight:600; margin:0 0 14px; }
+  h1 { font-family:var(--serif); font-weight:400; font-size:clamp(30px,4.2vw,46px);
+       line-height:1.12; margin:0 0 18px; letter-spacing:-.01em; text-wrap:balance; }
+  h1 em { font-style:italic; color:var(--chrome-accent); }
+  .standfirst { font-size:18px; line-height:1.65; color:var(--chrome-muted);
+                max-width:64ch; margin:0; }
+  .metarow { display:flex; flex-wrap:wrap; gap:8px; margin-top:24px; }
+  .chip { font-size:13px; padding:5px 11px; border-radius:3px;
+          background:var(--chrome-accent-soft); color:var(--chrome-accent);
+          font-weight:600; }
+
+  .intro { background:var(--chrome-card); border:1px solid var(--chrome-line);
+           border-radius:4px; padding:26px 30px; display:flex;
+           flex-direction:column; gap:14px; box-shadow:var(--shadow); }
+  .intro h2 { font-family:var(--serif); font-weight:400; font-size:21px;
+              margin:0; letter-spacing:-.005em; }
+  .intro p { margin:0; font-size:15px; line-height:1.7; color:var(--chrome-muted);
+             max-width:78ch; }
+  .intro strong { color:var(--chrome-ink); font-weight:600; }
+  code { font-family:var(--mono); font-size:.9em;
+         background:var(--chrome-accent-soft); padding:1px 5px; border-radius:3px; }
+
+  .shellhead { display:flex; align-items:baseline; justify-content:space-between;
+               gap:18px; flex-wrap:wrap; margin-bottom:-22px; }
+  .shellhead h2 { font-family:var(--serif); font-weight:400; font-size:22px; margin:0; }
+  .shellhead .note { font-size:13px; color:var(--chrome-faint); }
+  .scroller { overflow-x:auto; overflow-y:hidden; padding-bottom:6px; }
+
+  /* The dashboard canvas is deliberately NOT theme-aware. It is a faithful mock of a
+     light Tableau dashboard, and its palette was validated for contrast against a white
+     card on a #f4f4f2 plane. Theming it would invalidate the measurements. */
+  .canvas {
+    --plano:#f4f4f2; --card:#ffffff; --tinta:#111110;
+    --serie:#2a78d6; --acento:#eb6834; --marca:#8c8c89;
+    --grade:#e4e4e1; --txt2:#5c5c5a;
+    position:relative;
+    width:1200px; height:800px; flex:none;
+    background:var(--plano); color:var(--tinta);
+    /* Roboto is the workbook family; it is not installed everywhere, and the fallback
+       chain here mirrors the one documented in the design system. */
+    font-family:Roboto,"Segoe UI",Arial,sans-serif;
+    font-size:14px; line-height:1.45;
+    border:1px solid var(--chrome-line); border-radius:4px; overflow:hidden;
+    display:flex; flex-direction:column; box-shadow:var(--shadow);
+    font-variant-numeric:tabular-nums;
+  }
+
+  .cvhead { background:var(--card); padding:14px 24px 0;
+            display:flex; justify-content:space-between; align-items:flex-start; }
+  .cvtitle { font-size:17px; font-weight:600; margin:0 0 2px; letter-spacing:-.005em; }
+  .cvsrc { font-size:14px; color:var(--txt2); margin:0; }
+  /* Help sits above the tabs, right-aligned: always visible, always the same place, and
+     never in a footer nobody scrolls to. */
+  .cvactions { display:flex; flex-direction:column; align-items:flex-end; gap:9px; }
+  .cvtabs { display:flex; gap:4px; align-self:flex-end; }
+  .cvtab { font:inherit; font-size:14px; padding:8px 16px; border:0; cursor:pointer;
+           background:transparent; color:var(--txt2); border-bottom:3px solid transparent;
+           border-radius:3px 3px 0 0; }
+  .cvtab:hover { background:var(--plano); }
+  .cvtab[aria-selected="true"] { color:var(--tinta); font-weight:600;
+                                 border-bottom-color:var(--acento); }
+  .cvtab:focus-visible { outline:2px solid var(--serie); outline-offset:-2px; }
+
+  .cvfilters { background:var(--card); border-bottom:1px solid var(--grade);
+               padding:10px 24px 14px; display:flex; gap:8px; align-items:center;
+               position:relative; }
+  .flt { font:inherit; font-size:14px; padding:6px 12px; border:1px solid #d6d6d3;
+         border-radius:3px; background:var(--card); color:var(--tinta); cursor:pointer; }
+  .flt.on { border-color:var(--serie); box-shadow:0 0 0 1px var(--serie); }
+  .flt .k { color:var(--txt2); }
+  .flt[disabled] { cursor:default; color:var(--txt2); }
+  .flt:focus-visible { outline:2px solid var(--serie); outline-offset:1px; }
+  .fltmore { font:inherit; font-size:14px; color:var(--serie); background:none; border:0;
+             padding:6px 4px; cursor:pointer; }
+  .cvfilters .spacer { margin-left:auto; font-size:14px; color:var(--txt2); }
+  .menu { position:absolute; top:46px; left:24px; z-index:20; background:var(--card);
+          border:1px solid #d6d6d3; border-radius:3px; box-shadow:0 6px 20px rgba(0,0,0,.14);
+          padding:4px; min-width:210px; }
+  .menu button { font:inherit; font-size:14px; display:block; width:100%; text-align:left;
+                 padding:7px 10px; border:0; background:none; cursor:pointer;
+                 color:var(--tinta); border-radius:2px; }
+  .menu button:hover { background:var(--plano); }
+  .menu button[aria-current="true"] { font-weight:600; color:var(--serie); }
+  .menu hr { border:0; border-top:1px solid var(--grade); margin:4px 2px; }
+  .menu .grp { font-size:13px; color:var(--txt2); padding:6px 10px 2px; }
+
+  .cvbody { flex:1; padding:16px 24px; display:flex; flex-direction:column;
+            gap:8px; min-height:0; }
+  .row { display:flex; gap:8px; min-height:0; }
+  .card { background:var(--card); border-radius:3px; padding:16px;
+          display:flex; flex-direction:column; min-width:0; }
+  .cardhead { margin-bottom:10px; }
+  .cardtitle { font-size:15px; font-weight:600; margin:0; }
+  .cardsub { font-size:14px; color:var(--txt2); margin:2px 0 0; }
+  .cardnote { font-size:14px; color:var(--txt2); margin:8px 0 0; }
+  .cardnote b { color:var(--tinta); font-weight:600; }
+
+  .kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .kpi { background:var(--card); border-radius:3px; padding:14px 16px 12px;
+         display:flex; flex-direction:column; gap:2px; }
+  .kpi .lbl { font-size:14px; color:var(--txt2); }
+  .kpi .valrow { display:flex; align-items:baseline; gap:10px; }
+  .kpi .val { font-size:30px; font-weight:700; letter-spacing:-.02em; line-height:1.1; }
+  .kpi .dlt { font-size:14px; color:var(--txt2); white-space:nowrap; }
+  .kpi .dlt b { color:var(--tinta); font-weight:600; }
+  .kpi.hero .val { color:var(--acento); }
+  .kpi .spark { margin-top:6px; }
+  .kpi .per { font-size:14px; color:var(--txt2); margin-top:4px; }
+
+  .caveat { background:var(--card); border-top:1px solid var(--grade);
+            padding:9px 24px; font-size:14px; color:var(--txt2); display:flex;
+            gap:8px; align-items:center; }
+  .caveat b { color:var(--tinta); font-weight:600; }
+  .lgd { display:flex; gap:14px; flex-wrap:wrap; font-size:14px;
+         color:var(--txt2); margin-top:8px; align-items:center; }
+  .lgd i { width:11px; height:11px; border-radius:2px; display:inline-block;
+           margin-right:5px; vertical-align:-1px; }
+
+  .notes { display:flex; flex-direction:column; gap:18px; }
+  .notes h3 { font-family:var(--serif); font-weight:400; font-size:20px; margin:0; }
+  .ncard { background:var(--chrome-card); border:1px solid var(--chrome-line);
+           border-left:3px solid var(--chrome-accent); border-radius:4px;
+           padding:20px 24px; }
+  .ncard.warn { border-left-color:#eb6834; }
+  .ncard h4 { margin:0 0 8px; font-size:15px; font-weight:600; }
+  .ncard p { margin:0 0 10px; font-size:15px; line-height:1.7;
+             color:var(--chrome-muted); max-width:80ch; }
+  .ncard p:last-child { margin-bottom:0; }
+  .ncard strong { color:var(--chrome-ink); font-weight:600; }
+  .tablewrap { overflow-x:auto; }
+  table { border-collapse:collapse; font-size:14px; width:100%;
+          font-variant-numeric:tabular-nums; }
+  th,td { text-align:left; padding:7px 12px 7px 0; border-bottom:1px solid var(--chrome-line); }
+  th { font-size:13px; letter-spacing:.05em; text-transform:uppercase;
+       color:var(--chrome-faint); font-weight:600; }
+  td.num,th.num { text-align:right; }
+
+  footer { border-top:1px solid var(--chrome-line); padding-top:22px;
+           font-size:14px; color:var(--chrome-faint); }
+
+  /* ---------- orientation layer ----------
+     Closes the last open row of uxers_guidance.md (Nielsen, help + documentation), and
+     houses the editorial claims that were removed from the chart subtitles. */
+  .help { display:flex; gap:4px; align-items:center; }
+  .helpbtn { font:inherit; font-size:14px; padding:5px 11px; border:1px solid #d6d6d3;
+             border-radius:3px; background:var(--card); color:var(--tinta); cursor:pointer;
+             display:inline-flex; gap:5px; align-items:center; }
+  .helpbtn:hover { background:var(--plano); }
+  .helpbtn.on { border-color:var(--serie); color:var(--serie); font-weight:600; }
+  .helpbtn:focus-visible { outline:2px solid var(--serie); outline-offset:1px; }
+
+  /* First-run invitation. Deliberately NOT a modal: a welcome modal is the pattern
+     everyone dismisses unread, and teaching a user to dismiss help unread is worse than
+     shipping no help at all. */
+  .firstrun { position:absolute; right:16px; top:88px; z-index:40; max-width:296px;
+              background:var(--tinta); color:#fff; border-radius:4px; padding:14px 16px;
+              box-shadow:0 10px 30px rgba(0,0,0,.28); font-size:14px; line-height:1.5; }
+  .firstrun b { font-weight:600; }
+  .firstrun .acts { display:flex; gap:8px; margin-top:10px; }
+  .firstrun button { font:inherit; font-size:14px; border-radius:3px; cursor:pointer;
+                     padding:5px 11px; border:0; }
+  .firstrun .go { background:var(--acento); color:#fff; font-weight:600; }
+  .firstrun .no { background:transparent; color:#cfcfcb; border:1px solid #4a4a48; }
+
+  /* Sheet for "como usar" and the glossary. Sits inside the canvas so the 1200x800
+     constraint still holds — help that needs its own window is not help. */
+  .veil { position:absolute; inset:0; z-index:50; background:rgba(17,17,16,.34);
+          display:flex; align-items:stretch; justify-content:flex-end; }
+  .sheet { width:668px; background:var(--card); display:flex; flex-direction:column;
+           box-shadow:-12px 0 40px rgba(0,0,0,.2); }
+  .sheethead { padding:16px 24px 12px; border-bottom:1px solid var(--grade);
+               display:flex; justify-content:space-between; align-items:flex-start; gap:16px; }
+  .sheethead h3 { margin:0; font-size:17px; font-weight:600; }
+  .sheethead p { margin:2px 0 0; font-size:14px; color:var(--txt2); }
+  .sheetclose { font:inherit; font-size:20px; line-height:1; border:0; background:none;
+                cursor:pointer; color:var(--txt2); padding:2px 6px; border-radius:3px; }
+  .sheetclose:hover { background:var(--plano); color:var(--tinta); }
+  .sheetbody { padding:16px 24px 22px; overflow-y:auto; font-size:14px; line-height:1.55; }
+  .sheetbody h4 { margin:20px 0 8px; font-size:15px; font-weight:600; }
+  .sheetbody h4:first-child { margin-top:0; }
+  .sheetbody p { margin:0 0 10px; color:var(--txt2); }
+  .sheetbody p b, .sheetbody li b { color:var(--tinta); font-weight:600; }
+  .sheetbody ul { margin:0 0 10px; padding-left:20px; color:var(--txt2); }
+  .sheetbody li { margin-bottom:5px; }
+  .sheetbody table { font-size:14px; }
+  .sheetbody th { border-bottom:1px solid var(--grade); color:var(--txt2);
+                  font-size:13px; letter-spacing:.04em; text-transform:uppercase;
+                  text-align:left; padding:6px 12px 6px 0; font-weight:600; }
+  .sheetbody td { border-bottom:1px solid var(--grade); padding:8px 12px 8px 0;
+                  vertical-align:top; color:var(--txt2); }
+  .sheetbody td:first-child { color:var(--tinta); font-weight:600; white-space:nowrap; }
+  .gsearch { font:inherit; font-size:14px; width:100%; padding:7px 10px; margin-bottom:14px;
+             border:1px solid #d6d6d3; border-radius:3px; }
+  .gsearch:focus-visible { outline:2px solid var(--serie); outline-offset:-1px; }
+  .nores { color:var(--txt2); font-style:italic; }
+
+  /* Guided tour. Highlights its target by outlining the real element rather than
+     describing where to look. */
+  .tourveil { position:absolute; inset:0; z-index:45; background:rgba(17,17,16,.28); }
+  .tourcard { position:absolute; z-index:46; width:392px; background:var(--card);
+              border-radius:4px; padding:18px 20px; box-shadow:0 16px 44px rgba(0,0,0,.3); }
+  .tourcard .step { font-size:13px; letter-spacing:.08em; text-transform:uppercase;
+                    color:var(--acento); font-weight:600; margin:0 0 6px; }
+  .tourcard h4 { margin:0 0 8px; font-size:16px; font-weight:600; }
+  .tourcard p { margin:0; font-size:14px; line-height:1.55; color:var(--txt2); }
+  .tourcard p b { color:var(--tinta); font-weight:600; }
+  .tournav { display:flex; gap:8px; align-items:center; margin-top:14px; }
+  .tournav button { font:inherit; font-size:14px; padding:6px 13px; border-radius:3px;
+                    cursor:pointer; border:1px solid #d6d6d3; background:var(--card);
+                    color:var(--tinta); }
+  .tournav .prim { background:var(--serie); border-color:var(--serie); color:#fff;
+                   font-weight:600; }
+  .tournav .skip { margin-left:auto; border:0; background:none; color:var(--txt2); }
+  .tourdots { display:flex; gap:4px; }
+  .tourdots i { width:6px; height:6px; border-radius:50%; background:var(--grade); }
+  .tourdots i.on { background:var(--acento); }
+  .spot { position:relative; z-index:47; outline:3px solid var(--acento);
+          outline-offset:3px; border-radius:3px; }
+
+  @media (prefers-reduced-motion:reduce) { * { transition:none !important; } }
+</style>
+
+<div class="page">
+
+  <header>
+    <p class="eyebrow">Tableau User Group · wireframe do depois</p>
+    <h1>Ocupação hospitalar SUS no RS — a versão que <em>responde à pergunta</em></h1>
+    <p class="standfirst">
+      Mock de alta fidelidade da V2. Quatro abas num quadro de 1200 × 800 que cabe inteiro
+      numa tela — contra os 2.600 px de rolagem da V1. Todos os números vêm das tabelas
+      refinadas do projeto; nada aqui é sintético, e o filtro de período <strong>funciona
+      de verdade</strong>.
+    </p>
+    <div class="metarow">
+      <span class="chip">SIH-SUS × CNES</span>
+      <span class="chip">RS · 2019–2023</span>
+      <span class="chip" id="chip-uti">ocupação UTI 2021 · 111,9%</span>
+      <span class="chip">4 abas · 1200 × 800</span>
+    </div>
+  </header>
+
+  <section class="intro">
+    <h2>O que mudou nesta revisão</h2>
+    <p>
+      <strong>A UTI virou o herói da aba Panorama</strong>, e é o achado mais forte do
+      projeto: entre 2019 e 2021 a ocupação geral <em>caiu</em> de 58,4% para 53,2%,
+      enquanto a de UTI <em>subiu</em> de 76,1% para 111,9%. Em junho de 2021 a UTI marcou
+      131,9% contra 57,0% da rede — 75 pontos de distância. Um dashboard que mostrasse só o
+      agregado teria informado que a rede estava menos pressionada em 2021 que em 2019, no
+      pior ano sanitário do século.
+    </p>
+    <p>
+      <strong>Os títulos não afirmam mais conclusões.</strong> Na versão anterior cada
+      subtítulo era uma frase editorial que um filtro poderia desmentir, e os KPIs estavam
+      fixos em 2023 enquanto a barra de filtros dizia 2019–2023. Agora o período aparece no
+      próprio tile, os títulos descrevem o que o gráfico mostra, e as anotações de mínimo e
+      máximo são calculadas — mudam junto com a seleção. O argumento não desapareceu: ele
+      saiu do gráfico e vai para a camada de orientação.
+    </p>
+    <p>
+      <strong>O mapa é o mapa.</strong> São os 497 polígonos municipais do IBGE, unidos aos
+      dados pelo código de 7 dígitos, num contêiner quadrado — porque o RS <em>é</em>
+      quadrado: 1,03 de proporção. Os 272 municípios sem leito ficam em branco, o que é
+      informação.
+    </p>
+    <p>
+      <strong>E o painel agora explica a si mesmo.</strong> Três botões no cabeçalho —
+      <em>Como usar</em>, <em>Glossário</em> e <em>Tour</em> — fecham a última linha aberta
+      da orientação de UX. O tour tem 6 passos e destaca o elemento real de que fala; o
+      glossário tem 14 verbetes com busca, cada um com a ressalva que muda a leitura. Foi
+      para cá que as conclusões dos subtítulos vieram morar.
+    </p>
+    <p>
+      A tela é <strong>fixa em modo claro de propósito</strong>. As cores foram validadas em
+      simulador de daltonismo contra um card branco sobre plano <code>#f4f4f2</code>; trocar
+      o tema invalidaria a medição.
+    </p>
+  </section>
+
+  <div class="shellhead">
+    <h2>O dashboard</h2>
+    <p class="note">Abas e filtro de período funcionam. Quadro em escala real de 1200 × 800 px.</p>
+  </div>
+
+  <div class="scroller">
+    <div class="canvas">
+      <div class="cvhead">
+        <div>
+          <p class="cvtitle">Ocupação hospitalar SUS · Rio Grande do Sul</p>
+          <p class="cvsrc">SIH-SUS + CNES (DATASUS) · 2019–2023 · atualizado em 12/2023</p>
+        </div>
+        <div class="cvactions">
+          <div class="help" id="help">
+            <button class="helpbtn" id="h-ajuda" type="button">Como usar</button>
+            <button class="helpbtn" id="h-gloss" type="button">Glossário</button>
+            <button class="helpbtn" id="h-tour" type="button" title="Ver o tour guiado">Tour</button>
+          </div>
+          <div class="cvtabs" role="tablist" aria-label="Abas do dashboard" id="tabstrip">
+            <button class="cvtab" role="tab" id="tab-0" aria-selected="true"  aria-controls="panel">Panorama</button>
+            <button class="cvtab" role="tab" id="tab-1" aria-selected="false" aria-controls="panel">Território</button>
+            <button class="cvtab" role="tab" id="tab-2" aria-selected="false" aria-controls="panel">Capacidade</button>
+            <button class="cvtab" role="tab" id="tab-3" aria-selected="false" aria-controls="panel">Custo</button>
+          </div>
+        </div>
+      </div>
+      <div class="cvfilters" id="filters"></div>
+      <div class="cvbody" id="panel" role="tabpanel" aria-labelledby="tab-0"></div>
+      <div class="caveat" id="caveat"></div>
+      <div id="orient"></div>
+    </div>
+  </div>
+
+  <section class="notes">
+    <h3>Decisões de projeto que este quadro implementa</h3>
+
+    <div class="ncard warn">
+      <h4>Por que a UTI é o herói, e por que isso não é uma escolha de design</h4>
+      <p>
+        A tesoura capacidade × demanda continua na aba, mas deixou de ser o gráfico
+        principal. O motivo é que ela descreve uma pressão <em>estrutural</em> — capacidade
+        parada, demanda subindo — enquanto a UTI descreve uma pressão que o agregado
+        <strong>esconde com sinal invertido</strong>.
+      </p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>ano</th><th class="num">ocupação UTI</th><th class="num">ocupação geral</th><th class="num">distância</th></tr></thead>
+          <tbody>
+            <tr><td>2019</td><td class="num">76,1%</td><td class="num">58,4%</td><td class="num">+17,7 p.p.</td></tr>
+            <tr><td>2020</td><td class="num">86,8%</td><td class="num">50,1%</td><td class="num">+36,7 p.p.</td></tr>
+            <tr><td><b>2021</b></td><td class="num"><b>111,9%</b></td><td class="num">53,2%</td><td class="num"><b>+58,7 p.p.</b></td></tr>
+            <tr><td>2022</td><td class="num">79,6%</td><td class="num">57,8%</td><td class="num">+21,8 p.p.</td></tr>
+            <tr><td>2023</td><td class="num">78,6%</td><td class="num">60,0%</td><td class="num">+18,6 p.p.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top:12px">
+        É o mesmo tipo de erro que o denominador errado da V1: um número defensável,
+        calculado corretamente, respondendo a pergunta errada. Nenhuma revisão visual pega
+        nenhum dos dois — e é por isso que os dois fecham a apresentação.
+      </p>
+      <p>
+        Ganho colateral: como as duas séries são taxas na mesma unidade, o herói agora tem
+        <strong>eixo começando em zero</strong>, e a linha de 100% ganha significado próprio
+        (capacidade esgotada). A exceção do eixo indexado sobrou só para a tesoura, que é
+        onde ela é realmente inevitável.
+      </p>
+    </div>
+
+    <div class="ncard">
+      <h4>Título que não mente quando o filtro muda</h4>
+      <p>
+        Na versão anterior o tile dizia <em>60,0%</em> e a barra de filtros dizia
+        <em>2019–2023</em>. Os dois estavam certos e juntos eram enganosos: 60,0% é 2023, o
+        período inteiro é 55,8%. O tile não tinha como dizer qual dos dois você estava
+        vendo.
+      </p>
+      <p>
+        A correção tem três camadas. <strong>Título</strong> descreve e recebe o período por
+        inserção de campo — no Tableau, <code>&lt;Parâmetros.Ano&gt;</code>, aqui o mesmo
+        efeito em JS. <strong>Anotação</strong> de mínimo e máximo passa a ser cálculo
+        (<code>WINDOW_MIN</code> / <code>WINDOW_MAX</code>), então acompanha a seleção.
+        <strong>Afirmação editorial</strong> sai da tela: "a queda de 2020 é real porque
+        eletivas foram suspensas" é verdade, é importante, e não é trabalho de um subtítulo
+        que o filtro pode desmentir. Vai para a camada de orientação — o glossário e o tour
+        guiado, que é o próximo entregável.
+      </p>
+    </div>
+
+    <div class="ncard">
+      <h4>Cor com valência fixa</h4>
+      <p>
+        Laranja significa <strong>precisa de atenção</strong>; azul, saudável; cinza, sem
+        juízo. Isto implica uma proibição que a versão anterior violava em três lugares:
+        laranja marcava "o ano mais recente" na barra de internações, "a mediana" no
+        histograma de municípios e "o último ponto" na linha de idade. Nenhum dos três é um
+        alarme, e gastar o único sinal de alarme do sistema em não-alarme ensina o leitor a
+        ignorá-lo. Os três viraram azul ou cinza.
+      </p>
+      <p>
+        Cor semântica costuma ser desaconselhada em acessibilidade, mas o alvo daquele
+        conselho é verde/vermelho, indistinguível em protanopia. Azul + laranja mede ΔE
+        24,7 — então aqui a cor <em>pode</em> carregar significado, desde que nunca o
+        carregue sozinha: variação de KPI leva seta e sinal.
+      </p>
+    </div>
+
+    <div class="ncard">
+      <h4>O gráfico de municípios que estava errado de três formas</h4>
+      <p>
+        O "Os 15 municípios com mais leitos SUS" da versão anterior selecionava por uma
+        média por hospital-mês — Porto Alegre aparecia com <strong>281 leitos</strong> em vez
+        de <strong>4.748,6</strong> —, ordenava por essa média errada, e desenhava barras
+        cujo comprimento era a <em>taxa</em>, não o número de leitos. Título, ordenação e
+        comprimento eram três variáveis diferentes.
+      </p>
+      <p>
+        Agora a barra é leito, o título é leito, e a ordenação é leito. A taxa aparece como
+        rótulo. E a relação entre as duas dimensões, que é a pergunta que interessa a quem
+        monta um pleito, ganhou o gráfico que ela merecia: uma <strong>dispersão em
+        quadrantes</strong>, leitos (log) × ocupação, com linhas de referência na taxa
+        estadual e em 100 leitos. Dos 41 municípios com 100 leitos ou mais, 29 estão acima
+        da taxa do estado — e Porto Alegre está sozinha no canto que importa: a maior rede e
+        entre as mais pressionadas.
+      </p>
+    </div>
+
+    <div class="ncard">
+      <h4>Ocupação por tipo de leito, e as duas ressalvas que ela exige</h4>
+      <p>
+        A aba Capacidade agora responde "qual leito está sob pressão", que era o pedido:
+        UTI 78,6% · cirúrgico 75,7% · clínico 70,4% · outras 66,3% · pediátrico 54,8% ·
+        obstétrico 36,8% · hospital dia 18,2%.
+      </p>
+      <p>
+        Duas coisas precisam estar escritas ao lado desse gráfico. <strong>Hospital dia a
+        18,2% não está ocioso</strong> — leitos-dia giram dentro do mesmo dia, então
+        leito-dia é a unidade errada pra eles. E <strong>"complementar" não é UTI</strong>:
+        dos 2.404 leitos complementares de 2023 só 1.839 são UTI/UCO, o resto é cuidado
+        intermediário e isolamento. O denominador da taxa de UTI usa só os 1.839, e o rótulo
+        da categoria deixou de dizer "UTI".
+      </p>
+      <p>
+        O numerador de UTI não vem da especialidade do leito e sim do contador
+        <code>quantidade_dias_uti_mes</code>, porque o RS não usa <em>nenhum</em> código de
+        UTI em <code>especialidade_leito</code> — derivar UTI de lá devolveria zero, não um
+        subregistro. Detalhes e a terceira ressalva (dias de UTI não podem ser descontados
+        da enfermaria) em <code>docs/metrics_dictionary.md</code>, seções 4.3 e 4.4.
+      </p>
+    </div>
+
+    <div class="ncard">
+      <h4>A camada de orientação, e por que ela não é enfeite</h4>
+      <p>
+        A linha da orientação de UX é literal: <em>"dashboard sem glossário e sem botão de
+        suporte → dashboard com glossário e botão de suporte"</em> (Nielsen — ajuda e
+        documentação). É requisito com fonte, não ideia nova. Mas nesta revisão ela ganhou
+        uma segunda função, mais importante: <strong>é o destino das conclusões que saíram
+        dos subtítulos</strong>. Sem ela, a V2 trocaria um defeito (título que mente quando
+        o filtro muda) por outro (painel que não explica nada).
+      </p>
+      <p>
+        Três decisões de implementação que valem comentário. O convite da primeira visita
+        <strong>não é um modal</strong> — modal de boas-vindas é o padrão que todo mundo
+        fecha sem ler, e ensinar o usuário a descartar ajuda sem ler é pior que não ter
+        ajuda. O tour <strong>destaca o elemento real</strong> de que fala, em vez de
+        descrever onde olhar, e pula para a aba certa quando o alvo não está na tela. E o
+        glossário <strong>não é fonte de verdade</strong>: é o recorte voltado ao usuário de
+        <code>docs/metrics_dictionary.md</code>, que vence em qualquer conflito — duas fontes
+        de verdade sobre o que uma métrica mede é justamente o que a V1 demonstra por
+        ausência.
+      </p>
+      <p>
+        Aproveitando a mesma passada, entrou também o <strong>desfazer filtro</strong> que a
+        linha de <em>prevenção de erros</em> pede, e ele só aparece quando há algo para
+        desfazer — um botão de limpar sempre visível é decoração. Conteúdo de record das três
+        peças em <code>docs/dashboard_v2_orientation.md</code>, incluindo o que cada uma vira
+        no Tableau (onde o tour não tem equivalente nativo e a recomendação é uma aba
+        "Comece aqui", não uma corrente de contêineres mostrar/ocultar que ninguém consegue
+        manter).
+      </p>
+    </div>
+
+    <div class="ncard">
+      <h4>Filtros: dois níveis de região, um deles escondido</h4>
+      <p>
+        <strong>Região intermediária</strong> (8 no RS) fica visível: é grosso o bastante
+        para caber na Lei de Hick. <strong>Região de saúde</strong> (30) fica atrás de "mais
+        filtros" — é a unidade de planejamento real do SUS e é o que a persona usa de fato,
+        mas 30 itens num seletor sempre visível competem com o resto da tela. Nenhuma das
+        duas existia antes: a versão anterior oferecia um filtro "Macrorregião" sem campo
+        nenhum por trás, o que é pior que não oferecer.
+      </p>
+      <p>
+        O filtro de <strong>Período</strong> — pré-pandemia, pandemia, pós — está
+        implementado e funciona nas quatro abas. Ele existe porque a pandemia não é um
+        recorte de data qualquer neste dado: é o intervalo em que as duas taxas andam em
+        direções opostas.
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    Fonte: SIH-SUS (AIH reduzida) e CNES via Base dos Dados / DATASUS · recorte Rio Grande
+    do Sul, 2019–2023 · a base pública tem cerca de 6 meses de defasagem. Geometria
+    municipal do IBGE. Especificação em <code>docs/dashboard_v2_spec.md</code>; tokens em
+    <code>docs/dashboard_v2_design_system.md</code>; definições em
+    <code>docs/metrics_dictionary.md</code>.
+    <br><br>
+    Este arquivo é <strong>gerado</strong> por <code>scripts/build_wireframe_v2_data.py</code>
+    a partir de <code>docs/dashboard_v2_wireframe_template.html</code>. Edite o template,
+    não este arquivo.
+  </footer>
+</div>
+
+<script>
+const DATA = /*__DATA__*/;
+
+/* ---------- tokens (mirror of the CSS canvas scope) ---------- */
+const C = { serie:"#2a78d6", acento:"#eb6834", marca:"#8c8c89",
+            grade:"#e4e4e1", txt2:"#5c5c5a", tinta:"#111110", card:"#ffffff" };
+const RAMP = ["#cde2fb","#9ec5f4","#6da7ec","#3987e5","#256abf","#184f95","#0d366b"];
+const LEITO = ["#86b6ef","#3987e5","#256abf","#184f95"];
+const SEM_DADO = "#ececea";
+
+/* ---------- formatting ---------- */
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const nf  = (v,d=0) => v.toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const pct = (v,d=1) => nf(v*100,d)+"%";
+const pp  = v => (v>=0?"+":"−")+nf(Math.abs(v)*100,1)+" p.p.";
+const pc  = v => (v>=0?"+":"−")+nf(Math.abs(v)*100,1)+"%";
+
+/* ============================================================
+   FILTER STATE
+   The period filter is genuinely wired. Every figure below is recomputed as
+   SUM(numerator) / SUM(denominator) over the selected months — the same rule the Tableau
+   build uses. Nothing is a stored rate, so no figure is ever an average of averages.
+   ============================================================ */
+const PERIODOS = [
+  { id:"todos",  rotulo:"2019–2023",           anos:[2019,2020,2021,2022,2023] },
+  { id:"pre",    rotulo:"Pré-pandemia · 2019", anos:[2019] },
+  { id:"pand",   rotulo:"Pandemia · 2020–2021",anos:[2020,2021] },
+  { id:"pos",    rotulo:"Pós · 2022–2023",     anos:[2022,2023] },
+];
+const ANOS = [2019,2020,2021,2022,2023];
+const STATE = { tab:0, periodo:"todos", anos:PERIODOS[0].anos.slice(), rotulo:"2019–2023",
+                menu:null };
+
+const selAnos = () => STATE.anos;
+const inSel   = ano => STATE.anos.includes(ano);
+const mensalSel = () => DATA.mensal.filter(r => inSel(r[1]));
+
+/* mensal row: 0 label, 1 ano, 2 mes, 3 dias_perm, 4 leito_dias, 5 dias_uti,
+               6 leito_dias_uti, 7 internacoes, 8 leitos_sus, 9 leitos_uti */
+const sumBy = (rows,i) => rows.reduce((s,r)=>s+r[i],0);
+function ratio(rows, numIdx, denIdx){
+  const d = sumBy(rows,denIdx);
+  return d ? sumBy(rows,numIdx)/d : null;
+}
+/** Rate for one year, so year-over-year deltas never divide pre-divided rates. */
+function ratioAno(ano, numIdx, denIdx){
+  return ratio(DATA.mensal.filter(r=>r[1]===ano), numIdx, denIdx);
+}
+/** The year a delta compares against: the one before the earliest selected year. */
+function anoBase(){
+  const first = Math.min(...STATE.anos);
+  return ANOS.includes(first-1) ? first-1 : null;
+}
+const anoUltimo = () => Math.max(...STATE.anos);
+
+/* ---------- svg helpers ---------- */
+function svg(w,h,inner,extra=""){
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="100%" role="img" ${extra}
+          preserveAspectRatio="none" style="display:block">${inner}</svg>`;
+}
+function svgFit(w,h,inner,extra=""){
+  return `<svg viewBox="0 0 ${w} ${h}" role="img" ${extra}
+          preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:100%">${inner}</svg>`;
+}
+const path = pts => pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
+function scaler(dom,rng){
+  const [d0,d1]=dom,[r0,r1]=rng,k=(r1-r0)/((d1-d0)||1);
+  const f = v => r0+(v-d0)*k;
+  /* Callers filter candidate gridline values against the domain, so the scale has to
+     carry it. Attached to the function rather than returned separately to keep the
+     one-liner call sites unchanged. */
+  f.domainBottom=d0; f.domainTop=d1;
+  return f;
+}
+function gridlines(x0,x1,ys,fmt){
+  return ys.map(([v,y])=>
+    `<line x1="${x0}" x2="${x1}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}"
+       stroke="${C.grade}" stroke-width="1"/>
+     <text x="${x0-8}" y="${(y+4).toFixed(1)}" text-anchor="end" font-size="13"
+       fill="${C.txt2}">${fmt(v)}</text>`).join("");
+}
+function xLabels(rows, sx, y){
+  /* One tick per January in the selection, plus the final month. */
+  const out=[];
+  rows.forEach((r,i)=>{ if(r[2]===1) out.push([i,r[1]]); });
+  if(!out.length && rows.length) out.push([0, rows[0][1]]);
+  return out.map(([i,ano])=>
+    `<text x="${sx(i).toFixed(1)}" y="${y}" font-size="13" fill="${C.txt2}"
+       text-anchor="middle">${ano}</text>`).join("");
+}
+
+/* ---------- sparkline ---------- */
+function spark(vals,color){
+  const w=210,h=34,pad=3;
+  const clean=vals.filter(v=>v!=null&&isFinite(v));
+  if(clean.length<2) return `<div style="height:34px"></div>`;
+  const lo=Math.min(...clean), hi=Math.max(...clean);
+  const sx=scaler([0,vals.length-1],[pad,w-pad]);
+  const sy=scaler([lo,hi],[h-pad-1,pad+1]);
+  const pts=vals.map((v,i)=>v==null?null:[sx(i),sy(v)]).filter(Boolean);
+  const last=pts[pts.length-1];
+  return svg(w,h,
+    `<path d="${path(pts)} L${(w-pad).toFixed(1)},${h-pad} L${pad},${h-pad} Z"
+       fill="${color}" opacity=".12"/>
+     <path d="${path(pts)}" fill="none" stroke="${color}" stroke-width="2"
+       stroke-linejoin="round" stroke-linecap="round"/>
+     <circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="4"
+       fill="${color}" stroke="${C.card}" stroke-width="2"/>`,
+    `aria-label="Série mensal do período" style="display:block;height:34px"`);
+}
+
+/* ---------- KPI tile ----------
+   The period is printed on the tile itself. That is the fix for the defect where a tile
+   read 60,0% while the filter bar read 2019-2023: both were true, and together they were
+   misleading. No editorial caption — the tile states what it measures and over what. */
+function kpi({lbl,val,delta,deltaFmt,vals,color,hero}){
+  const base = anoBase();
+  const arrow = delta==null ? "" : delta>0 ? "▲" : delta<0 ? "▼" : "→";
+  const dtxt = delta==null
+    ? `<span class="dlt">sem ano anterior na base</span>`
+    : `<span class="dlt">${arrow} <b>${deltaFmt(delta)}</b> vs ${base}</span>`;
+  return `<div class="kpi${hero?" hero":""}">
+    <span class="lbl">${esc(lbl)}</span>
+    <div class="valrow"><span class="val">${val}</span>${dtxt}</div>
+    <div class="spark">${spark(vals,color)}</div>
+    <span class="per">${esc(STATE.rotulo)}</span>
+  </div>`;
+}
+
+/* ================= TAB 1 · PANORAMA ================= */
+function panorama(){
+  const M = mensalSel();
+  const base = anoBase(), last = anoUltimo();
+
+  const taxaGeral = ratio(M,3,4), taxaUti = ratio(M,5,6);
+  const dGeral = base==null?null:taxaGeral-ratioAno(base,3,4);
+  const dUti   = base==null?null:taxaUti  -ratioAno(base,5,6);
+
+  const leitosSus = sumBy(M,8)/M.length, internacoes = sumBy(M,7);
+  const permSel = DATA.permanencia.filter(r=>inSel(r[0]));
+  const leitosBase = base==null?null:
+    DATA.mensal.filter(r=>r[1]===base).reduce((s,r)=>s+r[8],0)/12;
+  const intBase = base==null?null:
+    DATA.mensal.filter(r=>r[1]===base).reduce((s,r)=>s+r[7],0);
+
+  const tiles = [
+    kpi({lbl:"Taxa de ocupação UTI", val:pct(taxaUti), hero:true, color:C.acento,
+         delta:dUti, deltaFmt:pp, vals:M.map(r=>r[6]?r[5]/r[6]:null)}),
+    kpi({lbl:"Taxa de ocupação SUS (rede)", val:pct(taxaGeral), color:C.serie,
+         delta:dGeral, deltaFmt:pp, vals:M.map(r=>r[4]?r[3]/r[4]:null)}),
+    kpi({lbl:"Leitos SUS", val:nf(leitosSus), color:C.serie,
+         delta:leitosBase==null?null:leitosSus/leitosBase-1, deltaFmt:pc,
+         vals:M.map(r=>r[8])}),
+    kpi({lbl:"Internações", val:nf(internacoes), color:C.serie,
+         delta:intBase==null?null:internacoes/intBase-1, deltaFmt:pc,
+         vals:M.map(r=>r[7])}),
+  ].join("");
+
+  /* ---- HERO: ICU vs network occupancy, both rates, zero-based ----
+     No index needed: the two series share a unit, so they are directly comparable and the
+     axis can start at zero. The 100% line is a real threshold (capacity exhausted), not a
+     baseline convention. */
+  const W=1114,H=286,L=48,R=96,T=14,B=26;
+  const sx=scaler([0,Math.max(M.length-1,1)],[L,W-R]);
+  const top=Math.max(1.4, Math.ceil((Math.max(...M.map(r=>r[6]?r[5]/r[6]:0))+.1)*10)/10);
+  const sy=scaler([0,top],[H-B,T]);
+  const gl=[0,.25,.5,.75,1,1.25].filter(v=>v<=top).map(v=>[v,sy(v)]);
+  const pGeral=M.map((r,i)=>[sx(i),sy(r[4]?r[3]/r[4]:0)]);
+  const pUti  =M.map((r,i)=>r[6]?[sx(i),sy(r[5]/r[6])]:null).filter(Boolean);
+
+  /* Min/max annotations are computed, not typed — they follow the filter. */
+  const utiVals=M.map(r=>r[6]?r[5]/r[6]:null);
+  let hiI=-1,hiV=-1;
+  utiVals.forEach((v,i)=>{ if(v!=null&&v>hiV){hiV=v;hiI=i;} });
+
+  const hero = svg(W,H,
+    gridlines(L,W-R,gl,v=>nf(v*100)+"%")+
+    /* 100% threshold */
+    (top>=1 ? `<line x1="${L}" x2="${W-R}" y1="${sy(1).toFixed(1)}" y2="${sy(1).toFixed(1)}"
+       stroke="${C.txt2}" stroke-width="1.5" stroke-dasharray="4 3"/>
+     <text x="${W-R+6}" y="${(sy(1)-5).toFixed(1)}" font-size="13" fill="${C.txt2}">100% · capacidade esgotada</text>` : "")+
+    `<path d="${path(pGeral)}" fill="none" stroke="${C.serie}" stroke-width="2" stroke-linejoin="round"/>
+     <path d="${path(pUti)}" fill="none" stroke="${C.acento}" stroke-width="2.5" stroke-linejoin="round"/>`+
+    (hiI>=0 ? `<circle cx="${sx(hiI).toFixed(1)}" cy="${sy(hiV).toFixed(1)}" r="4.5"
+        fill="${C.card}" stroke="${C.acento}" stroke-width="2"/>
+      <text x="${(sx(hiI)+8).toFixed(1)}" y="${(sy(hiV)-6).toFixed(1)}" font-size="13"
+        font-weight="600" fill="${C.tinta}">máx ${pct(hiV)} · ${esc(M[hiI][0])}</text>` : "")+
+    `<text x="${W-R+6}" y="${(pUti.at(-1)[1]+4).toFixed(1)}" font-size="13"
+       fill="${C.acento}" font-weight="600">UTI</text>
+     <text x="${W-R+6}" y="${(pGeral.at(-1)[1]+4).toFixed(1)}" font-size="13"
+       fill="${C.serie}" font-weight="600">Rede</text>`+
+    xLabels(M,sx,H-6));
+
+  /* ---- support 1: capacity vs demand, indexed ---- */
+  const w2=548,h2=190,l2=44,r2=76,t2=14,b2=24;
+  const anos=selAnos();
+  const byAno = a => DATA.mensal.filter(r=>r[1]===a);
+  const capAno = a => byAno(a).reduce((s,r)=>s+r[8],0)/12;
+  const demAno = a => byAno(a).reduce((s,r)=>s+r[3],0);
+  const b0=anos[0], capB=capAno(b0), demB=demAno(b0);
+  const s2x=scaler([0,Math.max(anos.length-1,1)],[l2+18,w2-r2]);
+  const idxCap=anos.map(a=>100*capAno(a)/capB), idxDem=anos.map(a=>100*demAno(a)/demB);
+  const all=[...idxCap,...idxDem];
+  const lo2=Math.floor(Math.min(...all,99)/5)*5, hi2=Math.ceil(Math.max(...all,101)/5)*5;
+  const s2y=scaler([lo2,hi2],[h2-b2,t2]);
+  const scissors = anos.length<2
+    ? `<div style="font-size:14px;color:${C.txt2};padding:20px 0">
+         Um ano só na seleção — o índice precisa de pelo menos dois.</div>`
+    : svg(w2,h2,
+        gridlines(l2,w2-r2,[lo2,100,hi2].map(v=>[v,s2y(v)]),v=>nf(v))+
+        `<line x1="${l2}" x2="${w2-r2}" y1="${s2y(100).toFixed(1)}" y2="${s2y(100).toFixed(1)}"
+           stroke="${C.txt2}" stroke-width="1.2" stroke-dasharray="4 3"/>
+         <path d="${path(idxCap.map((v,i)=>[s2x(i),s2y(v)]))}" fill="none"
+           stroke="${C.serie}" stroke-width="2"/>
+         <path d="${path(idxDem.map((v,i)=>[s2x(i),s2y(v)]))}" fill="none"
+           stroke="${C.acento}" stroke-width="2"/>
+         <text x="${w2-r2+6}" y="${(s2y(idxCap.at(-1))+4).toFixed(1)}" font-size="13"
+           fill="${C.serie}" font-weight="600">Capac. ${nf(idxCap.at(-1),1)}</text>
+         <text x="${w2-r2+6}" y="${(s2y(idxDem.at(-1))+4).toFixed(1)}" font-size="13"
+           fill="${C.acento}" font-weight="600">Demanda ${nf(idxDem.at(-1),1)}</text>`+
+        anos.map((a,i)=>`<text x="${s2x(i).toFixed(1)}" y="${h2-6}" font-size="13"
+           fill="${C.txt2}" text-anchor="middle">${a}</text>`).join(""));
+
+  /* ---- support 2: admissions vs mean length of stay, indexed ----
+     Indexed rather than dual-axis: the design system bans dual axes, and indexing puts two
+     different units (admissions, days) on one comparable scale. */
+  const w3=548,h3=190,l3=44,r3=88,t3=14,b3=24;
+  const intB=permSel[0][1], perB=permSel[0][2];
+  const idxInt=permSel.map(r=>100*r[1]/intB), idxPer=permSel.map(r=>100*r[2]/perB);
+  const all3=[...idxInt,...idxPer];
+  const lo3=Math.floor(Math.min(...all3,99)/5)*5, hi3=Math.ceil(Math.max(...all3,101)/5)*5;
+  const s3x=scaler([0,Math.max(permSel.length-1,1)],[l3+18,w3-r3]);
+  const s3y=scaler([lo3,hi3],[h3-b3,t3]);
+  const vol = permSel.length<2
+    ? `<div style="font-size:14px;color:${C.txt2};padding:20px 0">
+         Um ano só na seleção — o índice precisa de pelo menos dois.</div>`
+    : svg(w3,h3,
+        gridlines(l3,w3-r3,[lo3,100,hi3].map(v=>[v,s3y(v)]),v=>nf(v))+
+        `<line x1="${l3}" x2="${w3-r3}" y1="${s3y(100).toFixed(1)}" y2="${s3y(100).toFixed(1)}"
+           stroke="${C.txt2}" stroke-width="1.2" stroke-dasharray="4 3"/>
+         <path d="${path(idxInt.map((v,i)=>[s3x(i),s3y(v)]))}" fill="none"
+           stroke="${C.serie}" stroke-width="2"/>
+         <path d="${path(idxPer.map((v,i)=>[s3x(i),s3y(v)]))}" fill="none"
+           stroke="${C.marca}" stroke-width="2"/>
+         <text x="${w3-r3+6}" y="${(s3y(idxInt.at(-1))+4).toFixed(1)}" font-size="13"
+           fill="${C.serie}" font-weight="600">Internações</text>
+         <text x="${w3-r3+6}" y="${(s3y(idxPer.at(-1))+4).toFixed(1)}" font-size="13"
+           fill="${C.marca}" font-weight="600">Permanência</text>`+
+        permSel.map((r,i)=>`<text x="${s3x(i).toFixed(1)}" y="${h3-6}" font-size="13"
+           fill="${C.txt2}" text-anchor="middle">${r[0]}</text>`).join(""));
+
+  return `<div class="kpis" id="spot-kpis">${tiles}</div>
+  <div class="row" style="flex:1.3">
+    <div class="card" style="flex:1" id="spot-hero">
+      <div class="cardhead">
+        <p class="cardtitle">Ocupação de UTI e da rede · ${esc(STATE.rotulo)}</p>
+        <p class="cardsub">Taxas mensais, mesmo eixo, começando em zero.</p>
+      </div>
+      <div style="flex:1;min-height:0">${hero}</div>
+    </div>
+  </div>
+  <div class="row" style="flex:1">
+    <div class="card" style="flex:1">
+      <div class="cardhead">
+        <p class="cardtitle">Capacidade e demanda, indexadas · ${anos[0]} = 100</p>
+        <p class="cardsub">Leitos SUS e dias de permanência, um eixo só.</p>
+      </div>
+      <div style="flex:1;min-height:0">${scissors}</div>
+    </div>
+    <div class="card" style="flex:1">
+      <div class="cardhead">
+        <p class="cardtitle">Internações e permanência média, indexadas · ${anos[0]} = 100</p>
+        <p class="cardsub">Volume e duração na mesma escala.</p>
+      </div>
+      <div style="flex:1;min-height:0">${vol}</div>
+    </div>
+  </div>`;
+}
+
+/* ================= TAB 2 · TERRITÓRIO ================= */
+function municipiosSel(){
+  /* [code, nome, num, den] aggregated over the selected years. */
+  const acc=new Map();
+  DATA.municipioAno.forEach(([code,nome,ano,num,den])=>{
+    if(!inSel(ano)) return;
+    const cur=acc.get(code)||[code,nome,0,0];
+    cur[2]+=num; cur[3]+=den; acc.set(code,cur);
+  });
+  return [...acc.values()].map(r=>[r[0],r[1],r[2],r[3],r[3]?r[2]/r[3]:null,
+                                  r[3]/(365*selAnos().length)]);
+  /* -> [code, nome, num, den, taxa, leitos_medios] */
+}
+
+function territorio(){
+  const mun=municipiosSel().filter(r=>r[4]!=null);
+  const taxaEstado=(()=>{ const M=mensalSel(); return ratio(M,3,4); })();
+  const box=DATA.mapa.box;
+
+  /* ---- choropleth in a SQUARE box, because RS is square (aspect 1,03) ---- */
+  const byCode=new Map(mun.map(r=>[r[0],r]));
+  const taxas=mun.map(r=>r[4]).sort((a,b)=>a-b);
+  const q=p=>taxas[Math.min(taxas.length-1,Math.floor(p*taxas.length))];
+  const cuts=[q(.14),q(.28),q(.42),q(.57),q(.71),q(.85)];
+  const bucket=t=>{ let i=0; while(i<cuts.length&&t>cuts[i]) i++; return i; };
+  const polys=Object.entries(DATA.mapa.paths).map(([code,d])=>{
+    const r=byCode.get(code);
+    const fill = r ? RAMP[bucket(r[4])] : SEM_DADO;
+    return `<path d="${d}" fill="${fill}" stroke="${C.card}" stroke-width="1.1"/>`;
+  }).join("");
+  const mapa=svgFit(box,box,polys,`aria-label="Taxa de ocupação SUS por município"`);
+
+  /* ---- scatter: beds (log) x occupancy, quadrants ---- */
+  const w=692,h=300,l=44,r=16,t=14,b=30;
+  const LIM_LEITOS=100;
+  const maxB=Math.max(...mun.map(r=>r[5]));
+  const lx=scaler([Math.log10(4),Math.log10(maxB*1.15)],[l,w-r]);
+  const ly=scaler([0,Math.max(1,Math.ceil(Math.max(...mun.map(r=>r[4]))*10)/10)],[h-b,t]);
+  const grandes=mun.filter(r=>r[5]>=LIM_LEITOS);
+  const tensos=grandes.filter(r=>r[4]>=taxaEstado);
+  const dots=mun.map(r=>{
+    const big=r[5]>=LIM_LEITOS, hot=r[4]>=taxaEstado;
+    const fill = big&&hot ? C.acento : big ? C.serie : C.marca;
+    const rad  = big ? 4.5 : 2.8;
+    return `<circle cx="${lx(Math.log10(r[5])).toFixed(1)}" cy="${ly(r[4]).toFixed(1)}"
+      r="${rad}" fill="${fill}" opacity="${big?.9:.45}"/>`;
+  }).join("");
+  const poa=mun.reduce((a,r)=>r[5]>a[5]?r:a);
+  const ticks=[10,100,1000].filter(v=>v<=maxB*1.15);
+  const scatter=svg(w,h,
+    gridlines(l,w-r,[0,.25,.5,.75,1].filter(v=>v<=ly.domainTop).map(v=>[v,ly(v)]),v=>nf(v*100)+"%")+
+    `<line x1="${l}" x2="${w-r}" y1="${ly(taxaEstado).toFixed(1)}" y2="${ly(taxaEstado).toFixed(1)}"
+       stroke="${C.acento}" stroke-width="1.2" stroke-dasharray="5 3" opacity=".8"/>
+     <text x="${w-r-4}" y="${(ly(taxaEstado)-6).toFixed(1)}" text-anchor="end" font-size="13"
+       fill="${C.acento}">taxa do estado ${pct(taxaEstado)}</text>
+     <line x1="${lx(Math.log10(LIM_LEITOS)).toFixed(1)}" x2="${lx(Math.log10(LIM_LEITOS)).toFixed(1)}"
+       y1="${t}" y2="${h-b}" stroke="${C.grade}" stroke-width="1.4"/>
+     <text x="${(lx(Math.log10(LIM_LEITOS))+5).toFixed(1)}" y="${t+11}" font-size="13"
+       fill="${C.txt2}">100 leitos</text>`+
+    dots+
+    `<circle cx="${lx(Math.log10(poa[5])).toFixed(1)}" cy="${ly(poa[4]).toFixed(1)}" r="7"
+       fill="none" stroke="${C.tinta}" stroke-width="1.4"/>
+     <text x="${(lx(Math.log10(poa[5]))-10).toFixed(1)}" y="${(ly(poa[4])+4).toFixed(1)}"
+       text-anchor="end" font-size="13" font-weight="600" fill="${C.tinta}">${esc(poa[1])}</text>`+
+    ticks.map(v=>`<text x="${lx(Math.log10(v)).toFixed(1)}" y="${h-8}" font-size="13"
+       fill="${C.txt2}" text-anchor="middle">${nf(v)}</text>`).join("")+
+    `<text x="${((l+w-r)/2).toFixed(1)}" y="${h-8}" font-size="13" fill="${C.txt2}"
+       text-anchor="middle" opacity="0">x</text>`);
+
+  /* ---- ranked bars: length = beds, matching the title. Rate is a label. ---- */
+  const top=[...mun].sort((a,b)=>b[5]-a[5]).slice(0,15);
+  const bw=1114,bh=232,bl=132,br=104,bt=6;
+  const rowH=(bh-bt-8)/top.length;
+  const bx=scaler([0,Math.max(...top.map(r=>r[5]))*1.02],[bl,bw-br]);
+  const bars=top.map((m,i)=>{
+    const y=bt+i*rowH, hot=m[4]>=taxaEstado;
+    return `<text x="${bl-8}" y="${(y+rowH/2+4).toFixed(1)}" text-anchor="end" font-size="13"
+      fill="${C.txt2}">${esc(m[1])}</text>
+      <rect x="${bl}" y="${(y+2).toFixed(1)}" width="${Math.max(1,bx(m[5])-bl).toFixed(1)}"
+        height="${(rowH-4).toFixed(1)}" fill="${hot?C.acento:C.serie}" rx="2"/>
+      <text x="${(bx(m[5])+7).toFixed(1)}" y="${(y+rowH/2+4).toFixed(1)}" font-size="13"
+        fill="${C.tinta}">${nf(m[5])} leitos · <tspan fill="${C.txt2}">${pct(m[4])}</tspan></text>`;
+  }).join("");
+
+  return `<div class="row" style="flex:1.55">
+    <div class="card" style="flex:0 0 336px">
+      <div class="cardhead">
+        <p class="cardtitle">Ocupação por município</p>
+        <p class="cardsub">${esc(STATE.rotulo)} · ${DATA.mapa.semLeito.length} sem leito SUS, em branco</p>
+      </div>
+      <div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center">${mapa}</div>
+      <div class="lgd">
+        ${RAMP.map((c,i)=>`<span style="display:inline-flex;align-items:center;gap:4px">
+          <i style="background:${c}"></i>${i===0?"baixa":i===RAMP.length-1?"alta":""}</span>`).join("")}
+      </div>
+    </div>
+    <div class="card" style="flex:1">
+      <div class="cardhead">
+        <p class="cardtitle">Leitos SUS × ocupação, por município · ${esc(STATE.rotulo)}</p>
+        <p class="cardsub">Eixo horizontal em escala log. ${mun.length} municípios com leito SUS.</p>
+      </div>
+      <div style="flex:1;min-height:0">${scatter}</div>
+      <p class="cardnote"><b>${tensos.length} de ${grandes.length}</b> municípios com 100+
+        leitos estão acima da taxa do estado.</p>
+    </div>
+  </div>
+  <div class="row" style="flex:1">
+    <div class="card" style="flex:1">
+      <div class="cardhead">
+        <p class="cardtitle">Os 15 municípios com mais leitos SUS · ${esc(STATE.rotulo)}</p>
+        <p class="cardsub">Barra = leitos (média mensal). Laranja: ocupação acima da taxa do estado.</p>
+      </div>
+      <div style="flex:1;min-height:0">${svg(bw,bh,bars)}</div>
+    </div>
+  </div>`;
+}
+
+/* ================= TAB 3 · CAPACIDADE ================= */
+const ROTULO_TIPO = {
+  "clinico":"Clínico", "cirurgico":"Cirúrgico", "obstetricos":"Obstétrico",
+  "pediatricos":"Pediátrico", "complementar":"Complementar",
+  "outras especialidades":"Outras especialidades", "hospital dia":"Hospital dia",
+};
+
+function capacidade(){
+  /* ---- occupancy per bed type. ICU comes from its own numerator. ---- */
+  const wardAcc=new Map();
+  DATA.tipos.enfermaria.forEach(([tipo,ano,leitos,num,den])=>{
+    if(!inSel(ano)) return;
+    const cur=wardAcc.get(tipo)||{leitos:0,num:0,den:0,n:0};
+    cur.leitos+=leitos; cur.num+=num; cur.den+=den; cur.n++;
+    wardAcc.set(tipo,cur);
+  });
+  const icu=DATA.tipos.uti.filter(r=>inSel(r[0]))
+    .reduce((a,r)=>({leitos:a.leitos+r[1],num:a.num+r[2],den:a.den+r[3],n:a.n+1}),
+            {leitos:0,num:0,den:0,n:0});
+
+  const linhas=[...wardAcc.entries()]
+    .filter(([tipo])=>tipo!=="complementar")   /* replaced by the ICU row below */
+    .map(([tipo,v])=>({rot:ROTULO_TIPO[tipo]||tipo, leitos:v.leitos/v.n,
+                       taxa:v.den?v.num/v.den:null, uti:false}));
+  if(icu.den) linhas.push({rot:"UTI / UCO", leitos:icu.leitos/icu.n,
+                           taxa:icu.num/icu.den, uti:true});
+  const comp=wardAcc.get("complementar");
+  linhas.sort((a,b)=>(b.taxa??-1)-(a.taxa??-1));
+
+  const w=1114,h=250,l=150,r=120,t=8;
+  const rowH=(h-t-16)/linhas.length;
+  const maxT=Math.max(...linhas.map(x=>x.taxa??0),1);
+  const bx=scaler([0,Math.ceil(maxT*10)/10],[l,w-r]);
+  const barras=linhas.map((x,i)=>{
+    const y=t+i*rowH;
+    return `<text x="${l-8}" y="${(y+rowH/2+4).toFixed(1)}" text-anchor="end" font-size="13"
+      fill="${x.uti?C.tinta:C.txt2}" font-weight="${x.uti?600:400}">${esc(x.rot)}</text>
+      <rect x="${l}" y="${(y+3).toFixed(1)}" width="${Math.max(1,bx(x.taxa)-l).toFixed(1)}"
+        height="${(rowH-6).toFixed(1)}" fill="${x.uti?C.acento:C.serie}" rx="2"/>
+      <text x="${(bx(x.taxa)+7).toFixed(1)}" y="${(y+rowH/2+4).toFixed(1)}" font-size="13"
+        fill="${C.tinta}" font-weight="${x.uti?600:400}">${pct(x.taxa)}
+        <tspan fill="${C.txt2}" font-weight="400">· ${nf(x.leitos)} leitos</tspan></text>`;
+  }).join("")+
+  (maxT>=1?`<line x1="${bx(1).toFixed(1)}" x2="${bx(1).toFixed(1)}" y1="${t}" y2="${h-16}"
+     stroke="${C.txt2}" stroke-width="1.2" stroke-dasharray="4 3"/>
+   <text x="${(bx(1)+4).toFixed(1)}" y="${h-4}" font-size="13" fill="${C.txt2}">100%</text>`:"");
+
+  /* ---- beds by type over time. Grey for the residual, blue tones otherwise. ---- */
+  const anos=selAnos();
+  const serieTipos=["clinico","cirurgico","complementar","pediatricos"];
+  const outros=anos.map(a=>DATA.tipos.enfermaria
+    .filter(r=>r[1]===a && !serieTipos.includes(r[0]))
+    .reduce((s,r)=>s+r[2],0));
+  const series=serieTipos.map((tipo,i)=>({
+    rot:ROTULO_TIPO[tipo], color:LEITO[i],
+    vals:anos.map(a=>{const f=DATA.tipos.enfermaria.find(r=>r[0]===tipo&&r[1]===a);
+                      return f?f[2]:0;})
+  })).concat([{rot:"Outros", color:C.marca, vals:outros}]);
+
+  const w2=560,h2=214,l2=52,r2=104,t2=12,b2=26;
+  const s2x=scaler([0,Math.max(anos.length-1,1)],[l2,w2-r2]);
+  const s2y=scaler([0,Math.ceil(Math.max(...series.flatMap(s=>s.vals))/2000)*2000],[h2-b2,t2]);
+  const linhasTipo = anos.length<2
+    ? `<div style="font-size:14px;color:${C.txt2};padding:16px 0">
+         Selecione mais de um ano para ver a evolução.</div>`
+    : svg(w2,h2,
+        gridlines(l2,w2-r2,[0,2500,5000,7500,10000]
+          .filter(v=>v<=s2y.domainTop).map(v=>[v,s2y(v)]),v=>nf(v))+
+        series.map(s=>{
+          const pts=s.vals.map((v,i)=>[s2x(i),s2y(v)]);
+          return `<path d="${path(pts)}" fill="none" stroke="${s.color}" stroke-width="2"
+            stroke-linejoin="round"/>
+            <text x="${w2-r2+6}" y="${(pts.at(-1)[1]+4).toFixed(1)}" font-size="13"
+              fill="${C.txt2}">${esc(s.rot)} <tspan fill="${C.tinta}">${nf(s.vals.at(-1))}</tspan></text>`;
+        }).join("")+
+        anos.map((a,i)=>`<text x="${s2x(i).toFixed(1)}" y="${h2-6}" font-size="13"
+          fill="${C.txt2}" text-anchor="middle">${a}</text>`).join(""));
+
+  /* ---- 60+ share. Last point is NOT orange: recency is not an alarm. ---- */
+  const I=DATA.idade.filter(r=>inSel(r[0]));
+  const w3=520,h3=214,l3=48,r3=20,t3=14,b3=26;
+  const s3x=scaler([0,Math.max(I.length-1,1)],[l3+20,w3-r3-20]);
+  const lo3=Math.floor(Math.min(...I.map(r=>r[1]))*100-1), hi3=Math.ceil(Math.max(...I.map(r=>r[1]))*100+1);
+  const s3y=scaler([lo3/100,hi3/100],[h3-b3,t3]);
+  const idade = I.length<2
+    ? `<div style="font-size:14px;color:${C.txt2};padding:16px 0">
+         Selecione mais de um ano para ver a evolução.</div>`
+    : svg(w3,h3,
+        gridlines(l3,w3-r3,[lo3,(lo3+hi3)/2,hi3].map(v=>[v/100,s3y(v/100)]),v=>nf(v*100,1)+"%")+
+        `<path d="${path(I.map((r,i)=>[s3x(i),s3y(r[1])]))}" fill="none"
+           stroke="${C.serie}" stroke-width="2"/>`+
+        I.map((r,i)=>`<circle cx="${s3x(i).toFixed(1)}" cy="${s3y(r[1]).toFixed(1)}" r="3.5"
+           fill="${C.serie}"/>`).join("")+
+        I.map((r,i)=>`<text x="${s3x(i).toFixed(1)}" y="${h3-6}" font-size="13"
+           fill="${C.txt2}" text-anchor="middle">${r[0]}</text>`).join(""));
+
+  return `<div class="row" style="flex:1.15">
+    <div class="card" style="flex:1">
+      <div class="cardhead">
+        <p class="cardtitle">Ocupação por tipo de leito · ${esc(STATE.rotulo)}</p>
+        <p class="cardsub">UTI/UCO tem numerador próprio (contador de diárias de UTI), não a especialidade do leito.</p>
+      </div>
+      <div style="flex:1;min-height:0">${svg(w,h,barras)}</div>
+      <p class="cardnote">Hospital dia gira dentro do mesmo dia — leito-dia é a unidade
+        errada pra ele, não compare com os demais.${comp?` "Complementar" tem
+        <b>${nf(comp.leitos/comp.n)}</b> leitos, dos quais <b>${nf(icu.leitos/icu.n)}</b>
+        são UTI/UCO.`:""}</p>
+    </div>
+  </div>
+  <div class="row" style="flex:1">
+    <div class="card" style="flex:1">
+      <div class="cardhead">
+        <p class="cardtitle">Leitos SUS por tipo · média mensal</p>
+        <p class="cardsub">Quatro tipos maiores e o residual.</p>
+      </div>
+      <div style="flex:1;min-height:0">${linhasTipo}</div>
+    </div>
+    <div class="card" style="flex:1">
+      <div class="cardhead">
+        <p class="cardtitle">Pacientes com 60 anos ou mais</p>
+        <p class="cardsub">% das internações do período.</p>
+      </div>
+      <div style="flex:1;min-height:0">${idade}</div>
+    </div>
+  </div>`;
+}
+
+/* ================= TAB 4 · CUSTO ================= */
+function custo(){
+  const K=DATA.custo.anual.filter(r=>inSel(r[0]));
+  const anos=K.map(r=>r[0]);
+  const gastoB=K[0][2], intB=K[0][1];
+
+  /* indexed spend vs volume */
+  const w=1114,h=248,l=52,r=128,T=16,B=26;
+  const sx=scaler([0,Math.max(anos.length-1,1)],[l+24,w-r]);
+  const idxG=K.map(r=>100*r[2]/gastoB), idxI=K.map(r=>100*r[1]/intB);
+  const all=[...idxG,...idxI];
+  const lo=Math.floor(Math.min(...all,99)/5)*5, hi=Math.ceil(Math.max(...all,101)/5)*5;
+  const sy=scaler([lo,hi],[h-B,T]);
+  const chart = K.length<2
+    ? `<div style="font-size:14px;color:${C.txt2};padding:24px 0">
+         Um ano só na seleção — o índice precisa de pelo menos dois.</div>`
+    : svg(w,h,
+        gridlines(l,w-r,[lo,100,hi].map(v=>[v,sy(v)]),v=>nf(v))+
+        `<line x1="${l}" x2="${w-r}" y1="${sy(100).toFixed(1)}" y2="${sy(100).toFixed(1)}"
+           stroke="${C.txt2}" stroke-width="1.2" stroke-dasharray="4 3"/>
+         <text x="${w-r+6}" y="${(sy(100)+4).toFixed(1)}" font-size="13" fill="${C.txt2}">${anos[0]} = 100</text>
+         <path d="${path(idxG.map((v,i)=>[sx(i),sy(v)]))}" fill="none" stroke="${C.acento}" stroke-width="2"/>
+         <path d="${path(idxI.map((v,i)=>[sx(i),sy(v)]))}" fill="none" stroke="${C.serie}" stroke-width="2"/>
+         <text x="${w-r+6}" y="${(sy(idxG.at(-1))-6).toFixed(1)}" font-size="13"
+           fill="${C.acento}" font-weight="600">Gasto ${nf(idxG.at(-1),1)}</text>
+         <text x="${w-r+6}" y="${(sy(idxI.at(-1))+14).toFixed(1)}" font-size="13"
+           fill="${C.serie}" font-weight="600">Internações ${nf(idxI.at(-1),1)}</text>`+
+        K.map((r,i)=>`<text x="${sx(i).toFixed(1)}" y="${h-6}" font-size="13"
+           fill="${C.txt2}" text-anchor="middle">${r[0]}</text>`).join(""));
+
+  /* complexity split over the selection */
+  const cx=new Map();
+  DATA.custo.complexidade.forEach(([ano,desc,n,v])=>{
+    if(!inSel(ano)||!desc) return;
+    const cur=cx.get(desc)||[0,0]; cur[0]+=n; cur[1]+=v; cx.set(desc,cur);
+  });
+  const alta=cx.get("Alta Complexidade")||[0,0];
+  const media=cx.get("Média Complexidade")||[0,0];
+  const nT=alta[0]+media[0], gT=alta[1]+media[1];
+  const w2=520,h2=170,l2=100,r2=16;
+  const bar=(y,label,frac,txtHigh,txtMed)=>{
+    const wTot=w2-l2-r2, wHigh=wTot*frac;
+    return `<text x="${l2-10}" y="${y+24}" text-anchor="end" font-size="14"
+      fill="${C.txt2}">${label}</text>
+      <rect x="${l2}" y="${y}" width="${(wTot-wHigh-2).toFixed(1)}" height="38"
+        fill="${C.marca}" rx="2"/>
+      <rect x="${(l2+wTot-wHigh).toFixed(1)}" y="${y}" width="${Math.max(1,wHigh).toFixed(1)}"
+        height="38" fill="${C.acento}" rx="2"/>
+      <text x="${l2+8}" y="${y+24}" font-size="14" fill="#ffffff" font-weight="600">${txtMed}</text>
+      <text x="${(l2+wTot-wHigh-8).toFixed(1)}" y="${y+24}" text-anchor="end" font-size="14"
+        fill="${C.tinta}" font-weight="600">${txtHigh}</text>`;
+  };
+  const stack=svg(w2,h2,
+    bar(18,"Internações",nT?alta[0]/nT:0,pct(nT?alta[0]/nT:0),pct(nT?media[0]/nT:0))+
+    bar(86,"Gasto",gT?alta[1]/gT:0,pct(gT?alta[1]/gT:0),pct(gT?media[1]/gT:0)));
+
+  const custoUti=DATA.custo.uti.filter(r=>inSel(r[0]))
+    .reduce((a,r)=>({uti:a.uti+r[1],tot:a.tot+r[2]}),{uti:0,tot:0});
+
+  return `<div class="row" style="flex:1.15">
+    <div class="card" style="flex:1">
+      <div class="cardhead">
+        <p class="cardtitle">Gasto e internações, indexados · ${anos[0]} = 100</p>
+        <p class="cardsub">Valor de AIH e contagem de internações, um eixo só.</p>
+      </div>
+      <div style="flex:1;min-height:0">${chart}</div>
+    </div>
+  </div>
+  <div class="row" style="flex:.95">
+    <div class="card" style="flex:1.1">
+      <div class="cardhead">
+        <p class="cardtitle">Volume e gasto por complexidade · ${esc(STATE.rotulo)}</p>
+        <p class="cardsub">Alta complexidade em laranja. O descasamento entre as barras é o gráfico.</p>
+      </div>
+      <div style="flex:1;min-height:0">${stack}</div>
+      <p class="cardnote">Alta complexidade: <b>${pct(nT?alta[0]/nT:0)}</b> das internações,
+        <b>${pct(gT?alta[1]/gT:0)}</b> do gasto — R$ ${nf(alta[0]?alta[1]/alta[0]:0)} contra
+        R$ ${nf(media[0]?media[1]/media[0]:0)} por internação.</p>
+    </div>
+    <div class="card" style="flex:1">
+      <div class="cardhead">
+        <p class="cardtitle">Valor da AIH · média × mediana</p>
+        <p class="cardsub">Distribuição assimétrica: a mediana descreve melhor a internação típica.</p>
+      </div>
+      <div class="tablewrap" style="flex:1">
+        <table style="min-width:0">
+          <thead><tr><th>Ano</th><th class="num">Gasto</th><th class="num">Média</th><th class="num">Mediana</th></tr></thead>
+          <tbody>${K.map(r=>`<tr><td>${r[0]}</td>
+            <td class="num">R$ ${nf(r[2]/1e6,1)} mi</td>
+            <td class="num">${nf(r[3])}</td><td class="num">${nf(r[4])}</td></tr>`).join("")}</tbody>
+        </table>
+      </div>
+      <p class="cardnote">UTI responde por <b>${pct(custoUti.tot?custoUti.uti/custoUti.tot:0)}</b>
+        do valor das AIH do período.</p>
+    </div>
+  </div>`;
+}
+
+/* ---------- filters ---------- */
+const TERCEIRO=[["Caráter da internação","Todos"],["Município","Todos"],
+                ["Tipo de leito","Todos"],["Complexidade","Todas"]];
+
+function renderFilters(){
+  const per=PERIODOS.find(p=>p.id===STATE.periodo);
+  const extra=TERCEIRO[STATE.tab];
+  const alterado = STATE.periodo!=="todos";
+  document.getElementById("filters").innerHTML =
+    `<button class="flt${alterado?" on":""}" id="f-periodo" type="button"
+       aria-haspopup="true"><span class="k">Período:</span> ${esc(per.rotulo)} ▾</button>
+     <button class="flt" type="button" disabled><span class="k">Região intermediária:</span> Todas ▾</button>
+     <button class="flt" type="button" disabled><span class="k">${esc(extra[0])}:</span> ${esc(extra[1])} ▾</button>
+     <button class="fltmore" id="f-more" type="button">+ mais filtros</button>`+
+    /* Nielsen — prevenção de erros. The UXers' row asks for a breadcrumb to undo a
+       filter; the honest minimum is that a non-default selection says how to get back.
+       Absent while nothing is filtered, so it is never decoration. */
+    (alterado
+      ? `<button class="fltmore" id="f-reset" type="button">↺ limpar período</button>`
+      : "")+
+     `<span class="spacer">3 filtros · aplicam a esta aba</span>`;
+  document.getElementById("f-periodo").addEventListener("click",e=>{
+    e.stopPropagation(); toggleMenu("periodo");
+  });
+  document.getElementById("f-more").addEventListener("click",e=>{
+    e.stopPropagation(); toggleMenu("more");
+  });
+  const reset=document.getElementById("f-reset");
+  if(reset) reset.addEventListener("click",e=>{
+    e.stopPropagation();
+    const p=PERIODOS[0];
+    STATE.periodo=p.id; STATE.anos=p.anos.slice(); STATE.rotulo=p.rotulo; STATE.menu=null;
+    show(STATE.tab);
+  });
+  if(STATE.menu) drawMenu();
+}
+
+function toggleMenu(which){
+  STATE.menu = STATE.menu===which ? null : which;
+  renderFilters();
+}
+
+function drawMenu(){
+  const host=document.getElementById("filters");
+  const el=document.createElement("div");
+  el.className="menu";
+  if(STATE.menu==="periodo"){
+    el.innerHTML =
+      `<div class="grp">Período</div>`+
+      PERIODOS.map(p=>`<button type="button" data-per="${p.id}"
+        aria-current="${p.id===STATE.periodo}">${esc(p.rotulo)}</button>`).join("")+
+      `<hr><div class="grp">Ano</div>`+
+      ANOS.map(a=>`<button type="button" data-ano="${a}"
+        aria-current="${STATE.anos.length===1&&STATE.anos[0]===a}">${a}</button>`).join("");
+    el.addEventListener("click",e=>{
+      const b=e.target.closest("button"); if(!b) return;
+      if(b.dataset.per){
+        const p=PERIODOS.find(x=>x.id===b.dataset.per);
+        STATE.periodo=p.id; STATE.anos=p.anos.slice(); STATE.rotulo=p.rotulo;
+      } else {
+        const a=+b.dataset.ano;
+        STATE.periodo="ano"+a; STATE.anos=[a]; STATE.rotulo=String(a);
+      }
+      STATE.menu=null; show(STATE.tab);
+    });
+  } else {
+    el.style.left="auto"; el.style.right="24px";
+    el.innerHTML =
+      `<div class="grp">Filtros adicionais</div>`+
+      [["Região de saúde","30 opções"],["Tipo de leito","7"],
+       ["Especialidade do leito","13"],["Caráter da internação","2"],
+       ["Complexidade","2"]].map(([k,v])=>
+        `<button type="button" disabled style="cursor:default;display:flex;
+           justify-content:space-between;gap:16px"><span>${esc(k)}</span>
+           <span style="color:${C.txt2}">${esc(v)}</span></button>`).join("")+
+      `<hr><div class="grp" style="padding-bottom:8px">Só o período está ligado
+        neste mock. Região de saúde tem 30 itens — fica aqui, e não visível,
+        por Hick.</div>`;
+  }
+  host.appendChild(el);
+}
+
+document.addEventListener("click",()=>{ if(STATE.menu){ STATE.menu=null; renderFilters(); } });
+
+/* ============================================================
+   ORIENTATION LAYER
+   Closes the last open row of docs/uxers_guidance.md (Nielsen — help and documentation:
+   "dashboard sem glossário e sem botão de suporte"). It also has a second job: the chart
+   subtitles no longer assert conclusions, because a subtitle that asserts one is
+   contradicted by the first filter a user applies. The conclusions did not stop being
+   true — they moved here. Without this layer the V2 trades a title that lies for a
+   dashboard that explains nothing.
+
+   Content of record: docs/dashboard_v2_orientation.md. Glossary definitions are the
+   user-facing subset of docs/metrics_dictionary.md, which wins on any conflict — two
+   sources of truth about what a metric means is the defect V1 demonstrates by omission.
+   ============================================================ */
+
+const GLOSSARIO = [
+  ["Taxa de ocupação SUS (rede)",
+   "Dias de permanência de pacientes SUS ÷ (leitos SUS × dias do período).",
+   "O denominador é <b>só leito SUS</b>. Dividir por todos os leitos mede demanda SUS contra capacidade que o paciente SUS não pode ocupar — é o erro que a V1 comete."],
+  ["Taxa de ocupação de UTI",
+   "Diárias de UTI ÷ (leitos de UTI/UCO × dias do período).",
+   "O numerador vem do contador próprio de diárias de UTI, não da especialidade do leito: no RS <b>nenhuma</b> internação é classificada como UTI naquele campo."],
+  ["Leitos SUS",
+   "Média mensal de leitos cadastrados no CNES como SUS.",
+   "Média mensal, não total acumulado. São 77,1% dos leitos cadastrados no RS."],
+  ["Internações (AIH)",
+   "Contagem de autorizações de internação hospitalar.",
+   "<b>Não é contagem de pacientes.</b> Uma pessoa internada três vezes conta três."],
+  ["Dias de permanência",
+   "Soma das diárias de internação no período.",
+   "É o numerador da taxa de ocupação. Não é “dias por paciente”."],
+  ["Permanência média",
+   "Dias de permanência ÷ internações.",
+   "Cai quando a rede gira mais rápido, o que pode ser eficiência ou alta precoce — o número sozinho não distingue."],
+  ["Índice (base = 100)",
+   "Cada série reescalada para que o ano-base valha 100.",
+   "Lê-se a <b>distância entre as linhas</b>, não o nível de cada uma. O eixo começa em 100 porque, num índice, 100 é o zero."],
+  ["Complementar",
+   "Categoria do CNES que agrupa UTI, unidade coronariana, cuidados intermediários e isolamento.",
+   "<b>Não é sinônimo de UTI.</b> Em 2023, 1.839 dos 2.404 leitos complementares são UTI/UCO; o resto é cuidado intermediário e isolamento."],
+  ["Tipo de leito",
+   "Classificação do CNES em 7 categorias.",
+   "O SIH classifica internação em 13 especialidades no RS — vocabulário diferente. A taxa por tipo usa um crosswalk documentado e é aproximação."],
+  ["Hospital dia",
+   "Leito de internação que não pernoita.",
+   "Marca ~18% <b>e não está ocioso</b>: gira dentro do mesmo dia, então leito-dia é a unidade errada para ele. Não compare com os outros tipos."],
+  ["Complexidade",
+   "Média ou alta, conforme a tabela de procedimentos do SUS.",
+   "O dicionário da fonte grafa “Méida Complexidade”; corrigido só na exibição, nunca na chave de junção."],
+  ["Valor da AIH",
+   "Valor aprovado da autorização, em reais nominais.",
+   "É valor <b>aprovado, não custo real</b>, e <b>não está corrigido pela inflação</b>. A distribuição é assimétrica: use a mediana."],
+  ["Região de saúde / intermediária",
+   "30 e 8 agrupamentos de municípios, respectivamente.",
+   "Região de saúde é a unidade de planejamento do SUS; região intermediária é recorte estatístico do IBGE. Não são hierarquia uma da outra."],
+  ["Ocupação acima de 100%",
+   "A taxa pode passar de 100%.",
+   "Rotatividade de leito dentro do mês, e cadastro de capacidade que é uma foto mensal. Leitura válida: a demanda passou da capacidade cadastrada."],
+];
+
+const AJUDA = `
+  <h4>O que cada aba responde</h4>
+  <table><tbody>
+    <tr><td>Panorama</td><td>A rede está sob pressão? — e a resposta é que a pressão está
+      concentrada na UTI, onde o agregado a esconde.</td></tr>
+    <tr><td>Território</td><td>Onde? — a folga é do interior, e não é transferível.</td></tr>
+    <tr><td>Capacidade</td><td>Que tipo de leito? — UTI e cirúrgico são os tensionados.</td></tr>
+    <tr><td>Custo</td><td>Quanto, e para onde vai? — o gasto cresce acima do volume.</td></tr>
+  </tbody></table>
+
+  <h4>Como os filtros agem</h4>
+  <ul>
+    <li><b>Período vale para a aba inteira</b> — todos os gráficos e todos os KPIs. Não
+      existe filtro que atinja só um gráfico: era o defeito da V1, onde 8 de 11 filtros
+      atingiam alvos diferentes sem dizer quais.</li>
+    <li>Trocar o período <b>recalcula</b> cada taxa como soma dos dias ÷ soma dos
+      leito-dias no recorte novo. Não é média das médias — então a taxa de um recorte de
+      dois anos não é a média das taxas dos dois anos, e está certo assim: um mês com mais
+      leitos pesa mais.</li>
+    <li><b>Região intermediária</b> (8) fica visível; <b>região de saúde</b> (30) fica atrás
+      de “mais filtros”, por Hick.</li>
+    <li>Com filtro fora do padrão, aparece <b>como desfazer</b>.</li>
+  </ul>
+
+  <h4>Como ler o gráfico indexado</h4>
+  <p>Comparar 21.838 leitos com 4,78 milhões de dias de permanência no mesmo gráfico é
+    impossível — a série menor vira uma linha reta no chão. O índice põe as duas na mesma
+    escala: cada uma vira “quanto mudou desde o ano-base”, e o ano-base vale 100.</p>
+  <p><b>100 = igual ao ano-base. 103,1 = 3,1% acima. 87,9 = 12,1% abaixo.</b> A leitura é a
+    <b>distância entre as linhas</b>, não o nível de nenhuma delas.</p>
+  <p>O eixo começa em 100 e não em zero, contrariando a regra do próprio design system,
+    porque num índice <b>100 é o zero</b> — é o ponto onde nada mudou. Um eixo de zero
+    comprimiria a faixa de 88 a 106 nos 6% de cima da altura e apagaria o efeito que o
+    gráfico existe para mostrar. A regra do eixo zerado continua valendo para toda taxa e
+    toda barra — inclusive para o gráfico herói, que é de taxas e por isso começa em zero.
+    É a única exceção do sistema, ela é declarada, e a linha de base está desenhada.</p>
+
+  <h4>Por que a ocupação passa de 100%</h4>
+  <p>A taxa é dias de permanência ÷ (leitos × dias do mês) — a aproximação que o próprio
+    DATASUS documenta. Dois motivos a levam acima de 100%, e nenhum é erro de conta:
+    <b>rotatividade dentro do mês</b> (dois pacientes no mesmo leito no mesmo dia) e o
+    <b>cadastro de leitos ser uma foto mensal</b>. Na UTI de junho de 2021 isso deu 131,9%,
+    e é leitura correta: a demanda passou da capacidade cadastrada.</p>
+
+  <h4>Origem e limites do dado</h4>
+  <p>SIH-SUS (AIH reduzida) e CNES, via Base dos Dados / DATASUS. Recorte Rio Grande do Sul,
+    2019–2023. Geometria municipal do IBGE. A base pública tem cerca de <b>6 meses de
+    defasagem</b>. Dado <b>administrativo, não clínico</b>: descreve faturamento de
+    internação, não desfecho de paciente.</p>
+
+  <h4>Quando o número não fecha</h4>
+  <p>Use <b>Falar com quem mantém</b> e informe três coisas: a aba, o filtro aplicado e o
+    número que pareceu errado. É o que transforma “o dashboard está errado” num relato
+    reproduzível.</p>
+`;
+
+/* Tour steps. `alvo` is the id of the real element to outline — the tour points at the
+   thing rather than describing where to look. `pos` places the card clear of it. */
+const TOUR = [
+  { alvo:null, pos:{top:"210px", left:"404px"},
+    titulo:"Para que serve este painel",
+    texto:"Ele existe para <b>montar um pleito de recurso federal</b>: mostrar que a rede SUS do RS está sob pressão, e onde. Não decide alocação — produz a evidência que a pede." },
+  { alvo:"spot-hero", pos:{top:"470px", left:"300px"},
+    titulo:"O achado, e por que ele abre o painel",
+    texto:"UTI e rede no mesmo eixo. Entre 2019 e 2021 a rede <b>caiu</b> de 58,4% para 53,2% enquanto a UTI <b>subiu</b> para 111,9%. Quem olhasse só a média teria concluído que 2021 foi mais folgado que 2019 — no pior ano sanitário do século." },
+  { alvo:"spot-kpis", pos:{top:"290px", left:"404px"},
+    titulo:"Todo número diz de que período fala",
+    texto:"Cada tile carrega o recorte embaixo do valor. Se o filtro muda, o número muda <b>e diz que mudou</b> — antes, o tile mostrava 2023 enquanto a barra de filtros dizia 2019–2023, e não havia como saber qual dos dois você estava vendo." },
+  { alvo:"filters", pos:{top:"170px", left:"404px"},
+    titulo:"O filtro vale para a aba inteira",
+    texto:"Período é o controle principal, e <b>pandemia não é um recorte de data qualquer</b>: é o intervalo em que as duas taxas andam em direções opostas. Experimente — todos os gráficos e KPIs recalculam." },
+  { alvo:"tabstrip", pos:{top:"150px", left:"250px"},
+    titulo:"A ordem de leitura",
+    texto:"<b>Panorama</b> (o quê) → <b>Território</b> (onde) → <b>Capacidade</b> (que tipo de leito) → <b>Custo</b> (quanto). Cada aba responde uma pergunta e passa a próxima adiante." },
+  { alvo:"help", pos:{top:"150px", left:"250px"},
+    titulo:"Onde pedir ajuda",
+    texto:"<b>Glossário</b> para os números, <b>Como usar</b> para a mecânica, e uma pessoa para o resto. Sempre no cabeçalho, sempre no mesmo lugar." },
+];
+
+const ORIENT = { sheet:null, tour:-1, firstrun:true, busca:"" };
+
+function glossarioHTML(){
+  const q=ORIENT.busca.trim().toLowerCase();
+  const hits=GLOSSARIO.filter(([t,d,r])=>
+    !q || (t+" "+d+" "+r).toLowerCase().includes(q));
+  return `<input class="gsearch" id="g-busca" type="search" placeholder="Buscar termo…"
+      value="${esc(ORIENT.busca)}" aria-label="Buscar no glossário">`+
+    (hits.length
+      ? `<table><thead><tr><th>Termo</th><th>O que é, e a ressalva</th></tr></thead><tbody>`+
+        hits.map(([t,d,r])=>`<tr><td>${esc(t)}</td><td>${d}<br><span
+          style="color:${C.tinta}">Ressalva:</span> ${r}</td></tr>`).join("")+
+        `</tbody></table>`
+      : `<p class="nores">Nenhum termo encontrado para “${esc(ORIENT.busca)}”.</p>`)+
+    `<p style="margin-top:14px">Definição completa de cada número, com SQL e grão, em
+      <b>docs/metrics_dictionary.md</b> — que é a fonte de verdade. Este glossário é o
+      recorte voltado a quem lê o painel.</p>`;
+}
+
+function renderOrient(){
+  const host=document.getElementById("orient");
+  /* Clear any previous spotlight before re-rendering. */
+  ["spot-hero","spot-kpis","filters","tabstrip","help"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el && el.classList) el.classList.remove("spot");
+  });
+
+  let html="";
+  if(ORIENT.sheet){
+    const isG = ORIENT.sheet==="gloss";
+    html = `<div class="veil" id="veil"><div class="sheet">
+      <div class="sheethead">
+        <div>
+          <h3>${isG?"Glossário":"Como usar este painel"}</h3>
+          <p>${isG
+            ? GLOSSARIO.length+" termos · recorte de docs/metrics_dictionary.md"
+            : "Mecânica, leitura e limites do dado"}</p>
+        </div>
+        <button class="sheetclose" id="sheet-x" type="button" aria-label="Fechar">×</button>
+      </div>
+      <div class="sheetbody">${isG?glossarioHTML():AJUDA}
+        ${isG?"":`<h4>Falar com quem mantém</h4>
+          <p>Este painel é mantido pela equipe de dados da SES-RS —
+          <b>dados@exemplo.rs.gov.br</b>. Endereço fictício: este é um wireframe de
+          apresentação, não um painel em produção.</p>`}
+      </div></div></div>`;
+  } else if(ORIENT.tour>=0){
+    const s=TOUR[ORIENT.tour], n=TOUR.length;
+    html = `<div class="tourveil" id="tourveil"></div>
+      <div class="tourcard" style="top:${s.pos.top};left:${s.pos.left}">
+        <p class="step">Tour · passo ${ORIENT.tour+1} de ${n}</p>
+        <h4>${s.titulo}</h4>
+        <p>${s.texto}</p>
+        <div class="tournav">
+          <div class="tourdots">${TOUR.map((_,i)=>
+            `<i class="${i===ORIENT.tour?"on":""}"></i>`).join("")}</div>
+          ${ORIENT.tour>0?`<button id="t-prev" type="button">Voltar</button>`:""}
+          <button class="prim" id="t-next" type="button">${
+            ORIENT.tour===n-1?"Concluir":"Próximo"}</button>
+          <button class="skip" id="t-skip" type="button">Sair do tour</button>
+        </div>
+      </div>`;
+  } else if(ORIENT.firstrun){
+    html = `<div class="firstrun">
+      <b>Primeira vez aqui?</b> Um tour de 6 passos mostra a ordem de leitura das quatro
+      abas e o achado que abre o painel.
+      <div class="acts">
+        <button class="go" id="fr-go" type="button">Ver o tour</button>
+        <button class="no" id="fr-no" type="button">Depois</button>
+      </div></div>`;
+  }
+  host.innerHTML=html;
+
+  /* Spotlight the step's target, if it has one. */
+  if(ORIENT.tour>=0 && TOUR[ORIENT.tour].alvo){
+    const el=document.getElementById(TOUR[ORIENT.tour].alvo);
+    if(el && el.classList) el.classList.add("spot");
+  }
+
+  const on=(id,fn)=>{ const el=document.getElementById(id);
+                      if(el) el.addEventListener("click",e=>{e.stopPropagation();fn();}); };
+  on("sheet-x",()=>{ ORIENT.sheet=null; ORIENT.busca=""; refreshOrient(); });
+  on("veil",()=>{ ORIENT.sheet=null; ORIENT.busca=""; refreshOrient(); });
+  on("fr-go",()=>{ ORIENT.firstrun=false; ORIENT.tour=0; startTour(); });
+  on("fr-no",()=>{ ORIENT.firstrun=false; refreshOrient(); });
+  on("t-next",()=>{
+    if(ORIENT.tour===TOUR.length-1){ ORIENT.tour=-1; refreshOrient(); }
+    else { ORIENT.tour++; startTour(); }
+  });
+  on("t-prev",()=>{ ORIENT.tour--; startTour(); });
+  on("t-skip",()=>{ ORIENT.tour=-1; refreshOrient(); });
+
+  bindBusca();
+  syncHelpButtons();
+}
+
+/* Re-renders only the glossary body on each keystroke, rather than the whole overlay,
+   because a full re-render would recreate the input and steal focus mid-word. The input
+   is still recreated, so the listener rebinds itself and the caret is restored by hand. */
+function bindBusca(){
+  const el=document.getElementById("g-busca");
+  if(!el) return;
+  el.addEventListener("input",ev=>{
+    ORIENT.busca=ev.target.value;
+    const body=document.querySelector && document.querySelector(".sheetbody");
+    if(!body) return;
+    const pos=ev.target.selectionStart;
+    body.innerHTML=glossarioHTML();
+    const again=document.getElementById("g-busca");
+    if(again && again.focus){ again.focus(); again.setSelectionRange(pos,pos); }
+    bindBusca();
+  });
+}
+
+/* Step 2 points at the hero chart, which only exists on Panorama, and step 3 at the KPI
+   row. Jump to the tab that has them rather than outlining nothing. */
+function startTour(){
+  const alvo=TOUR[ORIENT.tour] && TOUR[ORIENT.tour].alvo;
+  if((alvo==="spot-hero"||alvo==="spot-kpis") && STATE.tab!==0){ show(0); return; }
+  refreshOrient();
+}
+
+function refreshOrient(){ renderOrient(); }
+
+function syncHelpButtons(){
+  const map={ "h-ajuda":ORIENT.sheet==="ajuda", "h-gloss":ORIENT.sheet==="gloss",
+              "h-tour":ORIENT.tour>=0 };
+  Object.entries(map).forEach(([id,active])=>{
+    const el=document.getElementById(id);
+    if(el && el.classList) el.classList.toggle("on",active);
+  });
+}
+
+function wireHelp(){
+  const on=(id,fn)=>{ const el=document.getElementById(id);
+                      if(el) el.addEventListener("click",e=>{e.stopPropagation();fn();}); };
+  on("h-ajuda",()=>{ ORIENT.tour=-1; ORIENT.firstrun=false;
+                     ORIENT.sheet = ORIENT.sheet==="ajuda"?null:"ajuda"; refreshOrient(); });
+  on("h-gloss",()=>{ ORIENT.tour=-1; ORIENT.firstrun=false; ORIENT.busca="";
+                     ORIENT.sheet = ORIENT.sheet==="gloss"?null:"gloss"; refreshOrient(); });
+  on("h-tour", ()=>{ ORIENT.sheet=null; ORIENT.firstrun=false;
+                     ORIENT.tour = ORIENT.tour>=0 ? -1 : 0; startTour(); });
+}
+
+/* ---------- shell ---------- */
+const TABS=[panorama,territorio,capacidade,custo];
+const CAVEATS=[
+  `<b>Taxa de ocupação</b> = dias de permanência ÷ (leitos SUS × dias do mês).
+   Aproximação — pode passar de 100% pela rotatividade de leito. A de UTI usa o contador
+   de diárias de UTI sobre os leitos de UTI/UCO. Dado administrativo, não clínico.`,
+  `<b>Municípios sem leito SUS cadastrado</b> aparecem em branco no mapa, não em zero.
+   Geometria: malha municipal do IBGE, unida pelo código de 7 dígitos.`,
+  `<b>"Complementar" não é UTI</b> — inclui cuidados intermediários e isolamento. A taxa de
+   UTI usa só os leitos de UTI/UCO. Hospital dia gira no mesmo dia: leito-dia é a unidade
+   errada pra ele.`,
+  `<b>Valor da AIH</b> é o valor aprovado, não o custo real do procedimento. A distribuição
+   é assimétrica — a mediana descreve a internação típica melhor que a média.`,
+];
+
+function show(i){
+  STATE.tab=i;
+  document.querySelectorAll(".cvtab").forEach((b,j)=>
+    b.setAttribute("aria-selected", j===i ? "true" : "false"));
+  const panel=document.getElementById("panel");
+  panel.setAttribute("aria-labelledby","tab-"+i);
+  panel.innerHTML=TABS[i]();
+  document.getElementById("caveat").innerHTML=CAVEATS[i];
+  renderFilters();
+  /* Re-render the orientation layer last: replacing the panel's innerHTML destroys any
+     element the tour was outlining, so the spotlight has to be reapplied after. */
+  renderOrient();
+}
+document.querySelectorAll(".cvtab").forEach((b,i)=>{
+  b.addEventListener("click",()=>show(i));
+  b.addEventListener("keydown",e=>{
+    if(e.key!=="ArrowRight"&&e.key!=="ArrowLeft") return;
+    e.preventDefault();
+    const n=(i+(e.key==="ArrowRight"?1:3))%4;
+    document.getElementById("tab-"+n).focus(); show(n);
+  });
+});
+
+/* Escape closes whichever overlay is open — the sheet, then the tour. Without it the only
+   way out of a modal-ish surface is finding the right button, which is the thing that
+   makes people distrust help panels. */
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Escape") return;
+  if(ORIENT.sheet){ ORIENT.sheet=null; ORIENT.busca=""; refreshOrient(); }
+  else if(ORIENT.tour>=0){ ORIENT.tour=-1; refreshOrient(); }
+});
+
+wireHelp();
+show(0);
+</script>

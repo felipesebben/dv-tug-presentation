@@ -384,7 +384,7 @@ delas gera quatro números diferentes para "a taxa de ocupação do RS":
 | | denominador = `leitos_total` | denominador = `leitos_sus` |
 |---|---|---|
 | **`AVG` das taxas por hospital** | **30,8%** ← *o que a V1 mostra* | 39,6% |
-| **Ponderada** (`SUM(dias)/SUM(leito_dias)`) | 43,0% | **55,9%** ← *o que a V2 usa* |
+| **Ponderada** (`SUM(dias)/SUM(leito_dias)`) | 43,0% | **55,8%** ← *o que a V2 usa* |
 
 Da célula da V1 para a da V2 o número **quase dobra**, sem que um único dado mude — só a
 aritmética. É o exemplo mais forte do projeto de um erro que design nenhum conserta.
@@ -409,7 +409,7 @@ capacidade total. Trocar o denominador por `leitos_sus` sobe a média de 30,8% p
 > **documentada aqui** e virar tema no V2: é o melhor exemplo do projeto de um erro que
 > nenhuma quantidade de design conserta. Layout bonito não salva denominador errado.
 
-> **Decisão para a V2: `leitos_sus`, ponderada.** Taxa estadual **55,9%**. A tabela
+> **Decisão para a V2: `leitos_sus`, ponderada.** Taxa estadual **55,8%** (55,8498% exatos — 55,85% em duas casas; a forma de uma casa é a que o resto do documento usa). A tabela
 > `occupancy` agora exporta os componentes da razão, não só a razão — ver §4.1.
 
 ### 4.1. Colunas de ocupação exportadas (a partir da V2)
@@ -462,6 +462,89 @@ enquanto a demanda passou por cima. 2023 é o ano mais pressionado da série.
 
 A ocupação **caiu** durante a COVID — o contrário do que a plateia espera — porque
 procedimentos eletivos foram suspensos.
+
+### 4.3. Ocupação de UTI — a métrica que inverte a leitura da pandemia
+
+Disponível a partir do reextract de 29/07/2026, que trouxe `quantidade_dias_uti_mes` do
+`aihs_reduzidas`. É a métrica mais importante que o projeto ganhou até aqui, porque ela
+**contradiz a série agregada**:
+
+| ano | ocupação UTI | ocupação geral | leitos UTI SUS (méd/mês) |
+|---|---|---|---|
+| 2019 | 76,1% | 58,4% | 1.516 |
+| 2020 | 86,8% | 50,1% | 1.514 |
+| 2021 | **111,9%** | 53,2% | 1.510 |
+| 2022 | 79,6% | 57,8% | 1.766 |
+| 2023 | 78,6% | **60,0%** | 1.837 |
+
+De 2019 para 2021 a ocupação geral **caiu 5,2 p.p.** enquanto a de UTI **subiu 35,8 p.p.**
+Mês a mês o descolamento é ainda mais violento:
+
+| mês | UTI | geral | distância |
+|---|---|---|---|
+| jun/2021 | **131,9%** | 57,0% | +75,0 p.p. |
+| abr/2021 | 129,6% | 53,5% | +76,2 p.p. |
+| jul/2021 | 127,4% | 53,8% | +73,6 p.p. |
+| mai/2021 | 124,0% | 52,3% | +71,7 p.p. |
+
+**Por que isso importa mais que qualquer escolha de design:** um dashboard que mostrasse
+só a taxa geral teria dito a um secretário de saúde que a rede estava *menos* pressionada
+em 2021 (53,2%) que em 2019 (58,4%) — no pior ano sanitário do século. A pressão existiu
+inteira, concentrada na UTI, e ficou invisível no agregado. É o mesmo tipo de erro que o
+denominador errado da V1, e nenhuma revisão visual pega nenhum dos dois.
+
+#### Colunas exportadas
+
+| coluna | definição |
+|---|---|
+| `dias_uti` | `SUM(quantidade_dias_uti_mes)` · **NULL** se `leitos_uti_sus = 0` |
+| `leitos_uti_sus` | leitos SUS de UTI/UCO — só o subconjunto intensivo de `complementar` |
+| `leito_dias_uti_sus` | `leitos_uti_sus × dias_no_mes` · **NULL** se `leitos_uti_sus = 0` |
+| `taxa_ocupacao_uti` | razão por hospital/mês (diagnóstico; **não** somar nem tirar média) |
+| `dias_uci` | dias de unidade intermediária, contados à parte da UTI |
+| `internacoes_com_uti` | internações que usaram UTI (342.929 no total, 9,2%) |
+| `valor_uti` | gasto de UTI, para separar do custo de enfermaria |
+
+Mesma regra de ouro: use `SUM(dias_uti) / SUM(leito_dias_uti_sus)`.
+
+#### Três ressalvas que precisam acompanhar a métrica
+
+1. **UTI não sai de `especialidade_leito`.** O RS usa 13 dos 41 códigos do dicionário e
+   **nenhum** é de UTI. Derivar UTI da especialidade retornaria zero, não um subregistro.
+   O contador `quantidade_dias_uti_mes` é a única fonte.
+2. **`complementar` não é sinônimo de UTI.** Dos 2.404 leitos `complementar` de 2023, só
+   **1.839** são UTI/UCO; os outros 565 são cuidados intermediários e isolamento. Rotular
+   a categoria como "UTI" superestima a capacidade intensiva em cerca de um terço — o
+   denominador aqui usa só os 1.839.
+3. **Acima de 100% é real, e tem a mesma natureza da ressalva da seção "Ocupação acima de
+   100%"**: rotatividade dentro do mês e um registro de leitos que é uma foto mensal. Em
+   jun/2021, 131,9% significa demanda acima da capacidade cadastrada — o que é exatamente
+   o que se noticiou no RS naquele momento. Não corrigir, **legendar**.
+
+### 4.4. Ocupação por tipo de leito (enfermaria)
+
+Via o crosswalk `especialidade_leito` (SIH) → `tipo_leito` (CNES) em
+`src/transform/bed_type_crosswalk.py`. 2023:
+
+| tipo | leitos SUS | ocupação |
+|---|---|---|
+| complementar (UTI/UCO) | 1.839 | **78,6%** ← via contador de UTI |
+| cirúrgico | 4.028 | 75,7% |
+| clínico | 9.382 | 70,4% |
+| outras especialidades | 2.518 | 66,3% |
+| pediátrico | 1.984 | 54,8% |
+| obstétrico | 1.734 | 36,8% |
+| hospital dia | 331 | 18,2% |
+
+Duas ressalvas de leitura:
+
+- **`hospital dia` a 18,2% não está ocioso** — leitos-dia giram dentro do mesmo dia, então
+  um denominador em leito-*dia* é a unidade errada pra eles. Não comparar com os demais.
+- Os dias de UTI **não são descontados** da enfermaria de origem. Não podem ser: em 37.483
+  das 342.929 internações com UTI (11%), `quantidade_dias_uti_mes` é *maior* que a
+  permanência total, porque o contador é mensal e uma internação longa se parte em vários
+  AIH. Subtrair produziria dias negativos em ~1% das linhas. A taxa de enfermaria
+  superestima um pouco, e isso é declarado em vez de silenciosamente truncado.
 
 ### Ocupação acima de 100%
 

@@ -54,11 +54,25 @@ def main() -> None:
     extractors = build_extractors(session)
 
     total_bytes = 0
+    unestimated = []
     for extractor in extractors:
-        bytes_processed = extractor.estimate_bytes() or 0
+        bytes_processed = extractor.estimate_bytes()
+        if bytes_processed is None:
+            unestimated.append(extractor.output_filename)
+            print(f"{extractor.output_filename}: ESTIMATE UNAVAILABLE")
+            continue
         total_bytes += bytes_processed
         print(f"{extractor.output_filename}: {bytes_processed / 1e6:.2f} MB estimated")
-    print(f"Total estimated: {total_bytes / 1e6:.2f} MB")
+
+    print(f"\nTotal estimated: {total_bytes / 1e6:.2f} MB "
+          f"across {len(extractors) - len(unestimated)} of {len(extractors)} queries")
+    if unestimated:
+        # Do not let an unpriced query masquerade as a free one. BigQuery returns no
+        # dry-run estimate for Base dos Dados tables, so this total is a floor, not the
+        # bill — size the unpriced queries by hand from table metadata before running.
+        print(f"WARNING: {len(unestimated)} query/queries could not be priced by the "
+              f"dry run, so the total above is a FLOOR, not an estimate of the bill: "
+              f"{', '.join(unestimated)}")
 
     if not args.execute:
         print("\nDry run only — no queries executed. Pass --execute to run for real.")

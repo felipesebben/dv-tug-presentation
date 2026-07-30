@@ -29,8 +29,21 @@ class BigQuerySession:
             print(f"Connection failed: {exc}")
             return False
 
-    def estimate_bytes(self, query: str) -> int:
-        """Dry-runs a query to get bytes processed, without executing or billing it."""
+    def estimate_bytes(self, query: str) -> int | None:
+        """Dry-runs a query to get bytes processed, without executing or billing it.
+
+        Returns None when BigQuery declines to estimate. This is not an edge case for
+        this project: Base dos Dados' tables return None for every dry run, while
+        Google's own public datasets return a real figure through the same client, so
+        the limitation is in how BD shares its data, not in our setup. Callers must
+        handle None explicitly rather than coercing it to 0 — a dry run that silently
+        reports "0 MB" is worse than one that admits it doesn't know, because the whole
+        point of the dry run is to catch an expensive query before it runs.
+
+        When None comes back, size the query by hand from table metadata instead:
+        `client.get_table(ref)` gives num_rows and num_bytes (both free to read), and
+        bytes/row ÷ column count approximates the per-column cost.
+        """
         job_config = bigquery.QueryJobConfig(dry_run=True, use_query_cache=False)
         job = self._client.query(query, job_config=job_config)
         return job.total_bytes_processed

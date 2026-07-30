@@ -52,11 +52,20 @@ class OccupancyRefiner(BaseRefiner):
         SUS beds only (77% of the total). This is the correct denominator: the numerator
         is SIH-SUS patient-days, i.e. SUS admissions, so dividing by all beds measures SUS
         demand against capacity SUS patients cannot occupy. State-level rate moves from
-        43,3% (all beds) to 55,9% (SUS-only).
+        43,0% (all beds) to 55,8% (SUS-only).
 
     38 of 15.994 hospital-months report zero SUS beds. Both ``dias_permanencia_sus`` and
     ``leito_dias_sus`` are NULL on those rows so numerator and denominator drop out
     together — nulling only the denominator would inflate the rate.
+
+    ``leito_dias_uti_sus``
+        The same construction for intensive care: ICU/coronary SUS beds only, paired with
+        ``dias_uti``. Most hospitals have no ICU at all, so this denominator is NULL far
+        more often than the general one — which is correct, and is why the pairing matters.
+        A hospital with ICU patients recorded but no registered ICU bed would otherwise
+        divide by zero; a hospital with ICU beds and no ICU patients would otherwise pull
+        an aggregate rate down as if it were at 0% rather than being absent from the
+        question.
 
     ``taxa_ocupacao`` is kept unchanged so the V1 workbook keeps working against the same
     extract; V2 uses the ``_sus`` columns.
@@ -77,9 +86,14 @@ class OccupancyRefiner(BaseRefiner):
                 make_date(ano, mes, 1) AS ano_mes,
                 {dias_no_mes} AS dias_no_mes,
                 sigla_uf,
+                id_municipio,
                 nome_municipio,
                 nome_uf,
                 nome_regiao,
+                nome_regiao_saude,
+                nome_regiao_intermediaria,
+                nome_microrregiao,
+                centroide,
                 total_internacoes,
                 total_dias_permanencia,
                 leitos_total,
@@ -95,7 +109,19 @@ class OccupancyRefiner(BaseRefiner):
                 CASE WHEN leitos_sus > 0
                      THEN ROUND(
                          total_dias_permanencia * 1.0 / (leitos_sus * {dias_no_mes}), 4)
-                END AS taxa_ocupacao_sus
+                END AS taxa_ocupacao_sus,
+                -- Intensive care, same numerator/denominator discipline as above.
+                leitos_uti_sus,
+                internacoes_com_uti,
+                valor_uti,
+                CASE WHEN leitos_uti_sus > 0 THEN dias_uti END AS dias_uti,
+                dias_uci,
+                CASE WHEN leitos_uti_sus > 0
+                     THEN leitos_uti_sus * {dias_no_mes}
+                END AS leito_dias_uti_sus,
+                CASE WHEN leitos_uti_sus > 0
+                     THEN ROUND(dias_uti * 1.0 / (leitos_uti_sus * {dias_no_mes}), 4)
+                END AS taxa_ocupacao_uti
             FROM read_parquet('{occupancy_path}')
         """
 

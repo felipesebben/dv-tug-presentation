@@ -37,7 +37,11 @@ that `dashboard_v1_wireframe.html` is **only partly** fed by real data (header a
 real, fine fill synthetic), so the wireframe must not be used as a build target — this
 file is the source of truth, and where Tableau disagrees with the wireframe, Tableau is
 right. Sections 1–2 cover the 8 KPI tiles: the exact SQL, the grain it's
-computed at, and the trap it hides. Leads with the `107,9 leitos` tile — which is the
+computed at, and the trap it hides. Section 4.3 is the one to read first as of 29/07/2026: **ICU occupancy inverts the
+pandemic story.** 111,9% in 2021 and 131,9% in June 2021, while general occupancy *fell*
+to 53,2% — so a dashboard showing only the aggregate would have told a health secretary
+the network was under less pressure in 2021 than in 2019. Section 4.4 adds per-bed-type
+rates and the two reading caveats they need. Leads with the `107,9 leitos` tile — which is the
 **mean beds per hospital per month**, not RS's bed count (~28.775/month), a 267× gap —
 and covers the three occupancy-rate weightings (30,8% unweighted vs 43,1% weighted vs
 39,6% SUS-only denominator), the SUS-numerator/total-denominator bias that systematically
@@ -109,25 +113,79 @@ the whole talk: no amount of design catches it.
 Ends with a build order that puts the palette and workbook-level formatting *before* the
 first sheet, which is what stops V1's inconsistency from reaccumulating.
 
+### `dashboard_v2_wireframe_template.html`
+**Edit this one.** Source for `dashboard_v2_wireframe.html`, which is *generated* by
+`scripts/build_wireframe_v2_data.py` injecting a ~230 KB data blob into the
+`/*__DATA__*/` placeholder. The split exists because the wireframe has to be a single
+self-contained file (it publishes as an artifact under a CSP that blocks every external
+request, so data cannot be fetched at runtime) while nobody should be hand-pasting 230 KB
+of JSON. Regenerate rather than patch: a stale figure then shows up as a diff.
+
+Verified by `scripts/test_wireframe.js`, which runs the page's script against a stubbed
+DOM and renders all four tabs under all seven period selections, failing on thrown errors,
+`NaN`, `undefined`, `Infinity` or a leaked `null`, and asserting that the headline figures
+(ICU 111,9% in 2021, network 53,2%, 60,0% in 2023, 55,8% across the period) actually come
+out of the code rather than out of prose.
+
 ### `dashboard_v2_wireframe.html`
+**Generated — do not edit.** See the template entry above.
+
 Mid/high-fidelity **visual mockup** of V2 and the counterpart to
 `dashboard_v1_wireframe.html` — the two are meant to be shown side by side. Four
 navigable tabs rendered inside a true 1200×800 frame, so "fits on one screen" is visible
-rather than claimed. Unlike the V1 wireframe, **every number and series is real**, read
-from `data/refined/` — no synthetic fill.
+rather than claimed. Every number and series is real, read from `data/refined/` — no
+synthetic fill.
 
-The KPI tiles are the part worth studying: each carries a year-over-year delta *and* a
-60-month sparkline, with the context chosen per indicator rather than repeated for
-symmetry. Leitos SUS is the case that justifies the pattern — its +0,3% delta reads as
-"nothing happened" until the sparkline shows the 2021 peak and rollback.
+**The Panorama hero is ICU versus network occupancy**, and it is the page's argument: from
+2019 to 2021 the network rate *fell* 5,2 p.p. while ICU *rose* 35,8 p.p., peaking at 131,9%
+in June 2021 against 57,0% for the network. A dashboard showing only the aggregate would
+have reported less pressure in the worst health year of the century. A useful side effect
+is that the hero no longer needs the indexed-axis exception: both series are rates in the
+same unit, so the axis starts at zero and the 100% line becomes a real threshold. The
+capacity-versus-demand scissors keeps the 100 baseline, and is now the only chart that
+needs it.
 
-Two deliberate departures, both annotated in the page itself: the dashboard canvas is
-**fixed light** and does not follow the viewer's theme (its palette was contrast-validated
-against a white card, so theming it would invalidate the measurement), and the indexed
-hero chart uses a **baseline of 100 rather than 0**, since in an index 100 *is* the zero.
-The zero-baseline rule still holds for every rate series and bar.
+**The period filter genuinely works.** It drives all four tabs, and the data blob ships raw
+numerators and denominators rather than rates so the page recomputes
+`SUM(num) / SUM(den)` — the same rule the Tableau build follows. Shipping rates would have
+forced the mock to average averages, which is the exact defect the V2 occupancy rebuild
+exists to fix, and the filter would have produced wrong numbers while looking like it
+worked. Two regional filters exist: Região intermediária (8) visible, Região de saúde (30)
+behind "mais filtros" for Hick's Law. Both are shown but not wired, and the page says so.
 
-Published as a Claude artifact; the file here is the source of truth for it.
+**No chart subtitle asserts a conclusion.** Titles describe and carry the selected period;
+min/max annotations are computed so they follow the filter. The editorial claims that used
+to live in subtitles are destined for the orientation layer instead. Colour valence is
+enforced: the three places where orange marked merely "most recent" or "the median" are now
+blue or grey.
+
+The canvas is **fixed light** deliberately — its palette was contrast-validated against a
+white card, so theming it would invalidate the measurement.
+
+Published as a Claude artifact; `dashboard_v2_wireframe_template.html` plus the generator is
+the source of truth for it.
+
+### `dashboard_v2_orientation.md`
+Content-of-record for the V2's orientation layer — guided tour, "how to use it", and
+glossary — specified together because they overlap heavily, so each sentence lives in one
+place and is referenced from the others. Closes the last open row of `uxers_guidance.md`
+(Nielsen, help and documentation: *"dashboard sem glossário e sem botão de suporte"*).
+
+It has a second job worth understanding before reading it: the 29/07/2026 revision removed
+every editorial claim from the chart subtitles, because a subtitle asserting a conclusion is
+contradicted by the first filter a user applies. Those conclusions did not stop being true —
+they moved here. Without this layer the V2 trades a title that lies for a dashboard that
+explains nothing.
+
+Section 1 fixes the procedence rule: the glossary is the **user-facing subset** of
+`metrics_dictionary.md`, which wins on any conflict, and nothing may be defined here that
+isn't defined there. Section 3 is the 6-step tour, including why the first-run prompt is not
+a modal. Section 4 carries the hardest thing the layer has to teach — the indexed chart's
+100 baseline, which contradicts the design system's own zero-baseline rule for reasons that
+have to be stated rather than assumed. Section 5 is the 14 glossary entries, each with the
+caveat that changes the reading. Section 6 maps each piece to its Tableau equivalent, and
+recommends a "Comece aqui" tab over a chain of show/hide containers for the tour, because the
+chain is the kind of construction nobody can maintain afterwards.
 
 ### `dashboard_v2_design_system.md`
 The token set the V2 is built from — colours, type scale, spacing grid, chart rules —
@@ -137,11 +195,21 @@ exactly 3 greys with measured contrast, an 8px spacing grid where the 8-vs-24
 intra/inter-group gap *is* the proximity law, a 9pt type floor, and a banned-forms
 list (pie, 3D, bubble, dual axis).
 
-Contains one **open decision**: the guidance's recommended green+orange highlight pair
-was tested with a CVD simulator and failed (ΔE 3,2 under protanopia, against a target
-of 8) — both hues sit on the red-green confusion axis. The document adopts blue+orange
-(ΔE 24,7) provisionally and flags that this contradicts a guidance document that
-normally wins on conflicts. Palettes ship as `tableau/Preferences.tps`.
+The green+orange highlight pair the guidance recommended was tested with a CVD simulator
+and failed (ΔE 3,2 under protanopia, against a target of 8) — both hues sit on the
+red-green confusion axis. Blue+orange (ΔE 24,7) replaced it and was **ratified 29/07/2026**,
+closing the document's last open decision.
+
+Two additions from that ratification. First, the colours now carry fixed **valence**, not
+just visual role: grey is neutral, blue means healthy, orange means *needs attention* —
+which implies a prohibition that is easy to violate by habit, namely that orange must never
+mark merely "the most recent" or "the median". Second, the type family is **Roboto**, with
+the warning that matters more than the choice: Tableau embeds no fonts and Roboto ships with
+neither Windows nor Tableau, so an uninstalled font is substituted silently on whatever
+machine renders the view. Section 6 also documents how the choropleth is wired — an IBGE
+spatial file joined on the 7-digit code rather than Tableau's name-based geocoding, because
+38 RS municipality names are reused in other states. Palettes ship as
+`tableau/Preferences.tps`.
 
 ### `dashboard_v1_spec.html`
 Styled, browsable companion to `dashboard_v1_spec.md` — same content, condensed
@@ -175,10 +243,41 @@ typeface; **I**'s 10 filters are scattered across **5 differently-styled blocks*
 page rather than stacked in a footer, so each block sits far from the chart it controls.
 Region A embeds inline copies of the three fictional SVG marks in `assets/logos/`.
 
+## Fixed in the 29/07/2026 revision
+
+Recorded because these are the defects the rebuild removed, and three of them are worth
+telling the audience about:
+
+- **KPI tiles were hardcoded to 2023** while the filter bar read `2019–2023`. Both figures
+  were right (60,0% and 55,8%) and together they were misleading, because the tile could not
+  say which one you were looking at. The tile now prints its own period.
+- **"Os 15 municípios com mais leitos SUS" was wrong three ways.** The bed figure was
+  `AVG(leitos_sus)`, a mean per hospital-month, so Porto Alegre read **281** instead of
+  **4.748,6**; the ranking was therefore wrong (Passo Fundo, Caxias do Sul and Novo Hamburgo
+  were missing, São Jerônimo and Uruguaiana did not belong); and the bars encoded occupancy
+  while the title said beds. Worth a slide: this is the same trap section 1 of
+  `metrics_dictionary.md` opens with, committed one tab away from where it is documented.
+- **The map was a schematic grid in a wide strip.** RS's aspect ratio is 1,03 — square — so
+  the strip either wasted ~800px or squashed the state. Now real IBGE geometry in a square
+  container.
+- **`55,9%` was a rounding error** repeated across six files. The true full-period rate is
+  55,8498%, which is 55,8% at the one decimal the rest of the docs use.
+- Subtitles no longer assert conclusions, and orange no longer marks "most recent".
+
 ## Not yet created
 
-- Nothing pending. The next artefact is the workbook itself,
-  `tableau/dashboard_v2.twb`, which lives in `tableau/`, not here.
+- The workbook itself, `tableau/dashboard_v2.twb`, which lives in `tableau/`, not here.
+  Everything it needs now exists: the refined tables with ICU columns, the design system
+  with a ratified palette and type family, the build spec, the wireframe, and
+  `dashboard_v2_orientation.md` section 6 for how the help layer maps onto Tableau objects.
+  Two prerequisites are on Felipe rather than in the repo: install Roboto, and copy
+  `tableau/Preferences.tps` into the Tableau repository folder.
+
+**Every row of `uxers_guidance.md` is now addressed.** The last one to close was Nielsen's
+help/documentation row, via `dashboard_v2_orientation.md`; the error-prevention row's
+"breadcrumb to undo a filter" closed in the same pass. One row was already marked open by
+the UX pair themselves (Nielsen — flexibility and efficiency of use, where they left a "?"
+on both sides), so it has nothing to satisfy.
 ## Deliberately not created
 
 - `assets/v1/` (i.e. `docs/assets/v1/`) — screenshots, load-time measurements and a

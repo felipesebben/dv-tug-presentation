@@ -95,6 +95,9 @@ Three stages, each reading the previous stage's output from `data/`
 (`raw/` → `transformed/` → `refined/`, all gitignored):
 
 ```bash
+# 0. Geometry: IBGE municipal boundaries -> data/raw/municipios_rs.geojson (free, public API)
+poetry run python scripts/fetch_municipal_geometry.py
+
 # 1. Extract: BigQuery -> data/raw/*.parquet
 poetry run python scripts/run_extraction.py            # dry run, prints byte estimates only
 poetry run python scripts/run_extraction.py --execute   # runs for real (touches billing)
@@ -106,7 +109,17 @@ poetry run python scripts/run_transform.py              # local only, no cost
 poetry run python scripts/run_refine.py                 # local only, no cost
 ```
 
-Only step 1 touches BigQuery/billing; steps 2 and 3 run entirely locally via DuckDB.
+Only step 1 touches BigQuery/billing; steps 0, 2 and 3 run entirely locally or against a
+free public API.
+
+> **The dry run cannot price the two fact-table queries.** BigQuery returns no byte
+> estimate for Base dos Dados tables — verified: Google's own public datasets return a
+> figure through the same client, every BD table returns nothing. Step 1's dry run now says
+> `ESTIMATE UNAVAILABLE` for those queries rather than silently reporting `0.00 MB`. Size
+> them by hand from table metadata instead (`client.get_table()` gives rows and bytes, both
+> free to read): `aihs_reduzidas` is 211,6M rows / 128,8 GB across 109 columns ≈ 609 bytes
+> per row, so the RS/2019–2023 slice at 22 columns scans roughly 7 GB — about 4 cents at
+> $6,25/TiB, and $0 against the 1 TiB monthly free allowance.
 
 ### Extract (`src/extract/`)
 
@@ -114,13 +127,22 @@ Only step 1 touches BigQuery/billing; steps 2 and 3 run entirely locally via Duc
 - `AihsReduzidasExtractor`, `LeitoExtractor` — the two fact tables, scoped to RS/2019-2023
 - `DictionaryExtractor` — code→description lookups (`dicionario` tables)
 - `DirectoryExtractor` — `municipio`/`uf` dimension tables
+- `IbgeMunicipalGeometry` — municipal boundary polygons from IBGE's public API (not
+  BigQuery, so free); validates that the polygon set exactly matches the municipality
+  directory before saving, because a choropleth that silently drops municipalities looks
+  finished
 
 ### Transform (`src/transform/`)
 
 - `DuckDBSession` — local query engine over the raw parquet files
 - `DictionaryResolver` — generates the repeated code→description join SQL
 - `AihsEnricher`, `LeitoEnricher` — record-level detail + dictionary descriptions + geography
-- `OccupancyCalculator` — hospital/month occupancy rate aggregate
+- `OccupancyCalculator` — hospital/month occupancy aggregate, general and ICU
+- `bed_type_crosswalk` — maps SIH's 41 `especialidade_leito` codes onto CNES's 7
+  `tipo_leito` values, so a per-bed-type rate can put bed-days and registered beds on one
+  vocabulary. Documents why ICU is *not* derivable this way (RS uses no ICU specialty
+  codes at all) and why ICU days cannot be netted out of ward days (the counter is
+  monthly and exceeds total stay days on 11% of ICU admissions)
 
 ### Refine (`src/refine/`)
 
@@ -157,6 +179,20 @@ Short version:
 - `docs/dashboard_v1_spec.html` / `docs/dashboard_v1_wireframe.html` — styled,
   browsable companions to the spec: the first is the write-up, the second is a mid/high-fidelity
   navigable mockup with a toggleable per-region diagnostic
+- `docs/dashboard_v1_as_built.md` — what the workbook actually contains, since the build
+  diverged from the spec in five places. Read it before opening the workbook
+- `docs/metrics_dictionary.md` — definition-of-record for every number: exact SQL, grain,
+  and the trap each one hides. V1 deliberately ships no data dictionary; this is what it's
+  missing
+- `docs/dashboard_v2_design_system.md` — the tokens V2 is built from, so consistency is
+  decided once instead of judged per sheet. Includes the CVD measurement that overruled the
+  guidance's recommended colour pair
+- `docs/dashboard_v2_spec.md` — build spec for the corrected version, with the V1-sin →
+  V2-fix map that doubles as the workshop script
+- `docs/dashboard_v2_wireframe.html` — the "depois" mockup: four tabs at 1200×800, a working
+  period filter, real geometry, all figures from `data/refined/`
+- `docs/dashboard_v2_orientation.md` — the tour, "how to use it" and glossary, and the home
+  of the conclusions removed from the chart subtitles
 
 Principles come from *Learn Design Driven Data Visualization* (Aurélien Vautier /
 Dataviz Clarity, CC BY-NC-ND 4.0) — the PDF lives in the gitignored `references/`.
@@ -181,13 +217,61 @@ Dataviz Clarity, CC BY-NC-ND 4.0) — the PDF lives in the gitignored `reference
   automatic Y axis on the time series, dual-axis line chart, one known legend/pie filter
   mismatch
 - [x] V2 foundations — occupancy rate rebuilt as SUS-only and weighted (state rate moves
-  30,8% → 55,9%), with numerator and denominator exported separately so it stays correct
+  30,8% → 55,8%), with numerator and denominator exported separately so it stays correct
   at every drill level; design system + validated Tableau palettes
   (`docs/dashboard_v2_design_system.md`, `tableau/Preferences.tps`)
 - [x] V2 build spec (`docs/dashboard_v2_spec.md`) — persona, four-tab architecture at
   1200×800, sheet-by-sheet spec with verified anchor numbers, and the V1-sin → V2-fix
   map that doubles as the workshop script
-- [ ] Build V2 in Tableau (`tableau/dashboard_v2.twb`)
+- [x] V2 wireframe, rebuilt around the ICU inversion (`docs/dashboard_v2_wireframe.html`,
+  generated from `..._template.html`) — four navigable tabs at 1200×800, a **working period
+  filter** fed raw numerators and denominators so it recomputes `SUM(num)/SUM(den)` rather
+  than averaging averages, real IBGE geometry in a square container, and no chart subtitle
+  that asserts a conclusion a filter could falsify. Verified by `scripts/test_wireframe.js`
+  (63 checks: every tab under every period selection, plus the orientation layer)
+- [x] **ICU occupancy, and it inverts the pandemic story** — re-extracted `aihs_reduzidas`
+  with 6 more columns (`especialidade_leito`, `tipo_uti`, `tipo_uci`,
+  `quantidade_dias_uti_mes`, `quantidade_dias_unidade_intermediaria`, `valor_uti`), giving
+  a real ICU rate: **111,9% in 2021 and 131,9% in June 2021, while general occupancy
+  *fell* to 53,2%**. A dashboard showing only the aggregate would have reported less
+  pressure in 2021 than in 2019. Also adds per-bed-type occupancy via a documented
+  SIH→CNES crosswalk (`src/transform/bed_type_crosswalk.py`)
+- [x] Regional geography and municipal boundaries — `nome_regiao_saude` (30 in RS),
+  `nome_regiao_intermediaria` (8), `nome_microrregiao` (35) and `centroide` now flow
+  through the pipeline from the BD directory (no BigQuery needed), and
+  `scripts/fetch_municipal_geometry.py` pulls IBGE's 497 municipal polygons for a
+  code-joined choropleth. Verified: polygon codes exactly equal the BD directory set
+- [x] Palette semantics ratified — blue+orange confirmed, with orange fixed to mean
+  "needs attention" and never "most recent" or "median"; type family set to Roboto with a
+  documented Arial fallback (`docs/dashboard_v2_design_system.md`, `tableau/Preferences.tps`)
+- [x] Dry-run cost reporting no longer lies — `estimate_bytes()` returns `None` for every
+  Base dos Dados table (Google's own public datasets return a real figure through the same
+  client), and `run_extraction.py` was coercing that to `0`, so dry-run mode printed
+  `0.00 MB estimated` for every query. It now reports `ESTIMATE UNAVAILABLE` and warns
+  that the total is a floor, not the bill
+- [x] **V2 orientation layer** (`docs/dashboard_v2_orientation.md`, implemented in the
+  wireframe) — closes the last open row of `docs/uxers_guidance.md`, whose Nielsen row reads
+  *"dashboard sem glossário e sem botão de suporte → dashboard com glossário e botão de
+  suporte"*. Three pieces, specced together because they overlap:
+  - **Guided tour** — 6 steps that outline the *real* element they describe and jump to the
+    tab holding it. The first-run prompt is deliberately not a modal: a welcome modal is the
+    pattern everyone dismisses unread, and teaching a user to dismiss help unread is worse
+    than shipping none
+  - **How to use it** — what each tab answers, how the period filter scopes, why a two-year
+    rate is not the average of two annual rates, and the indexed chart's 100 baseline, which
+    contradicts the design system's zero-baseline rule for reasons now stated rather than
+    assumed
+  - **Glossary** — 14 searchable entries, each with the caveat that changes the reading,
+    derived from `docs/metrics_dictionary.md`, which stays the definition-of-record and wins
+    on conflict. Nothing is defined here that isn't defined there
+  - Also closes the error-prevention row's "breadcrumb to undo a filter": a reset that
+    appears only while something is filtered
+- [ ] **Next: build V2 in Tableau** (`tableau/dashboard_v2.twb`). Two prerequisites are
+  outside the repo: install Roboto (Tableau embeds no fonts, and substitution is silent),
+  and copy `tableau/Preferences.tps` into the Tableau repository folder. See
+  `docs/dashboard_v2_orientation.md` section 6 for how the help layer maps onto Tableau
+  objects — the tour has no native equivalent, and a "Comece aqui" tab is recommended over a
+  chain of show/hide containers
 
 *Capturing the "before" artefacts (screenshots, timings, usability recording) was dropped
 from this repo's scope — the UX co-presenters own the presentation materials.*
