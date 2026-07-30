@@ -256,7 +256,7 @@ Roteiro do workshop. Colunas 1-2 vêm do placar da §7 de `dashboard_v1_spec.md`
 | 35 | Dispersão espremida 1200×180 | Dispersão cortada |
 | 36-38 | Pizzas | Cortadas — nenhuma pizza na V2 |
 | 79 | Mapa divergente verde-amarelo-vermelho | Rampa sequencial de um hue |
-| — | Denominador errado (só no dicionário) | Taxa SUS ponderada, 30,8% → 55,9% |
+| — | Denominador errado (só no dicionário) | Taxa SUS ponderada, 30,8% → 55,8% |
 
 O item **32 (eixo truncado) não entra** — não chegou a ser construído na V1. Ver
 `dashboard_v1_as_built.md` §3.
