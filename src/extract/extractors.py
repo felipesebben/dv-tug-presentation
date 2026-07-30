@@ -24,7 +24,9 @@ class BigQueryExtractor(ABC):
     def build_query(self) -> str:
         """Returns the SQL query this extractor runs."""
 
-    def estimate_bytes(self) -> int:
+    def estimate_bytes(self) -> int | None:
+        """Bytes this extractor's query would scan, or None if BigQuery won't estimate
+        it (which is the norm for Base dos Dados tables — see BigQuerySession)."""
         return self.session.estimate_bytes(self.build_query())
 
     def extract(self) -> pd.DataFrame:
@@ -74,6 +76,18 @@ class AihsReduzidasExtractor(BigQueryExtractor):
         "raca_cor_paciente",
         "indicador_obito",
         "valor_aih",
+        # Bed-type attribution. Without these, bed-days are a single undifferentiated
+        # total and the occupancy rate can only be computed for the network as a whole:
+        # there is no way to ask which *kind* of bed is under pressure.
+        "especialidade_leito",  # bed specialty the admission occupied (SIH's own code set)
+        "tipo_uti",  # which kind of ICU, when the stay used one
+        "tipo_uci",  # which kind of intermediate-care unit
+        # ICU and intermediate-care days are counted separately from
+        # quantidade_dias_permanencia rather than being a subset of it by specialty —
+        # ICU is not a value of especialidade_leito, so these are the only ICU numerator.
+        "quantidade_dias_uti_mes",
+        "quantidade_dias_unidade_intermediaria",
+        "valor_uti",  # ICU spend, so the cost tab can separate it from ward cost
     ]
 
     def __init__(
