@@ -179,6 +179,20 @@ Short version:
 - `docs/dashboard_v1_spec.html` / `docs/dashboard_v1_wireframe.html` — styled,
   browsable companions to the spec: the first is the write-up, the second is a mid/high-fidelity
   navigable mockup with a toggleable per-region diagnostic
+- `docs/dashboard_v1_as_built.md` — what the workbook actually contains, since the build
+  diverged from the spec in five places. Read it before opening the workbook
+- `docs/metrics_dictionary.md` — definition-of-record for every number: exact SQL, grain,
+  and the trap each one hides. V1 deliberately ships no data dictionary; this is what it's
+  missing
+- `docs/dashboard_v2_design_system.md` — the tokens V2 is built from, so consistency is
+  decided once instead of judged per sheet. Includes the CVD measurement that overruled the
+  guidance's recommended colour pair
+- `docs/dashboard_v2_spec.md` — build spec for the corrected version, with the V1-sin →
+  V2-fix map that doubles as the workshop script
+- `docs/dashboard_v2_wireframe.html` — the "depois" mockup: four tabs at 1200×800, a working
+  period filter, real geometry, all figures from `data/refined/`
+- `docs/dashboard_v2_orientation.md` — the tour, "how to use it" and glossary, and the home
+  of the conclusions removed from the chart subtitles
 
 Principles come from *Learn Design Driven Data Visualization* (Aurélien Vautier /
 Dataviz Clarity, CC BY-NC-ND 4.0) — the PDF lives in the gitignored `references/`.
@@ -209,8 +223,12 @@ Dataviz Clarity, CC BY-NC-ND 4.0) — the PDF lives in the gitignored `reference
 - [x] V2 build spec (`docs/dashboard_v2_spec.md`) — persona, four-tab architecture at
   1200×800, sheet-by-sheet spec with verified anchor numbers, and the V1-sin → V2-fix
   map that doubles as the workshop script
-- [x] V2 wireframe (`docs/dashboard_v2_wireframe.html`) — four navigable tabs at 1200×800,
-  KPI tiles with sparklines and YoY context, built entirely from real refined data
+- [x] V2 wireframe, rebuilt around the ICU inversion (`docs/dashboard_v2_wireframe.html`,
+  generated from `..._template.html`) — four navigable tabs at 1200×800, a **working period
+  filter** fed raw numerators and denominators so it recomputes `SUM(num)/SUM(den)` rather
+  than averaging averages, real IBGE geometry in a square container, and no chart subtitle
+  that asserts a conclusion a filter could falsify. Verified by `scripts/test_wireframe.js`
+  (63 checks: every tab under every period selection, plus the orientation layer)
 - [x] **ICU occupancy, and it inverts the pandemic story** — re-extracted `aihs_reduzidas`
   with 6 more columns (`especialidade_leito`, `tipo_uti`, `tipo_uci`,
   `quantidade_dias_uti_mes`, `quantidade_dias_unidade_intermediaria`, `valor_uti`), giving
@@ -231,18 +249,29 @@ Dataviz Clarity, CC BY-NC-ND 4.0) — the PDF lives in the gitignored `reference
   client), and `run_extraction.py` was coercing that to `0`, so dry-run mode printed
   `0.00 MB estimated` for every query. It now reports `ESTIMATE UNAVAILABLE` and warns
   that the total is a floor, not the bill
-- [ ] **Next: V2 orientation layer** — the "how do I use this" pass, and the last open
-  requirement from `docs/uxers_guidance.md`, whose Nielsen row reads *"dashboard sem
-  glossário e sem botão de suporte → dashboard com glossário e botão de suporte"*. Three
-  pieces, to be specced together:
-  - **Guided tour** — first-run walkthrough of the four tabs, so the reading order is
-    taught rather than guessed
-  - **How to use it** — what each tab answers, how the filters scope, how to read the
-    indexed hero chart (the 100-baseline needs explaining, not just annotating)
-  - **Glossary** — user-facing definitions of every metric on screen. Derive it from
-    `docs/metrics_dictionary.md`, which is already the definition-of-record; the glossary
-    is its public subset, not a second source of truth
-- [ ] Build V2 in Tableau (`tableau/dashboard_v2.twb`)
+- [x] **V2 orientation layer** (`docs/dashboard_v2_orientation.md`, implemented in the
+  wireframe) — closes the last open row of `docs/uxers_guidance.md`, whose Nielsen row reads
+  *"dashboard sem glossário e sem botão de suporte → dashboard com glossário e botão de
+  suporte"*. Three pieces, specced together because they overlap:
+  - **Guided tour** — 6 steps that outline the *real* element they describe and jump to the
+    tab holding it. The first-run prompt is deliberately not a modal: a welcome modal is the
+    pattern everyone dismisses unread, and teaching a user to dismiss help unread is worse
+    than shipping none
+  - **How to use it** — what each tab answers, how the period filter scopes, why a two-year
+    rate is not the average of two annual rates, and the indexed chart's 100 baseline, which
+    contradicts the design system's zero-baseline rule for reasons now stated rather than
+    assumed
+  - **Glossary** — 14 searchable entries, each with the caveat that changes the reading,
+    derived from `docs/metrics_dictionary.md`, which stays the definition-of-record and wins
+    on conflict. Nothing is defined here that isn't defined there
+  - Also closes the error-prevention row's "breadcrumb to undo a filter": a reset that
+    appears only while something is filtered
+- [ ] **Next: build V2 in Tableau** (`tableau/dashboard_v2.twb`). Two prerequisites are
+  outside the repo: install Roboto (Tableau embeds no fonts, and substitution is silent),
+  and copy `tableau/Preferences.tps` into the Tableau repository folder. See
+  `docs/dashboard_v2_orientation.md` section 6 for how the help layer maps onto Tableau
+  objects — the tour has no native equivalent, and a "Comece aqui" tab is recommended over a
+  chain of show/hide containers
 
 *Capturing the "before" artefacts (screenshots, timings, usability recording) was dropped
 from this repo's scope — the UX co-presenters own the presentation materials.*

@@ -165,6 +165,28 @@ white card, so theming it would invalidate the measurement.
 Published as a Claude artifact; `dashboard_v2_wireframe_template.html` plus the generator is
 the source of truth for it.
 
+### `dashboard_v2_orientation.md`
+Content-of-record for the V2's orientation layer — guided tour, "how to use it", and
+glossary — specified together because they overlap heavily, so each sentence lives in one
+place and is referenced from the others. Closes the last open row of `uxers_guidance.md`
+(Nielsen, help and documentation: *"dashboard sem glossário e sem botão de suporte"*).
+
+It has a second job worth understanding before reading it: the 29/07/2026 revision removed
+every editorial claim from the chart subtitles, because a subtitle asserting a conclusion is
+contradicted by the first filter a user applies. Those conclusions did not stop being true —
+they moved here. Without this layer the V2 trades a title that lies for a dashboard that
+explains nothing.
+
+Section 1 fixes the procedence rule: the glossary is the **user-facing subset** of
+`metrics_dictionary.md`, which wins on any conflict, and nothing may be defined here that
+isn't defined there. Section 3 is the 6-step tour, including why the first-run prompt is not
+a modal. Section 4 carries the hardest thing the layer has to teach — the indexed chart's
+100 baseline, which contradicts the design system's own zero-baseline rule for reasons that
+have to be stated rather than assumed. Section 5 is the 14 glossary entries, each with the
+caveat that changes the reading. Section 6 maps each piece to its Tableau equivalent, and
+recommends a "Comece aqui" tab over a chain of show/hide containers for the tour, because the
+chain is the kind of construction nobody can maintain afterwards.
+
 ### `dashboard_v2_design_system.md`
 The token set the V2 is built from — colours, type scale, spacing grid, chart rules —
 so that consistency is a decision made once rather than a judgement repeated per
@@ -244,12 +266,18 @@ telling the audience about:
 
 ## Not yet created
 
-- The orientation layer (guided tour, "how to use it", glossary) — the last open row of
-  `uxers_guidance.md`, and now also the home the wireframe's removed editorial claims are
-  waiting for. The wireframe currently states its argument in the notes *below* the canvas;
-  the orientation layer is what puts it back inside the dashboard, where a real user would
-  need it.
 - The workbook itself, `tableau/dashboard_v2.twb`, which lives in `tableau/`, not here.
+  Everything it needs now exists: the refined tables with ICU columns, the design system
+  with a ratified palette and type family, the build spec, the wireframe, and
+  `dashboard_v2_orientation.md` section 6 for how the help layer maps onto Tableau objects.
+  Two prerequisites are on Felipe rather than in the repo: install Roboto, and copy
+  `tableau/Preferences.tps` into the Tableau repository folder.
+
+**Every row of `uxers_guidance.md` is now addressed.** The last one to close was Nielsen's
+help/documentation row, via `dashboard_v2_orientation.md`; the error-prevention row's
+"breadcrumb to undo a filter" closed in the same pass. One row was already marked open by
+the UX pair themselves (Nielsen — flexibility and efficiency of use, where they left a "?"
+on both sides), so it has nothing to satisfy.
 ## Deliberately not created
 
 - `assets/v1/` (i.e. `docs/assets/v1/`) — screenshots, load-time measurements and a

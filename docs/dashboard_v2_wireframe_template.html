@@ -70,6 +70,7 @@
     --plano:#f4f4f2; --card:#ffffff; --tinta:#111110;
     --serie:#2a78d6; --acento:#eb6834; --marca:#8c8c89;
     --grade:#e4e4e1; --txt2:#5c5c5a;
+    position:relative;
     width:1200px; height:800px; flex:none;
     background:var(--plano); color:var(--tinta);
     /* Roboto is the workbook family; it is not installed everywhere, and the fallback
@@ -85,7 +86,9 @@
             display:flex; justify-content:space-between; align-items:flex-start; }
   .cvtitle { font-size:17px; font-weight:600; margin:0 0 2px; letter-spacing:-.005em; }
   .cvsrc { font-size:14px; color:var(--txt2); margin:0; }
-  .cvactions { display:flex; gap:6px; align-items:center; }
+  /* Help sits above the tabs, right-aligned: always visible, always the same place, and
+     never in a footer nobody scrolls to. */
+  .cvactions { display:flex; flex-direction:column; align-items:flex-end; gap:9px; }
   .cvtabs { display:flex; gap:4px; align-self:flex-end; }
   .cvtab { font:inherit; font-size:14px; padding:8px 16px; border:0; cursor:pointer;
            background:transparent; color:var(--txt2); border-bottom:3px solid transparent;
@@ -171,6 +174,86 @@
 
   footer { border-top:1px solid var(--chrome-line); padding-top:22px;
            font-size:14px; color:var(--chrome-faint); }
+
+  /* ---------- orientation layer ----------
+     Closes the last open row of uxers_guidance.md (Nielsen, help + documentation), and
+     houses the editorial claims that were removed from the chart subtitles. */
+  .help { display:flex; gap:4px; align-items:center; }
+  .helpbtn { font:inherit; font-size:14px; padding:5px 11px; border:1px solid #d6d6d3;
+             border-radius:3px; background:var(--card); color:var(--tinta); cursor:pointer;
+             display:inline-flex; gap:5px; align-items:center; }
+  .helpbtn:hover { background:var(--plano); }
+  .helpbtn.on { border-color:var(--serie); color:var(--serie); font-weight:600; }
+  .helpbtn:focus-visible { outline:2px solid var(--serie); outline-offset:1px; }
+
+  /* First-run invitation. Deliberately NOT a modal: a welcome modal is the pattern
+     everyone dismisses unread, and teaching a user to dismiss help unread is worse than
+     shipping no help at all. */
+  .firstrun { position:absolute; right:16px; top:88px; z-index:40; max-width:296px;
+              background:var(--tinta); color:#fff; border-radius:4px; padding:14px 16px;
+              box-shadow:0 10px 30px rgba(0,0,0,.28); font-size:14px; line-height:1.5; }
+  .firstrun b { font-weight:600; }
+  .firstrun .acts { display:flex; gap:8px; margin-top:10px; }
+  .firstrun button { font:inherit; font-size:14px; border-radius:3px; cursor:pointer;
+                     padding:5px 11px; border:0; }
+  .firstrun .go { background:var(--acento); color:#fff; font-weight:600; }
+  .firstrun .no { background:transparent; color:#cfcfcb; border:1px solid #4a4a48; }
+
+  /* Sheet for "como usar" and the glossary. Sits inside the canvas so the 1200x800
+     constraint still holds — help that needs its own window is not help. */
+  .veil { position:absolute; inset:0; z-index:50; background:rgba(17,17,16,.34);
+          display:flex; align-items:stretch; justify-content:flex-end; }
+  .sheet { width:668px; background:var(--card); display:flex; flex-direction:column;
+           box-shadow:-12px 0 40px rgba(0,0,0,.2); }
+  .sheethead { padding:16px 24px 12px; border-bottom:1px solid var(--grade);
+               display:flex; justify-content:space-between; align-items:flex-start; gap:16px; }
+  .sheethead h3 { margin:0; font-size:17px; font-weight:600; }
+  .sheethead p { margin:2px 0 0; font-size:14px; color:var(--txt2); }
+  .sheetclose { font:inherit; font-size:20px; line-height:1; border:0; background:none;
+                cursor:pointer; color:var(--txt2); padding:2px 6px; border-radius:3px; }
+  .sheetclose:hover { background:var(--plano); color:var(--tinta); }
+  .sheetbody { padding:16px 24px 22px; overflow-y:auto; font-size:14px; line-height:1.55; }
+  .sheetbody h4 { margin:20px 0 8px; font-size:15px; font-weight:600; }
+  .sheetbody h4:first-child { margin-top:0; }
+  .sheetbody p { margin:0 0 10px; color:var(--txt2); }
+  .sheetbody p b, .sheetbody li b { color:var(--tinta); font-weight:600; }
+  .sheetbody ul { margin:0 0 10px; padding-left:20px; color:var(--txt2); }
+  .sheetbody li { margin-bottom:5px; }
+  .sheetbody table { font-size:14px; }
+  .sheetbody th { border-bottom:1px solid var(--grade); color:var(--txt2);
+                  font-size:13px; letter-spacing:.04em; text-transform:uppercase;
+                  text-align:left; padding:6px 12px 6px 0; font-weight:600; }
+  .sheetbody td { border-bottom:1px solid var(--grade); padding:8px 12px 8px 0;
+                  vertical-align:top; color:var(--txt2); }
+  .sheetbody td:first-child { color:var(--tinta); font-weight:600; white-space:nowrap; }
+  .gsearch { font:inherit; font-size:14px; width:100%; padding:7px 10px; margin-bottom:14px;
+             border:1px solid #d6d6d3; border-radius:3px; }
+  .gsearch:focus-visible { outline:2px solid var(--serie); outline-offset:-1px; }
+  .nores { color:var(--txt2); font-style:italic; }
+
+  /* Guided tour. Highlights its target by outlining the real element rather than
+     describing where to look. */
+  .tourveil { position:absolute; inset:0; z-index:45; background:rgba(17,17,16,.28); }
+  .tourcard { position:absolute; z-index:46; width:392px; background:var(--card);
+              border-radius:4px; padding:18px 20px; box-shadow:0 16px 44px rgba(0,0,0,.3); }
+  .tourcard .step { font-size:13px; letter-spacing:.08em; text-transform:uppercase;
+                    color:var(--acento); font-weight:600; margin:0 0 6px; }
+  .tourcard h4 { margin:0 0 8px; font-size:16px; font-weight:600; }
+  .tourcard p { margin:0; font-size:14px; line-height:1.55; color:var(--txt2); }
+  .tourcard p b { color:var(--tinta); font-weight:600; }
+  .tournav { display:flex; gap:8px; align-items:center; margin-top:14px; }
+  .tournav button { font:inherit; font-size:14px; padding:6px 13px; border-radius:3px;
+                    cursor:pointer; border:1px solid #d6d6d3; background:var(--card);
+                    color:var(--tinta); }
+  .tournav .prim { background:var(--serie); border-color:var(--serie); color:#fff;
+                   font-weight:600; }
+  .tournav .skip { margin-left:auto; border:0; background:none; color:var(--txt2); }
+  .tourdots { display:flex; gap:4px; }
+  .tourdots i { width:6px; height:6px; border-radius:50%; background:var(--grade); }
+  .tourdots i.on { background:var(--acento); }
+  .spot { position:relative; z-index:47; outline:3px solid var(--acento);
+          outline-offset:3px; border-radius:3px; }
+
   @media (prefers-reduced-motion:reduce) { * { transition:none !important; } }
 </style>
 
@@ -218,6 +301,13 @@
       informação.
     </p>
     <p>
+      <strong>E o painel agora explica a si mesmo.</strong> Três botões no cabeçalho —
+      <em>Como usar</em>, <em>Glossário</em> e <em>Tour</em> — fecham a última linha aberta
+      da orientação de UX. O tour tem 6 passos e destaca o elemento real de que fala; o
+      glossário tem 14 verbetes com busca, cada um com a ressalva que muda a leitura. Foi
+      para cá que as conclusões dos subtítulos vieram morar.
+    </p>
+    <p>
       A tela é <strong>fixa em modo claro de propósito</strong>. As cores foram validadas em
       simulador de daltonismo contra um card branco sobre plano <code>#f4f4f2</code>; trocar
       o tema invalidaria a medição.
@@ -236,16 +326,24 @@
           <p class="cvtitle">Ocupação hospitalar SUS · Rio Grande do Sul</p>
           <p class="cvsrc">SIH-SUS + CNES (DATASUS) · 2019–2023 · atualizado em 12/2023</p>
         </div>
-        <div class="cvtabs" role="tablist" aria-label="Abas do dashboard">
-          <button class="cvtab" role="tab" id="tab-0" aria-selected="true"  aria-controls="panel">Panorama</button>
-          <button class="cvtab" role="tab" id="tab-1" aria-selected="false" aria-controls="panel">Território</button>
-          <button class="cvtab" role="tab" id="tab-2" aria-selected="false" aria-controls="panel">Capacidade</button>
-          <button class="cvtab" role="tab" id="tab-3" aria-selected="false" aria-controls="panel">Custo</button>
+        <div class="cvactions">
+          <div class="help" id="help">
+            <button class="helpbtn" id="h-ajuda" type="button">Como usar</button>
+            <button class="helpbtn" id="h-gloss" type="button">Glossário</button>
+            <button class="helpbtn" id="h-tour" type="button" title="Ver o tour guiado">Tour</button>
+          </div>
+          <div class="cvtabs" role="tablist" aria-label="Abas do dashboard" id="tabstrip">
+            <button class="cvtab" role="tab" id="tab-0" aria-selected="true"  aria-controls="panel">Panorama</button>
+            <button class="cvtab" role="tab" id="tab-1" aria-selected="false" aria-controls="panel">Território</button>
+            <button class="cvtab" role="tab" id="tab-2" aria-selected="false" aria-controls="panel">Capacidade</button>
+            <button class="cvtab" role="tab" id="tab-3" aria-selected="false" aria-controls="panel">Custo</button>
+          </div>
         </div>
       </div>
       <div class="cvfilters" id="filters"></div>
       <div class="cvbody" id="panel" role="tabpanel" aria-labelledby="tab-0"></div>
       <div class="caveat" id="caveat"></div>
+      <div id="orient"></div>
     </div>
   </div>
 
@@ -364,6 +462,38 @@
         UTI em <code>especialidade_leito</code> — derivar UTI de lá devolveria zero, não um
         subregistro. Detalhes e a terceira ressalva (dias de UTI não podem ser descontados
         da enfermaria) em <code>docs/metrics_dictionary.md</code>, seções 4.3 e 4.4.
+      </p>
+    </div>
+
+    <div class="ncard">
+      <h4>A camada de orientação, e por que ela não é enfeite</h4>
+      <p>
+        A linha da orientação de UX é literal: <em>"dashboard sem glossário e sem botão de
+        suporte → dashboard com glossário e botão de suporte"</em> (Nielsen — ajuda e
+        documentação). É requisito com fonte, não ideia nova. Mas nesta revisão ela ganhou
+        uma segunda função, mais importante: <strong>é o destino das conclusões que saíram
+        dos subtítulos</strong>. Sem ela, a V2 trocaria um defeito (título que mente quando
+        o filtro muda) por outro (painel que não explica nada).
+      </p>
+      <p>
+        Três decisões de implementação que valem comentário. O convite da primeira visita
+        <strong>não é um modal</strong> — modal de boas-vindas é o padrão que todo mundo
+        fecha sem ler, e ensinar o usuário a descartar ajuda sem ler é pior que não ter
+        ajuda. O tour <strong>destaca o elemento real</strong> de que fala, em vez de
+        descrever onde olhar, e pula para a aba certa quando o alvo não está na tela. E o
+        glossário <strong>não é fonte de verdade</strong>: é o recorte voltado ao usuário de
+        <code>docs/metrics_dictionary.md</code>, que vence em qualquer conflito — duas fontes
+        de verdade sobre o que uma métrica mede é justamente o que a V1 demonstra por
+        ausência.
+      </p>
+      <p>
+        Aproveitando a mesma passada, entrou também o <strong>desfazer filtro</strong> que a
+        linha de <em>prevenção de erros</em> pede, e ele só aparece quando há algo para
+        desfazer — um botão de limpar sempre visível é decoração. Conteúdo de record das três
+        peças em <code>docs/dashboard_v2_orientation.md</code>, incluindo o que cada uma vira
+        no Tableau (onde o tour não tem equivalente nativo e a recomendação é uma aba
+        "Comece aqui", não uma corrente de contêineres mostrar/ocultar que ninguém consegue
+        manter).
       </p>
     </div>
 
@@ -650,9 +780,9 @@ function panorama(){
         permSel.map((r,i)=>`<text x="${s3x(i).toFixed(1)}" y="${h3-6}" font-size="13"
            fill="${C.txt2}" text-anchor="middle">${r[0]}</text>`).join(""));
 
-  return `<div class="kpis">${tiles}</div>
+  return `<div class="kpis" id="spot-kpis">${tiles}</div>
   <div class="row" style="flex:1.3">
-    <div class="card" style="flex:1">
+    <div class="card" style="flex:1" id="spot-hero">
       <div class="cardhead">
         <p class="cardtitle">Ocupação de UTI e da rede · ${esc(STATE.rotulo)}</p>
         <p class="cardsub">Taxas mensais, mesmo eixo, começando em zero.</p>
@@ -1027,18 +1157,32 @@ const TERCEIRO=[["Caráter da internação","Todos"],["Município","Todos"],
 function renderFilters(){
   const per=PERIODOS.find(p=>p.id===STATE.periodo);
   const extra=TERCEIRO[STATE.tab];
+  const alterado = STATE.periodo!=="todos";
   document.getElementById("filters").innerHTML =
-    `<button class="flt${STATE.periodo!=="todos"?" on":""}" id="f-periodo" type="button"
+    `<button class="flt${alterado?" on":""}" id="f-periodo" type="button"
        aria-haspopup="true"><span class="k">Período:</span> ${esc(per.rotulo)} ▾</button>
      <button class="flt" type="button" disabled><span class="k">Região intermediária:</span> Todas ▾</button>
      <button class="flt" type="button" disabled><span class="k">${esc(extra[0])}:</span> ${esc(extra[1])} ▾</button>
-     <button class="fltmore" id="f-more" type="button">+ mais filtros</button>
-     <span class="spacer">3 filtros · aplicam a esta aba</span>`;
+     <button class="fltmore" id="f-more" type="button">+ mais filtros</button>`+
+    /* Nielsen — prevenção de erros. The UXers' row asks for a breadcrumb to undo a
+       filter; the honest minimum is that a non-default selection says how to get back.
+       Absent while nothing is filtered, so it is never decoration. */
+    (alterado
+      ? `<button class="fltmore" id="f-reset" type="button">↺ limpar período</button>`
+      : "")+
+     `<span class="spacer">3 filtros · aplicam a esta aba</span>`;
   document.getElementById("f-periodo").addEventListener("click",e=>{
     e.stopPropagation(); toggleMenu("periodo");
   });
   document.getElementById("f-more").addEventListener("click",e=>{
     e.stopPropagation(); toggleMenu("more");
+  });
+  const reset=document.getElementById("f-reset");
+  if(reset) reset.addEventListener("click",e=>{
+    e.stopPropagation();
+    const p=PERIODOS[0];
+    STATE.periodo=p.id; STATE.anos=p.anos.slice(); STATE.rotulo=p.rotulo; STATE.menu=null;
+    show(STATE.tab);
   });
   if(STATE.menu) drawMenu();
 }
@@ -1090,6 +1234,288 @@ function drawMenu(){
 
 document.addEventListener("click",()=>{ if(STATE.menu){ STATE.menu=null; renderFilters(); } });
 
+/* ============================================================
+   ORIENTATION LAYER
+   Closes the last open row of docs/uxers_guidance.md (Nielsen — help and documentation:
+   "dashboard sem glossário e sem botão de suporte"). It also has a second job: the chart
+   subtitles no longer assert conclusions, because a subtitle that asserts one is
+   contradicted by the first filter a user applies. The conclusions did not stop being
+   true — they moved here. Without this layer the V2 trades a title that lies for a
+   dashboard that explains nothing.
+
+   Content of record: docs/dashboard_v2_orientation.md. Glossary definitions are the
+   user-facing subset of docs/metrics_dictionary.md, which wins on any conflict — two
+   sources of truth about what a metric means is the defect V1 demonstrates by omission.
+   ============================================================ */
+
+const GLOSSARIO = [
+  ["Taxa de ocupação SUS (rede)",
+   "Dias de permanência de pacientes SUS ÷ (leitos SUS × dias do período).",
+   "O denominador é <b>só leito SUS</b>. Dividir por todos os leitos mede demanda SUS contra capacidade que o paciente SUS não pode ocupar — é o erro que a V1 comete."],
+  ["Taxa de ocupação de UTI",
+   "Diárias de UTI ÷ (leitos de UTI/UCO × dias do período).",
+   "O numerador vem do contador próprio de diárias de UTI, não da especialidade do leito: no RS <b>nenhuma</b> internação é classificada como UTI naquele campo."],
+  ["Leitos SUS",
+   "Média mensal de leitos cadastrados no CNES como SUS.",
+   "Média mensal, não total acumulado. São 77,1% dos leitos cadastrados no RS."],
+  ["Internações (AIH)",
+   "Contagem de autorizações de internação hospitalar.",
+   "<b>Não é contagem de pacientes.</b> Uma pessoa internada três vezes conta três."],
+  ["Dias de permanência",
+   "Soma das diárias de internação no período.",
+   "É o numerador da taxa de ocupação. Não é “dias por paciente”."],
+  ["Permanência média",
+   "Dias de permanência ÷ internações.",
+   "Cai quando a rede gira mais rápido, o que pode ser eficiência ou alta precoce — o número sozinho não distingue."],
+  ["Índice (base = 100)",
+   "Cada série reescalada para que o ano-base valha 100.",
+   "Lê-se a <b>distância entre as linhas</b>, não o nível de cada uma. O eixo começa em 100 porque, num índice, 100 é o zero."],
+  ["Complementar",
+   "Categoria do CNES que agrupa UTI, unidade coronariana, cuidados intermediários e isolamento.",
+   "<b>Não é sinônimo de UTI.</b> Em 2023, 1.839 dos 2.404 leitos complementares são UTI/UCO; o resto é cuidado intermediário e isolamento."],
+  ["Tipo de leito",
+   "Classificação do CNES em 7 categorias.",
+   "O SIH classifica internação em 13 especialidades no RS — vocabulário diferente. A taxa por tipo usa um crosswalk documentado e é aproximação."],
+  ["Hospital dia",
+   "Leito de internação que não pernoita.",
+   "Marca ~18% <b>e não está ocioso</b>: gira dentro do mesmo dia, então leito-dia é a unidade errada para ele. Não compare com os outros tipos."],
+  ["Complexidade",
+   "Média ou alta, conforme a tabela de procedimentos do SUS.",
+   "O dicionário da fonte grafa “Méida Complexidade”; corrigido só na exibição, nunca na chave de junção."],
+  ["Valor da AIH",
+   "Valor aprovado da autorização, em reais nominais.",
+   "É valor <b>aprovado, não custo real</b>, e <b>não está corrigido pela inflação</b>. A distribuição é assimétrica: use a mediana."],
+  ["Região de saúde / intermediária",
+   "30 e 8 agrupamentos de municípios, respectivamente.",
+   "Região de saúde é a unidade de planejamento do SUS; região intermediária é recorte estatístico do IBGE. Não são hierarquia uma da outra."],
+  ["Ocupação acima de 100%",
+   "A taxa pode passar de 100%.",
+   "Rotatividade de leito dentro do mês, e cadastro de capacidade que é uma foto mensal. Leitura válida: a demanda passou da capacidade cadastrada."],
+];
+
+const AJUDA = `
+  <h4>O que cada aba responde</h4>
+  <table><tbody>
+    <tr><td>Panorama</td><td>A rede está sob pressão? — e a resposta é que a pressão está
+      concentrada na UTI, onde o agregado a esconde.</td></tr>
+    <tr><td>Território</td><td>Onde? — a folga é do interior, e não é transferível.</td></tr>
+    <tr><td>Capacidade</td><td>Que tipo de leito? — UTI e cirúrgico são os tensionados.</td></tr>
+    <tr><td>Custo</td><td>Quanto, e para onde vai? — o gasto cresce acima do volume.</td></tr>
+  </tbody></table>
+
+  <h4>Como os filtros agem</h4>
+  <ul>
+    <li><b>Período vale para a aba inteira</b> — todos os gráficos e todos os KPIs. Não
+      existe filtro que atinja só um gráfico: era o defeito da V1, onde 8 de 11 filtros
+      atingiam alvos diferentes sem dizer quais.</li>
+    <li>Trocar o período <b>recalcula</b> cada taxa como soma dos dias ÷ soma dos
+      leito-dias no recorte novo. Não é média das médias — então a taxa de um recorte de
+      dois anos não é a média das taxas dos dois anos, e está certo assim: um mês com mais
+      leitos pesa mais.</li>
+    <li><b>Região intermediária</b> (8) fica visível; <b>região de saúde</b> (30) fica atrás
+      de “mais filtros”, por Hick.</li>
+    <li>Com filtro fora do padrão, aparece <b>como desfazer</b>.</li>
+  </ul>
+
+  <h4>Como ler o gráfico indexado</h4>
+  <p>Comparar 21.838 leitos com 4,78 milhões de dias de permanência no mesmo gráfico é
+    impossível — a série menor vira uma linha reta no chão. O índice põe as duas na mesma
+    escala: cada uma vira “quanto mudou desde o ano-base”, e o ano-base vale 100.</p>
+  <p><b>100 = igual ao ano-base. 103,1 = 3,1% acima. 87,9 = 12,1% abaixo.</b> A leitura é a
+    <b>distância entre as linhas</b>, não o nível de nenhuma delas.</p>
+  <p>O eixo começa em 100 e não em zero, contrariando a regra do próprio design system,
+    porque num índice <b>100 é o zero</b> — é o ponto onde nada mudou. Um eixo de zero
+    comprimiria a faixa de 88 a 106 nos 6% de cima da altura e apagaria o efeito que o
+    gráfico existe para mostrar. A regra do eixo zerado continua valendo para toda taxa e
+    toda barra — inclusive para o gráfico herói, que é de taxas e por isso começa em zero.
+    É a única exceção do sistema, ela é declarada, e a linha de base está desenhada.</p>
+
+  <h4>Por que a ocupação passa de 100%</h4>
+  <p>A taxa é dias de permanência ÷ (leitos × dias do mês) — a aproximação que o próprio
+    DATASUS documenta. Dois motivos a levam acima de 100%, e nenhum é erro de conta:
+    <b>rotatividade dentro do mês</b> (dois pacientes no mesmo leito no mesmo dia) e o
+    <b>cadastro de leitos ser uma foto mensal</b>. Na UTI de junho de 2021 isso deu 131,9%,
+    e é leitura correta: a demanda passou da capacidade cadastrada.</p>
+
+  <h4>Origem e limites do dado</h4>
+  <p>SIH-SUS (AIH reduzida) e CNES, via Base dos Dados / DATASUS. Recorte Rio Grande do Sul,
+    2019–2023. Geometria municipal do IBGE. A base pública tem cerca de <b>6 meses de
+    defasagem</b>. Dado <b>administrativo, não clínico</b>: descreve faturamento de
+    internação, não desfecho de paciente.</p>
+
+  <h4>Quando o número não fecha</h4>
+  <p>Use <b>Falar com quem mantém</b> e informe três coisas: a aba, o filtro aplicado e o
+    número que pareceu errado. É o que transforma “o dashboard está errado” num relato
+    reproduzível.</p>
+`;
+
+/* Tour steps. `alvo` is the id of the real element to outline — the tour points at the
+   thing rather than describing where to look. `pos` places the card clear of it. */
+const TOUR = [
+  { alvo:null, pos:{top:"210px", left:"404px"},
+    titulo:"Para que serve este painel",
+    texto:"Ele existe para <b>montar um pleito de recurso federal</b>: mostrar que a rede SUS do RS está sob pressão, e onde. Não decide alocação — produz a evidência que a pede." },
+  { alvo:"spot-hero", pos:{top:"470px", left:"300px"},
+    titulo:"O achado, e por que ele abre o painel",
+    texto:"UTI e rede no mesmo eixo. Entre 2019 e 2021 a rede <b>caiu</b> de 58,4% para 53,2% enquanto a UTI <b>subiu</b> para 111,9%. Quem olhasse só a média teria concluído que 2021 foi mais folgado que 2019 — no pior ano sanitário do século." },
+  { alvo:"spot-kpis", pos:{top:"290px", left:"404px"},
+    titulo:"Todo número diz de que período fala",
+    texto:"Cada tile carrega o recorte embaixo do valor. Se o filtro muda, o número muda <b>e diz que mudou</b> — antes, o tile mostrava 2023 enquanto a barra de filtros dizia 2019–2023, e não havia como saber qual dos dois você estava vendo." },
+  { alvo:"filters", pos:{top:"170px", left:"404px"},
+    titulo:"O filtro vale para a aba inteira",
+    texto:"Período é o controle principal, e <b>pandemia não é um recorte de data qualquer</b>: é o intervalo em que as duas taxas andam em direções opostas. Experimente — todos os gráficos e KPIs recalculam." },
+  { alvo:"tabstrip", pos:{top:"150px", left:"250px"},
+    titulo:"A ordem de leitura",
+    texto:"<b>Panorama</b> (o quê) → <b>Território</b> (onde) → <b>Capacidade</b> (que tipo de leito) → <b>Custo</b> (quanto). Cada aba responde uma pergunta e passa a próxima adiante." },
+  { alvo:"help", pos:{top:"150px", left:"250px"},
+    titulo:"Onde pedir ajuda",
+    texto:"<b>Glossário</b> para os números, <b>Como usar</b> para a mecânica, e uma pessoa para o resto. Sempre no cabeçalho, sempre no mesmo lugar." },
+];
+
+const ORIENT = { sheet:null, tour:-1, firstrun:true, busca:"" };
+
+function glossarioHTML(){
+  const q=ORIENT.busca.trim().toLowerCase();
+  const hits=GLOSSARIO.filter(([t,d,r])=>
+    !q || (t+" "+d+" "+r).toLowerCase().includes(q));
+  return `<input class="gsearch" id="g-busca" type="search" placeholder="Buscar termo…"
+      value="${esc(ORIENT.busca)}" aria-label="Buscar no glossário">`+
+    (hits.length
+      ? `<table><thead><tr><th>Termo</th><th>O que é, e a ressalva</th></tr></thead><tbody>`+
+        hits.map(([t,d,r])=>`<tr><td>${esc(t)}</td><td>${d}<br><span
+          style="color:${C.tinta}">Ressalva:</span> ${r}</td></tr>`).join("")+
+        `</tbody></table>`
+      : `<p class="nores">Nenhum termo encontrado para “${esc(ORIENT.busca)}”.</p>`)+
+    `<p style="margin-top:14px">Definição completa de cada número, com SQL e grão, em
+      <b>docs/metrics_dictionary.md</b> — que é a fonte de verdade. Este glossário é o
+      recorte voltado a quem lê o painel.</p>`;
+}
+
+function renderOrient(){
+  const host=document.getElementById("orient");
+  /* Clear any previous spotlight before re-rendering. */
+  ["spot-hero","spot-kpis","filters","tabstrip","help"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el && el.classList) el.classList.remove("spot");
+  });
+
+  let html="";
+  if(ORIENT.sheet){
+    const isG = ORIENT.sheet==="gloss";
+    html = `<div class="veil" id="veil"><div class="sheet">
+      <div class="sheethead">
+        <div>
+          <h3>${isG?"Glossário":"Como usar este painel"}</h3>
+          <p>${isG
+            ? GLOSSARIO.length+" termos · recorte de docs/metrics_dictionary.md"
+            : "Mecânica, leitura e limites do dado"}</p>
+        </div>
+        <button class="sheetclose" id="sheet-x" type="button" aria-label="Fechar">×</button>
+      </div>
+      <div class="sheetbody">${isG?glossarioHTML():AJUDA}
+        ${isG?"":`<h4>Falar com quem mantém</h4>
+          <p>Este painel é mantido pela equipe de dados da SES-RS —
+          <b>dados@exemplo.rs.gov.br</b>. Endereço fictício: este é um wireframe de
+          apresentação, não um painel em produção.</p>`}
+      </div></div></div>`;
+  } else if(ORIENT.tour>=0){
+    const s=TOUR[ORIENT.tour], n=TOUR.length;
+    html = `<div class="tourveil" id="tourveil"></div>
+      <div class="tourcard" style="top:${s.pos.top};left:${s.pos.left}">
+        <p class="step">Tour · passo ${ORIENT.tour+1} de ${n}</p>
+        <h4>${s.titulo}</h4>
+        <p>${s.texto}</p>
+        <div class="tournav">
+          <div class="tourdots">${TOUR.map((_,i)=>
+            `<i class="${i===ORIENT.tour?"on":""}"></i>`).join("")}</div>
+          ${ORIENT.tour>0?`<button id="t-prev" type="button">Voltar</button>`:""}
+          <button class="prim" id="t-next" type="button">${
+            ORIENT.tour===n-1?"Concluir":"Próximo"}</button>
+          <button class="skip" id="t-skip" type="button">Sair do tour</button>
+        </div>
+      </div>`;
+  } else if(ORIENT.firstrun){
+    html = `<div class="firstrun">
+      <b>Primeira vez aqui?</b> Um tour de 6 passos mostra a ordem de leitura das quatro
+      abas e o achado que abre o painel.
+      <div class="acts">
+        <button class="go" id="fr-go" type="button">Ver o tour</button>
+        <button class="no" id="fr-no" type="button">Depois</button>
+      </div></div>`;
+  }
+  host.innerHTML=html;
+
+  /* Spotlight the step's target, if it has one. */
+  if(ORIENT.tour>=0 && TOUR[ORIENT.tour].alvo){
+    const el=document.getElementById(TOUR[ORIENT.tour].alvo);
+    if(el && el.classList) el.classList.add("spot");
+  }
+
+  const on=(id,fn)=>{ const el=document.getElementById(id);
+                      if(el) el.addEventListener("click",e=>{e.stopPropagation();fn();}); };
+  on("sheet-x",()=>{ ORIENT.sheet=null; ORIENT.busca=""; refreshOrient(); });
+  on("veil",()=>{ ORIENT.sheet=null; ORIENT.busca=""; refreshOrient(); });
+  on("fr-go",()=>{ ORIENT.firstrun=false; ORIENT.tour=0; startTour(); });
+  on("fr-no",()=>{ ORIENT.firstrun=false; refreshOrient(); });
+  on("t-next",()=>{
+    if(ORIENT.tour===TOUR.length-1){ ORIENT.tour=-1; refreshOrient(); }
+    else { ORIENT.tour++; startTour(); }
+  });
+  on("t-prev",()=>{ ORIENT.tour--; startTour(); });
+  on("t-skip",()=>{ ORIENT.tour=-1; refreshOrient(); });
+
+  bindBusca();
+  syncHelpButtons();
+}
+
+/* Re-renders only the glossary body on each keystroke, rather than the whole overlay,
+   because a full re-render would recreate the input and steal focus mid-word. The input
+   is still recreated, so the listener rebinds itself and the caret is restored by hand. */
+function bindBusca(){
+  const el=document.getElementById("g-busca");
+  if(!el) return;
+  el.addEventListener("input",ev=>{
+    ORIENT.busca=ev.target.value;
+    const body=document.querySelector && document.querySelector(".sheetbody");
+    if(!body) return;
+    const pos=ev.target.selectionStart;
+    body.innerHTML=glossarioHTML();
+    const again=document.getElementById("g-busca");
+    if(again && again.focus){ again.focus(); again.setSelectionRange(pos,pos); }
+    bindBusca();
+  });
+}
+
+/* Step 2 points at the hero chart, which only exists on Panorama, and step 3 at the KPI
+   row. Jump to the tab that has them rather than outlining nothing. */
+function startTour(){
+  const alvo=TOUR[ORIENT.tour] && TOUR[ORIENT.tour].alvo;
+  if((alvo==="spot-hero"||alvo==="spot-kpis") && STATE.tab!==0){ show(0); return; }
+  refreshOrient();
+}
+
+function refreshOrient(){ renderOrient(); }
+
+function syncHelpButtons(){
+  const map={ "h-ajuda":ORIENT.sheet==="ajuda", "h-gloss":ORIENT.sheet==="gloss",
+              "h-tour":ORIENT.tour>=0 };
+  Object.entries(map).forEach(([id,active])=>{
+    const el=document.getElementById(id);
+    if(el && el.classList) el.classList.toggle("on",active);
+  });
+}
+
+function wireHelp(){
+  const on=(id,fn)=>{ const el=document.getElementById(id);
+                      if(el) el.addEventListener("click",e=>{e.stopPropagation();fn();}); };
+  on("h-ajuda",()=>{ ORIENT.tour=-1; ORIENT.firstrun=false;
+                     ORIENT.sheet = ORIENT.sheet==="ajuda"?null:"ajuda"; refreshOrient(); });
+  on("h-gloss",()=>{ ORIENT.tour=-1; ORIENT.firstrun=false; ORIENT.busca="";
+                     ORIENT.sheet = ORIENT.sheet==="gloss"?null:"gloss"; refreshOrient(); });
+  on("h-tour", ()=>{ ORIENT.sheet=null; ORIENT.firstrun=false;
+                     ORIENT.tour = ORIENT.tour>=0 ? -1 : 0; startTour(); });
+}
+
 /* ---------- shell ---------- */
 const TABS=[panorama,territorio,capacidade,custo];
 const CAVEATS=[
@@ -1114,6 +1540,9 @@ function show(i){
   panel.innerHTML=TABS[i]();
   document.getElementById("caveat").innerHTML=CAVEATS[i];
   renderFilters();
+  /* Re-render the orientation layer last: replacing the panel's innerHTML destroys any
+     element the tour was outlining, so the spotlight has to be reapplied after. */
+  renderOrient();
 }
 document.querySelectorAll(".cvtab").forEach((b,i)=>{
   b.addEventListener("click",()=>show(i));
@@ -1124,5 +1553,16 @@ document.querySelectorAll(".cvtab").forEach((b,i)=>{
     document.getElementById("tab-"+n).focus(); show(n);
   });
 });
+
+/* Escape closes whichever overlay is open — the sheet, then the tour. Without it the only
+   way out of a modal-ish surface is finding the right button, which is the thing that
+   makes people distrust help panels. */
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Escape") return;
+  if(ORIENT.sheet){ ORIENT.sheet=null; ORIENT.busca=""; refreshOrient(); }
+  else if(ORIENT.tour>=0){ ORIENT.tour=-1; refreshOrient(); }
+});
+
+wireHelp();
 show(0);
 </script>
