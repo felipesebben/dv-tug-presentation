@@ -32,10 +32,12 @@ visual.
 **Isto contradiz a orientação dos UXers**, que pela regra do projeto vence em conflito.
 Mas a regra de prioridade é editorial, e aqui há medição.
 
-**Decidido: azul + laranja.** Passa com folga (24,7), e não é o par azul-vermelho que os
-UXers queriam evitar — a preocupação original deles segue respeitada. O verde sai do
-sistema por completo: mantê-lo como cor terciária reintroduziria o mesmo par pela porta
-dos fundos assim que duas séries coincidissem numa tela.
+**Decidido: azul + laranja** — ratificado por Felipe em 29/07/2026, encerrando a única
+decisão que este documento deixava aberta. Passa com folga (24,7), e não é o par
+azul-vermelho que os UXers queriam evitar — a preocupação original deles segue
+respeitada. O verde sai do sistema por completo: mantê-lo como cor terciária
+reintroduziria o mesmo par pela porta dos fundos assim que duas séries coincidissem numa
+tela.
 
 > Vale como momento de palco: a dupla recomendou um par por intuição, e a simulação
 > reprovou. "Rode o verificador, não confie no olho" é uma lição mais forte vinda de um
@@ -63,6 +65,33 @@ O laranja aparece **pouco, de propósito**: é a única cor do sistema que não 
 estrutural, então toda vez que ela aparece, ela quer dizer alguma coisa. Uma barra laranja
 numa série cinza carrega mais informação que doze barras coloridas — é o princípio do
 ponto focal implementado por escassez, não por saturação.
+
+### O que cada cor *significa* — a regra semântica
+
+Papel visual não basta: as duas cores também carregam **valência**, e ela é fixa em todo
+o dashboard.
+
+| cor | significa | exemplos legítimos |
+|---|---|---|
+| `--marca-neutra` cinza | sem juízo de valor — o padrão | marcas não destacadas, categorias de contexto, séries de apoio |
+| `--serie` azul | normal, saudável, sob controle | capacidade, volume de internações, o mapa, tons de leito |
+| `--acento` laranja | **precisa de atenção** | taxa de ocupação, a demanda que passa a capacidade, municípios acima de 85%, alta complexidade, o gasto crescendo acima do volume |
+
+A consequência prática é uma proibição: **laranja não marca "o mais recente" nem "a
+mediana".** Se um valor só se destaca por ser o último ponto da série ou o centro da
+distribuição, ele é azul ou cinza. Usar laranja ali gasta o único sinal de alarme do
+sistema em algo que não é alarme — e, pior, ensina o leitor a ignorá-lo.
+
+O cinza é o que resolve a tensão entre os dois papéis do azul. Se o azul fosse ao mesmo
+tempo o padrão *e* o "positivo", toda série neutra viraria uma afirmação de que está tudo
+bem. Então o padrão é cinza, o azul é o dado saudável, e o laranja é a exceção que pede
+ação.
+
+> Vale notar por que isto é aceitável em acessibilidade: cor semântica costuma ser
+> alertada justamente porque o par típico é verde/vermelho, indistinguível em protanopia.
+> Azul + laranja mede ΔE 24,7 — então **aqui** a cor pode carregar significado. O que
+> continua valendo é que ela nunca carrega significado *sozinha*: variação de KPI leva
+> seta e sinal, e destaque em gráfico leva rótulo.
 
 ### Cinzas (exatamente 3 — o teto dos UXers)
 
@@ -109,6 +138,31 @@ magnitude). Divergente só se houver um ponto neutro real — taxa de ocupação
 
 ## 3. Tipografia
 
+**Família: Roboto.** Uma só, em todo o dashboard.
+
+Roboto foi escolhido por ser uma grotesca neutra com números de largura uniforme
+(*tabular*), o que importa mais aqui que em texto corrido: numa coluna de taxas ou de
+reais, algarismos de larguras diferentes desalinham a vírgula e obrigam o olho a
+reencontrar a casa decimal em cada linha.
+
+**Atenção antes de fixar isto na pasta de trabalho:** o Tableau não embute fontes. Ele usa
+o que está instalado **na máquina que renderiza** — e Roboto **não vem com o Windows nem
+com o Tableau**. Consequências:
+
+| onde | o que acontece |
+|---|---|
+| Tableau Desktop, máquina com Roboto instalado | renderiza como projetado |
+| Tableau Desktop, máquina sem Roboto | substitui por uma fonte do sistema, silenciosamente |
+| Tableau Public / Server | usa as fontes do servidor; uma fonte não padrão é substituída |
+
+Então: instalar Roboto localmente antes de construir, e **verificar em Tableau Public
+antes de publicar**, se a apresentação for por lá. Como a substituição é silenciosa, o
+sintoma não é um erro — é o dashboard ficando um pouco pior sem avisar.
+
+Cadeia de fallback declarada, na ordem: **Roboto → Arial → Tableau Book**. Arial existe em
+qualquer Windows e tem métrica próxima o suficiente para não quebrar o layout; Tableau Book
+acompanha o Tableau.
+
 Mínimo dos UXers: **14px / 9pt**. O Tableau trabalha em pt.
 
 | papel | tamanho | peso | cor |
@@ -123,6 +177,9 @@ Mínimo dos UXers: **14px / 9pt**. O Tableau trabalha em pt.
 Seis tamanhos, cada um com uma função. **Nada abaixo de 9pt. Nada em caixa alta** —
 caixa alta destrói o contorno da palavra, que é o que a leitura por forma usa (bloco de
 dislexia dos UXers). Uma família só.
+
+Números sempre **alinhados à direita** e com separador de milhar pt-BR, para que a
+tabularidade do Roboto seja realmente aproveitada.
 
 ---
 
@@ -203,7 +260,21 @@ Onde cada coisa é definida:
 | Fundo do card | Contêiner → Sombreamento → `#ffffff` |
 | Espaçamento | Layout → Espaçamento externo, múltiplos de 8 |
 | Grade | Formatar → Linhas → Linhas de grade `#e4e4e1`, zero linhas verticais |
-| Fontes | Formatar → Fonte da pasta de trabalho, mínimo 9pt |
+| Fontes | Formatar → Pasta de trabalho → Fonte: **Roboto**, mínimo 9pt |
+| Mapa | Mapa → Camadas do mapa, e `data/raw/municipios_rs.geojson` como arquivo espacial |
+
+**Mapa — como o coroplético é ligado.** A geometria não vem do geocodificação embutida do
+Tableau: vem de `data/raw/municipios_rs.geojson`, baixado do IBGE por
+`scripts/fetch_municipal_geometry.py` (grátis, API pública). São 497 polígonos, um por
+município do RS, com o código IBGE de 7 dígitos em `codarea`. No Tableau ele entra como
+**arquivo espacial** e se relaciona a `occupancy` por `id_municipio`.
+
+O motivo de não usar a geocodificação por nome do Tableau: **38 nomes de municípios do RS
+existem também em outros estados** (Alto Alegre em RR e SP, Bom Jesus em PB, SC, PI e RN).
+Casamento por nome erra ou descarta esses casos em silêncio; casamento por código é exato.
+Verificado: os 497 códigos do GeoJSON são exatamente o conjunto do diretório da BD, e os
+245 municípios com leitos casam todos. Os 252 sem leito ficam em branco no mapa — o que é
+informação, não falha.
 
 Formatar **no nível da pasta de trabalho** (Formatar → Pasta de trabalho) antes de
 formatar folha a folha. É o que impede a V2 de recair na inconsistência que a V1
