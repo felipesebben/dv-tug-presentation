@@ -142,22 +142,59 @@ in June 2021 against 57,0% for the network. A dashboard showing only the aggrega
 have reported less pressure in the worst health year of the century. A useful side effect
 is that the hero no longer needs the indexed-axis exception: both series are rates in the
 same unit, so the axis starts at zero and the 100% line becomes a real threshold. The
-capacity-versus-demand scissors keeps the 100 baseline, and is now the only chart that
-needs it.
+scissors chart keeps the 100 baseline, and is now the only chart that needs it.
 
-**The period filter genuinely works.** It drives all four tabs, and the data blob ships raw
+**The scissors chart was renamed after a reader misread it**, which is the most instructive
+thing in the file. Asked "if ICU hit 111,9% in 2021, why didn't demand overcome capacity in
+the chart?", the answer is that it did — in ICU view, where capacity sat at 99,6 and demand
+at 146,4. The network view hides it because ICU was 6,5% of SUS beds. But the deeper problem
+was the chart itself: two series each indexed to *their own* 2019 base, in different units,
+so **the crossing point means nothing**. Capacity at 106 above demand at 96,5 is not spare
+capacity; the absolute answer is the occupancy rate, 53,2%. It is now titled *"de onde veio a
+variação da ocupação"* with the caveat on screen, because its real value is decomposition —
+telling you occupancy rose because demand rose rather than because capacity shrank. Same
+family as V1's wrong denominator: a correct calculation answering a question nobody asked,
+found by a reader's question rather than by design review.
+
+**Two filters genuinely work.** *Período* drives all four tabs, and the data blob ships raw
 numerators and denominators rather than rates so the page recomputes
 `SUM(num) / SUM(den)` — the same rule the Tableau build follows. Shipping rates would have
 forced the mock to average averages, which is the exact defect the V2 occupancy rebuild
 exists to fix, and the filter would have produced wrong numbers while looking like it
-worked. Two regional filters exist: Região intermediária (8) visible, Região de saúde (30)
-behind "mais filtros" for Hick's Law. Both are shown but not wired, and the page says so.
+worked.
+
+*Visão* switches the population between **rede SUS and UTI** across Panorama and Território,
+replacing what would otherwise be duplicated charts. It earns its place beyond convenience:
+in ICU view, Território asks a question the network view cannot — where intensive care is
+physically **absent**. Only 87 of 270 hospitals and 59 of 225 municipalities have any SUS ICU
+bed, so two thirds of the map goes blank, and that blankness is the finding. It is offered
+only where "ocupação" is the headline metric; Capacidade and Custo would make it inert, and
+an inert filter is the V1 defect we removed.
+
+Two regional filters are shown but not wired, and the page says so: Região intermediária (8)
+visible, Região de saúde (30) behind "mais filtros" for Hick's Law.
+
+**Occupancy targets** are marked at 85% (atenção) and 95% (crítico), same ruler in both
+views. Two levels are expressed with **one hue** plus opacity, stroke weight and a word, so
+the palette budget survives. Only rate tiles carry a target — a threshold on admissions would
+imply someone is steering how many people fall ill.
 
 **No chart subtitle asserts a conclusion.** Titles describe and carry the selected period;
 min/max annotations are computed so they follow the filter. The editorial claims that used
-to live in subtitles are destined for the orientation layer instead. Colour valence is
-enforced: the three places where orange marked merely "most recent" or "the median" are now
-blue or grey.
+to live in subtitles moved to the orientation layer. Colour valence is enforced: the three
+places where orange marked merely "most recent" or "the median" are now blue or grey.
+
+**Território** pairs a square choropleth with a square scatter — RS's aspect ratio is 1,03,
+and a scatter in a wide box tells the eye the x spread matters more than the y spread, which
+is a claim about the data rather than the layout. Below them, ranked municipalities use a
+**filled capacity bar**: total length is beds, the filled portion is occupancy, and the empty
+remainder is free capacity, which is the quantity a funding case argues about. Demand above
+100% is drawn as a hatched overhang past the bar's end rather than clipped — clipping would
+silently turn 131,9% into 100%, the same class of lie as a truncated axis.
+
+**The standing caveat strip is gone.** It was always-on text nobody read after the first
+visit, competing with the charts for the same attention. Each caveat now travels with the
+metric it qualifies, as an ⓘ on the chart title that opens that term's glossary entry.
 
 The canvas is **fixed light** deliberately — its palette was contrast-validated against a
 white card, so theming it would invalidate the measurement.

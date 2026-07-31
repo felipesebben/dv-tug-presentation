@@ -266,6 +266,20 @@ Dataviz Clarity, CC BY-NC-ND 4.0) — the PDF lives in the gitignored `reference
     on conflict. Nothing is defined here that isn't defined there
   - Also closes the error-prevention row's "breadcrumb to undo a filter": a reset that
     appears only while something is filtered
+- [x] **Targets, the rede/UTI switch, and a chart that was misleading** — occupancy
+  thresholds at 85% (atenção) and 95% (crítico), from the bed-crisis literature (Bagust et
+  al., *BMJ* 1999) and **not an official SES-RS or Ministry target**, so they live in one
+  constant and need clinical sign-off. Two levels are drawn with one hue plus opacity,
+  weight and a word, so the palette budget survives; only rate tiles carry a target, since
+  a threshold on admissions would imply someone steers how many people fall ill. A **Visão**
+  filter switches Panorama and Território between rede SUS and UTI — in ICU view two thirds
+  of the map goes blank, because only 59 of 225 municipalities have any ICU bed, and that
+  absence is the finding. Território's scatter is now square and its ranked bars are filled
+  capacity bars (length = beds, fill = occupancy, hatched overhang above 100%). The standing
+  caveat strip was replaced by ⓘ affordances that open the relevant glossary entry.
+  **The scissors chart was renamed** after Felipe's question exposed that its crossing point
+  means nothing — two series indexed to their own base in different units — so it is now
+  *"de onde veio a variação da ocupação"*, with the caveat on screen
 - [ ] **Next: build V2 in Tableau** (`tableau/dashboard_v2.twb`). Two prerequisites are
   outside the repo: install Roboto (Tableau embeds no fonts, and substitution is silent),
   and copy `tableau/Preferences.tps` into the Tableau repository folder. See

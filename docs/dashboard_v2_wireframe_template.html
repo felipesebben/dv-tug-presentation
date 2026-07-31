@@ -144,10 +144,18 @@
   .kpi .spark { margin-top:6px; }
   .kpi .per { font-size:14px; color:var(--txt2); margin-top:4px; }
 
-  .caveat { background:var(--card); border-top:1px solid var(--grade);
-            padding:9px 24px; font-size:14px; color:var(--txt2); display:flex;
-            gap:8px; align-items:center; }
-  .caveat b { color:var(--tinta); font-weight:600; }
+  .kpi .gauge { margin-top:8px; }
+
+  /* Replaces the standing caveat strip that used to sit under every tab. That strip was
+     always-on text nobody read after the first visit, competing with the charts for the
+     same attention. The caveat now travels with the metric it belongs to: an info affordance
+     on the chart title, opening that term's glossary entry. */
+  .infob { font:inherit; font-size:12px; line-height:1; width:16px; height:16px;
+           border-radius:50%; border:1px solid #c9c9c6; background:var(--card);
+           color:var(--txt2); cursor:pointer; padding:0; margin-left:6px;
+           vertical-align:1px; }
+  .infob:hover { border-color:var(--serie); color:var(--serie); }
+  .infob:focus-visible { outline:2px solid var(--serie); outline-offset:1px; }
   .lgd { display:flex; gap:14px; flex-wrap:wrap; font-size:14px;
          color:var(--txt2); margin-top:8px; align-items:center; }
   .lgd i { width:11px; height:11px; border-radius:2px; display:inline-block;
@@ -342,7 +350,6 @@
       </div>
       <div class="cvfilters" id="filters"></div>
       <div class="cvbody" id="panel" role="tabpanel" aria-labelledby="tab-0"></div>
-      <div class="caveat" id="caveat"></div>
       <div id="orient"></div>
     </div>
   </div>
@@ -559,8 +566,46 @@ const PERIODOS = [
   { id:"pos",    rotulo:"Pós · 2022–2023",     anos:[2022,2023] },
 ];
 const ANOS = [2019,2020,2021,2022,2023];
+
+/* The rede/UTI switch. It is a filter rather than duplicated charts because the two views
+   answer the same questions of different populations — and because in ICU view the
+   Território tab asks something the network view cannot: where intensive care is
+   physically absent. Only 87 of 270 hospitals and 59 of 225 municipalities have any SUS
+   ICU bed, so two thirds of the map goes blank, and that blankness is the finding.
+
+   Column indices into a `mensal` row, so every chart reads its metric from one place. */
+const VISOES = {
+  rede: { id:"rede", rotulo:"Rede SUS", curto:"rede",
+          num:3, den:4, leitos:8, rotLeitos:"Leitos SUS" },
+  uti:  { id:"uti",  rotulo:"UTI",      curto:"UTI",
+          num:5, den:6, leitos:9, rotLeitos:"Leitos de UTI" },
+};
+
 const STATE = { tab:0, periodo:"todos", anos:PERIODOS[0].anos.slice(), rotulo:"2019–2023",
-                menu:null };
+                visao:"rede", menu:null };
+
+const V = () => VISOES[STATE.visao];
+const outraV = () => VISOES[STATE.visao==="rede" ? "uti" : "rede"];
+/* Visão is offered only where "ocupação" is the headline metric. Capacidade compares bed
+   types against each other and Custo is about spend, so the switch would be inert there —
+   and a filter that does nothing is the defect we removed from V1's Macrorregião. */
+const visaoVale = () => STATE.tab===0 || STATE.tab===1;
+const visaoAtiva = () => visaoVale() ? V() : VISOES.rede;
+
+/* ---------- thresholds ----------
+   Colour carries the level, but never alone: the band is labelled and the tile prints a
+   word. Two thresholds are expressed with one hue plus weight and text, rather than a
+   third colour, so the system's "orange means attention" rule survives intact. */
+const LIM = DATA.limiares;
+function nivel(taxa){
+  if(taxa==null) return null;
+  if(taxa>=LIM.critico) return "critico";
+  if(taxa>=LIM.atencao) return "atencao";
+  return "ok";
+}
+const NIVEL_ROT = { ok:"sob controle", atencao:"atenção", critico:"crítico" };
+const nivelCor = n => n==="ok" ? C.serie : C.acento;
+const nivelPeso = n => n==="critico" ? 700 : 600;
 
 const selAnos = () => STATE.anos;
 const inSel   = ano => STATE.anos.includes(ano);
@@ -640,22 +685,54 @@ function spark(vals,color){
     `aria-label="Série mensal do período" style="display:block;height:34px"`);
 }
 
+/* An info affordance bound to a glossary term. Clicking opens the glossary already
+   filtered to it, so the caveat is one click from the number it qualifies instead of
+   standing permanently under the whole dashboard. */
+function infoBtn(termo){
+  return `<button class="infob" type="button" data-termo="${esc(termo)}"
+    title="O que é «${esc(termo)}»?" aria-label="O que é ${esc(termo)}?">i</button>`;
+}
+
 /* ---------- KPI tile ----------
    The period is printed on the tile itself. That is the fix for the defect where a tile
    read 60,0% while the filter bar read 2019-2023: both were true, and together they were
    misleading. No editorial caption — the tile states what it measures and over what. */
-function kpi({lbl,val,delta,deltaFmt,vals,color,hero}){
+function kpi({lbl,val,delta,deltaFmt,vals,color,hero,taxa}){
   const base = anoBase();
   const arrow = delta==null ? "" : delta>0 ? "▲" : delta<0 ? "▼" : "→";
   const dtxt = delta==null
     ? `<span class="dlt">sem ano anterior na base</span>`
     : `<span class="dlt">${arrow} <b>${deltaFmt(delta)}</b> vs ${base}</span>`;
+  /* A rate tile carries its standing against the threshold. A volume tile does not: a
+     target implies a direction you are steering toward, and nobody steers admissions. */
+  const n = taxa==null ? null : nivel(taxa);
+  const gauge = n==null ? "" : `<div class="gauge">${gaugeSVG(taxa)}</div>
+    <span class="per" style="color:${nivelCor(n)};font-weight:${nivelPeso(n)}">
+      ${NIVEL_ROT[n]} · alvo ${pct(LIM.atencao,0)}</span>`;
   return `<div class="kpi${hero?" hero":""}">
     <span class="lbl">${esc(lbl)}</span>
-    <div class="valrow"><span class="val">${val}</span>${dtxt}</div>
-    <div class="spark">${spark(vals,color)}</div>
+    <div class="valrow"><span class="val"${n&&n!=="ok"?` style="color:${C.acento}"`:""}>${val}</span>${dtxt}</div>
+    ${n==null ? `<div class="spark">${spark(vals,color)}</div>` : gauge}
     <span class="per">${esc(STATE.rotulo)}</span>
   </div>`;
+}
+
+/* A bullet gauge: where this rate sits against the two thresholds. Replaces the sparkline
+   on rate tiles because "how close am I to the line" is the question a target creates,
+   and a 60-month trend does not answer it. */
+function gaugeSVG(taxa){
+  const w=210,h=16,pad=1;
+  const top=Math.max(1.1, taxa*1.08);
+  const sx=scaler([0,top],[pad,w-pad]);
+  const n=nivel(taxa);
+  return svg(w,h,
+    `<rect x="${pad}" y="5" width="${(w-2*pad).toFixed(1)}" height="6" rx="3" fill="${C.grade}"/>
+     <rect x="${pad}" y="5" width="${Math.max(2,sx(taxa)-pad).toFixed(1)}" height="6" rx="3"
+       fill="${nivelCor(n)}"/>`+
+    [["atencao",LIM.atencao],["critico",LIM.critico]].map(([k,v])=>
+      v<=top ? `<line x1="${sx(v).toFixed(1)}" x2="${sx(v).toFixed(1)}" y1="1" y2="15"
+        stroke="${C.txt2}" stroke-width="${k==="critico"?2:1.2}"/>` : "").join(""),
+    `aria-label="Posição contra os limiares" style="display:block;height:16px"`);
 }
 
 /* ================= TAB 1 · PANORAMA ================= */
@@ -674,14 +751,21 @@ function panorama(){
   const intBase = base==null?null:
     DATA.mensal.filter(r=>r[1]===base).reduce((s,r)=>s+r[7],0);
 
+  /* The two rate tiles always show both views: their contrast IS the finding. The volume
+     tiles follow the selected view, because "how many beds" has a different answer. */
+  const v = V();
+  const leitosV = sumBy(M,v.leitos)/M.length;
+  const leitosVBase = base==null?null:
+    DATA.mensal.filter(r=>r[1]===base).reduce((s,r)=>s+r[v.leitos],0)/12;
+
   const tiles = [
     kpi({lbl:"Taxa de ocupação UTI", val:pct(taxaUti), hero:true, color:C.acento,
-         delta:dUti, deltaFmt:pp, vals:M.map(r=>r[6]?r[5]/r[6]:null)}),
+         delta:dUti, deltaFmt:pp, taxa:taxaUti}),
     kpi({lbl:"Taxa de ocupação SUS (rede)", val:pct(taxaGeral), color:C.serie,
-         delta:dGeral, deltaFmt:pp, vals:M.map(r=>r[4]?r[3]/r[4]:null)}),
-    kpi({lbl:"Leitos SUS", val:nf(leitosSus), color:C.serie,
-         delta:leitosBase==null?null:leitosSus/leitosBase-1, deltaFmt:pc,
-         vals:M.map(r=>r[8])}),
+         delta:dGeral, deltaFmt:pp, taxa:taxaGeral}),
+    kpi({lbl:v.rotLeitos, val:nf(leitosV), color:C.serie,
+         delta:leitosVBase==null?null:leitosV/leitosVBase-1, deltaFmt:pc,
+         vals:M.map(r=>r[v.leitos])}),
     kpi({lbl:"Internações", val:nf(internacoes), color:C.serie,
          delta:intBase==null?null:internacoes/intBase-1, deltaFmt:pc,
          vals:M.map(r=>r[7])}),
@@ -706,6 +790,20 @@ function panorama(){
 
   const hero = svg(W,H,
     gridlines(L,W-R,gl,v=>nf(v*100)+"%")+
+    /* Threshold bands. Drawn behind the data, in the accent at low opacity: the region a
+       reader should worry about is shaded rather than announced. */
+    `<rect x="${L}" y="${sy(Math.min(top,LIM.critico)).toFixed(1)}"
+       width="${(W-R-L).toFixed(1)}"
+       height="${Math.max(0,sy(LIM.atencao)-sy(Math.min(top,LIM.critico))).toFixed(1)}"
+       fill="${C.acento}" opacity=".07"/>
+     ${top>=LIM.critico?`<rect x="${L}" y="${T}" width="${(W-R-L).toFixed(1)}"
+       height="${Math.max(0,sy(LIM.critico)-T).toFixed(1)}"
+       fill="${C.acento}" opacity=".13"/>`:""}
+     ${[["atencao",LIM.atencao],["critico",LIM.critico]].map(([k,val])=>val<=top?
+       `<line x1="${L}" x2="${W-R}" y1="${sy(val).toFixed(1)}" y2="${sy(val).toFixed(1)}"
+          stroke="${C.acento}" stroke-width="1.2" stroke-dasharray="6 4" opacity=".85"/>
+        <text x="${L+6}" y="${(sy(val)-5).toFixed(1)}" font-size="13" fill="${C.acento}"
+          font-weight="600">${k==="critico"?"crítico":"atenção"} ${pct(val,0)}</text>`:"").join("")}`+
     /* 100% threshold */
     (top>=1 ? `<line x1="${L}" x2="${W-R}" y1="${sy(1).toFixed(1)}" y2="${sy(1).toFixed(1)}"
        stroke="${C.txt2}" stroke-width="1.5" stroke-dasharray="4 3"/>
@@ -726,8 +824,8 @@ function panorama(){
   const w2=548,h2=190,l2=44,r2=76,t2=14,b2=24;
   const anos=selAnos();
   const byAno = a => DATA.mensal.filter(r=>r[1]===a);
-  const capAno = a => byAno(a).reduce((s,r)=>s+r[8],0)/12;
-  const demAno = a => byAno(a).reduce((s,r)=>s+r[3],0);
+  const capAno = a => byAno(a).reduce((s,r)=>s+r[v.leitos],0)/12;
+  const demAno = a => byAno(a).reduce((s,r)=>s+r[v.num],0);
   const b0=anos[0], capB=capAno(b0), demB=demAno(b0);
   const s2x=scaler([0,Math.max(anos.length-1,1)],[l2+18,w2-r2]);
   const idxCap=anos.map(a=>100*capAno(a)/capB), idxDem=anos.map(a=>100*demAno(a)/demB);
@@ -784,7 +882,7 @@ function panorama(){
   <div class="row" style="flex:1.3">
     <div class="card" style="flex:1" id="spot-hero">
       <div class="cardhead">
-        <p class="cardtitle">Ocupação de UTI e da rede · ${esc(STATE.rotulo)}</p>
+        <p class="cardtitle">Ocupação de UTI e da rede · ${esc(STATE.rotulo)}${infoBtn("Ocupação acima de 100%")}</p>
         <p class="cardsub">Taxas mensais, mesmo eixo, começando em zero.</p>
       </div>
       <div style="flex:1;min-height:0">${hero}</div>
@@ -793,14 +891,17 @@ function panorama(){
   <div class="row" style="flex:1">
     <div class="card" style="flex:1">
       <div class="cardhead">
-        <p class="cardtitle">Capacidade e demanda, indexadas · ${anos[0]} = 100</p>
-        <p class="cardsub">Leitos SUS e dias de permanência, um eixo só.</p>
+        <p class="cardtitle">De onde veio a variação da ocupação · ${esc(v.rotulo)}
+          ${infoBtn("Índice (base = 100)")}</p>
+        <p class="cardsub">Capacidade e demanda, cada uma indexada a ${anos[0]} = 100.
+          A distância entre as linhas <b>não é folga de capacidade</b> — é a variação da
+          ocupação.</p>
       </div>
       <div style="flex:1;min-height:0">${scissors}</div>
     </div>
     <div class="card" style="flex:1">
       <div class="cardhead">
-        <p class="cardtitle">Internações e permanência média, indexadas · ${anos[0]} = 100</p>
+        <p class="cardtitle">Internações e permanência média, indexadas · ${anos[0]} = 100${infoBtn("Internações (AIH)")}</p>
         <p class="cardsub">Volume e duração na mesma escala.</p>
       </div>
       <div style="flex:1;min-height:0">${vol}</div>
@@ -810,16 +911,18 @@ function panorama(){
 
 /* ================= TAB 2 · TERRITÓRIO ================= */
 function municipiosSel(){
-  /* [code, nome, num, den] aggregated over the selected years. */
+  /* Aggregated over the selected years, for the selected view.
+     -> [code, nome, num, den, taxa, leitos_medios] */
+  const v=V(), iN = v.id==="rede"?3:5, iD = v.id==="rede"?4:6;
   const acc=new Map();
-  DATA.municipioAno.forEach(([code,nome,ano,num,den])=>{
+  DATA.municipioAno.forEach(row=>{
+    const [code,nome,ano]=row;
     if(!inSel(ano)) return;
     const cur=acc.get(code)||[code,nome,0,0];
-    cur[2]+=num; cur[3]+=den; acc.set(code,cur);
+    cur[2]+=row[iN]; cur[3]+=row[iD]; acc.set(code,cur);
   });
   return [...acc.values()].map(r=>[r[0],r[1],r[2],r[3],r[3]?r[2]/r[3]:null,
                                   r[3]/(365*selAnos().length)]);
-  /* -> [code, nome, num, den, taxa, leitos_medios] */
 }
 
 function territorio(){
@@ -840,85 +943,139 @@ function territorio(){
   }).join("");
   const mapa=svgFit(box,box,polys,`aria-label="Taxa de ocupação SUS por município"`);
 
-  /* ---- scatter: beds (log) x occupancy, quadrants ---- */
-  const w=692,h=300,l=44,r=16,t=14,b=30;
-  const LIM_LEITOS=100;
+  /* ---- scatter: beds (log) x occupancy, quadrants. Square by construction: a scatter
+     encodes two comparable magnitudes, and a wide box tells the eye the x spread matters
+     more than the y spread, which is a claim about the data rather than about the layout. */
+  const w=330,h=330,l=44,r=14,t=14,b=30;
+  const LIM_LEITOS = V().id==="uti" ? 20 : 100;
   const maxB=Math.max(...mun.map(r=>r[5]));
   const lx=scaler([Math.log10(4),Math.log10(maxB*1.15)],[l,w-r]);
   const ly=scaler([0,Math.max(1,Math.ceil(Math.max(...mun.map(r=>r[4]))*10)/10)],[h-b,t]);
   const grandes=mun.filter(r=>r[5]>=LIM_LEITOS);
   const tensos=grandes.filter(r=>r[4]>=taxaEstado);
   const dots=mun.map(r=>{
-    const big=r[5]>=LIM_LEITOS, hot=r[4]>=taxaEstado;
-    const fill = big&&hot ? C.acento : big ? C.serie : C.marca;
-    const rad  = big ? 4.5 : 2.8;
+    const big=r[5]>=LIM_LEITOS, n=nivel(r[4]);
+    const fill = big && n!=="ok" ? C.acento : big ? C.serie : C.marca;
+    const rad  = big ? 4.2 : 2.6;
     return `<circle cx="${lx(Math.log10(r[5])).toFixed(1)}" cy="${ly(r[4]).toFixed(1)}"
       r="${rad}" fill="${fill}" opacity="${big?.9:.45}"/>`;
   }).join("");
   const poa=mun.reduce((a,r)=>r[5]>a[5]?r:a);
-  const ticks=[10,100,1000].filter(v=>v<=maxB*1.15);
-  const scatter=svg(w,h,
+  const ticks=[1,10,100,1000].filter(v=>v<=maxB*1.15);
+  const scatter=svgFit(w,h,
     gridlines(l,w-r,[0,.25,.5,.75,1].filter(v=>v<=ly.domainTop).map(v=>[v,ly(v)]),v=>nf(v*100)+"%")+
+    /* Threshold bands, same rule as the hero. */
+    [["atencao",LIM.atencao],["critico",LIM.critico]].map(([k,val])=>val<=ly.domainTop?
+      `<line x1="${l}" x2="${w-r}" y1="${ly(val).toFixed(1)}" y2="${ly(val).toFixed(1)}"
+         stroke="${C.acento}" stroke-width="1.1" stroke-dasharray="6 4" opacity=".8"/>
+       <text x="${w-r-2}" y="${(ly(val)-4).toFixed(1)}" text-anchor="end" font-size="13"
+         fill="${C.acento}">${pct(val,0)}</text>`:"").join("")+
     `<line x1="${l}" x2="${w-r}" y1="${ly(taxaEstado).toFixed(1)}" y2="${ly(taxaEstado).toFixed(1)}"
-       stroke="${C.acento}" stroke-width="1.2" stroke-dasharray="5 3" opacity=".8"/>
-     <text x="${w-r-4}" y="${(ly(taxaEstado)-6).toFixed(1)}" text-anchor="end" font-size="13"
-       fill="${C.acento}">taxa do estado ${pct(taxaEstado)}</text>
+       stroke="${C.txt2}" stroke-width="1.1" stroke-dasharray="3 3" opacity=".8"/>
+     <text x="${l+4}" y="${(ly(taxaEstado)-4).toFixed(1)}" font-size="13"
+       fill="${C.txt2}">estado ${pct(taxaEstado)}</text>
      <line x1="${lx(Math.log10(LIM_LEITOS)).toFixed(1)}" x2="${lx(Math.log10(LIM_LEITOS)).toFixed(1)}"
        y1="${t}" y2="${h-b}" stroke="${C.grade}" stroke-width="1.4"/>
      <text x="${(lx(Math.log10(LIM_LEITOS))+5).toFixed(1)}" y="${t+11}" font-size="13"
-       fill="${C.txt2}">100 leitos</text>`+
+       fill="${C.txt2}">${LIM_LEITOS} leitos</text>`+
     dots+
     `<circle cx="${lx(Math.log10(poa[5])).toFixed(1)}" cy="${ly(poa[4]).toFixed(1)}" r="7"
        fill="none" stroke="${C.tinta}" stroke-width="1.4"/>
      <text x="${(lx(Math.log10(poa[5]))-10).toFixed(1)}" y="${(ly(poa[4])+4).toFixed(1)}"
        text-anchor="end" font-size="13" font-weight="600" fill="${C.tinta}">${esc(poa[1])}</text>`+
     ticks.map(v=>`<text x="${lx(Math.log10(v)).toFixed(1)}" y="${h-8}" font-size="13"
-       fill="${C.txt2}" text-anchor="middle">${nf(v)}</text>`).join("")+
-    `<text x="${((l+w-r)/2).toFixed(1)}" y="${h-8}" font-size="13" fill="${C.txt2}"
-       text-anchor="middle" opacity="0">x</text>`);
+       fill="${C.txt2}" text-anchor="middle">${nf(v)}</text>`).join(""),
+    `aria-label="Leitos por ocupação, por município"`);
 
-  /* ---- ranked bars: length = beds, matching the title. Rate is a label. ---- */
-  const top=[...mun].sort((a,b)=>b[5]-a[5]).slice(0,15);
-  const bw=1114,bh=232,bl=132,br=104,bt=6;
-  const rowH=(bh-bt-8)/top.length;
-  const bx=scaler([0,Math.max(...top.map(r=>r[5]))*1.02],[bl,bw-br]);
-  const bars=top.map((m,i)=>{
-    const y=bt+i*rowH, hot=m[4]>=taxaEstado;
+  /* ---- Filled capacity bars: total length = beds, filled portion = occupancy.
+     One mark carries both dimensions, so the reader never has to hold "which is big" and
+     "which is strained" in separate charts. The empty remainder is free capacity, which is
+     the quantity a funding case actually argues about.
+
+     Occupancy above 100% has no room left to fill, so it is drawn as a hatched overhang
+     past the bar's end rather than clipped — clipping would silently turn 131,9% into
+     100%, which is the same class of lie as the truncated axis. */
+  const top=[...mun].sort((a,b)=>b[5]-a[5]).slice(0,12);
+  const bw=1114,bh=214,bl=140,br=150,bt=4;
+  const rowH=(bh-bt-6)/top.length;
+  const maxLeitos=Math.max(...top.map(r=>r[5]));
+  const bx=scaler([0,maxLeitos*1.02],[bl,bw-br]);
+  const bars=`<defs><pattern id="over" width="5" height="5" patternUnits="userSpaceOnUse"
+      patternTransform="rotate(45)">
+      <rect width="5" height="5" fill="${C.card}"/>
+      <line x1="0" y1="0" x2="0" y2="5" stroke="${C.acento}" stroke-width="2.4"/>
+    </pattern></defs>`+
+  top.map((m,i)=>{
+    const y=bt+i*rowH, hAlt=rowH-5;
+    const full=bx(m[5])-bl;                     /* total beds */
+    const frac=Math.min(m[4],1);                /* filled share, capped for the fill */
+    const over=Math.max(0,m[4]-1);              /* overflow beyond capacity */
+    const n=nivel(m[4]);
     return `<text x="${bl-8}" y="${(y+rowH/2+4).toFixed(1)}" text-anchor="end" font-size="13"
       fill="${C.txt2}">${esc(m[1])}</text>
-      <rect x="${bl}" y="${(y+2).toFixed(1)}" width="${Math.max(1,bx(m[5])-bl).toFixed(1)}"
-        height="${(rowH-4).toFixed(1)}" fill="${hot?C.acento:C.serie}" rx="2"/>
-      <text x="${(bx(m[5])+7).toFixed(1)}" y="${(y+rowH/2+4).toFixed(1)}" font-size="13"
-        fill="${C.tinta}">${nf(m[5])} leitos · <tspan fill="${C.txt2}">${pct(m[4])}</tspan></text>`;
+      <rect x="${bl}" y="${(y+2).toFixed(1)}" width="${Math.max(1,full).toFixed(1)}"
+        height="${hAlt.toFixed(1)}" fill="${C.grade}" rx="2"/>
+      <rect x="${bl}" y="${(y+2).toFixed(1)}" width="${Math.max(1,full*frac).toFixed(1)}"
+        height="${hAlt.toFixed(1)}" fill="${nivelCor(n)}" rx="2"/>
+      ${over>0?`<rect x="${(bl+full).toFixed(1)}" y="${(y+2).toFixed(1)}"
+        width="${Math.max(2,full*over).toFixed(1)}" height="${hAlt.toFixed(1)}"
+        fill="url(#over)" stroke="${C.acento}" stroke-width="1"/>`:""}
+      <text x="${(bl+full+Math.max(0,full*over)+8).toFixed(1)}"
+        y="${(y+rowH/2+4).toFixed(1)}" font-size="13" fill="${C.txt2}">${nf(m[5])} leitos ·
+        <tspan fill="${n==="ok"?C.txt2:C.acento}"
+          font-weight="${n==="ok"?400:600}">${pct(m[4])}</tspan></text>`;
   }).join("");
 
-  return `<div class="row" style="flex:1.55">
-    <div class="card" style="flex:0 0 336px">
+  const v=V();
+  const semLeito = V().id==="uti"
+    ? Object.keys(DATA.mapa.paths).length - mun.length
+    : DATA.mapa.semLeito.length;
+  const acima = mun.filter(r=>nivel(r[4])!=="ok").length;
+
+  return `<div class="row" style="flex:1.05">
+    <div class="card" style="flex:0 0 330px">
       <div class="cardhead">
-        <p class="cardtitle">Ocupação por município</p>
-        <p class="cardsub">${esc(STATE.rotulo)} · ${DATA.mapa.semLeito.length} sem leito SUS, em branco</p>
+        <p class="cardtitle">Ocupação por município${infoBtn(
+          v.id==="uti"?"Taxa de ocupação de UTI":"Taxa de ocupação SUS (rede)")}</p>
+        <p class="cardsub">${esc(v.rotulo)} · ${esc(STATE.rotulo)}</p>
       </div>
       <div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center">${mapa}</div>
       <div class="lgd">
         ${RAMP.map((c,i)=>`<span style="display:inline-flex;align-items:center;gap:4px">
           <i style="background:${c}"></i>${i===0?"baixa":i===RAMP.length-1?"alta":""}</span>`).join("")}
+        <span style="margin-left:auto"><i style="background:${SEM_DADO}"></i>${semLeito} sem leito</span>
       </div>
     </div>
     <div class="card" style="flex:1">
       <div class="cardhead">
-        <p class="cardtitle">Leitos SUS × ocupação, por município · ${esc(STATE.rotulo)}</p>
-        <p class="cardsub">Eixo horizontal em escala log. ${mun.length} municípios com leito SUS.</p>
+        <p class="cardtitle">Leitos × ocupação, por município · ${esc(v.rotulo)}</p>
+        <p class="cardsub">Escala log no eixo horizontal. ${mun.length} municípios com leito.</p>
       </div>
-      <div style="flex:1;min-height:0">${scatter}</div>
-      <p class="cardnote"><b>${tensos.length} de ${grandes.length}</b> municípios com 100+
-        leitos estão acima da taxa do estado.</p>
+      <div style="flex:1;min-height:0;display:flex;gap:16px;align-items:stretch">
+        <div style="flex:0 0 330px;min-height:0">${scatter}</div>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;
+                    justify-content:center;gap:10px">
+          <p class="cardnote" style="margin:0"><b>${tensos.length} de ${grandes.length}</b>
+            municípios com ${LIM_LEITOS}+ leitos estão acima da taxa do estado
+            (${pct(taxaEstado)}).</p>
+          <p class="cardnote" style="margin:0"><b>${acima}</b> ${acima===1?"município":"municípios"}
+            ${acima===1?"passa":"passam"} de ${pct(LIM.atencao,0)}${
+            mun.filter(r=>nivel(r[4])==="critico").length
+              ? `, e <b>${mun.filter(r=>nivel(r[4])==="critico").length}</b> de ${pct(LIM.critico,0)}`
+              : ""}.</p>
+          <p class="cardnote" style="margin:0">${v.id==="uti"
+            ? `Só <b>${mun.length}</b> municípios têm leito de UTI. A ausência é o achado: nos outros, a UTI mais próxima fica noutra cidade.`
+            : `A folga do interior <b>não é transferível</b> — capacidade ociosa num município de 8 leitos não absorve a demanda de Porto Alegre.`}</p>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="row" style="flex:1">
+  <div class="row" style="flex:.95">
     <div class="card" style="flex:1">
       <div class="cardhead">
-        <p class="cardtitle">Os 15 municípios com mais leitos SUS · ${esc(STATE.rotulo)}</p>
-        <p class="cardsub">Barra = leitos (média mensal). Laranja: ocupação acima da taxa do estado.</p>
+        <p class="cardtitle">Os 12 municípios com mais leitos · ${esc(v.rotulo)} · ${esc(STATE.rotulo)}</p>
+        <p class="cardsub">Comprimento da barra = leitos. Parte preenchida = ocupação;
+          o vazio é capacidade livre. Hachurado = demanda acima da capacidade.</p>
       </div>
       <div style="flex:1;min-height:0">${svg(bw,bh,bars)}</div>
     </div>
@@ -1024,7 +1181,7 @@ function capacidade(){
   return `<div class="row" style="flex:1.15">
     <div class="card" style="flex:1">
       <div class="cardhead">
-        <p class="cardtitle">Ocupação por tipo de leito · ${esc(STATE.rotulo)}</p>
+        <p class="cardtitle">Ocupação por tipo de leito · ${esc(STATE.rotulo)}${infoBtn("Complementar")}${infoBtn("Hospital dia")}</p>
         <p class="cardsub">UTI/UCO tem numerador próprio (contador de diárias de UTI), não a especialidade do leito.</p>
       </div>
       <div style="flex:1;min-height:0">${svg(w,h,barras)}</div>
@@ -1133,7 +1290,7 @@ function custo(){
     </div>
     <div class="card" style="flex:1">
       <div class="cardhead">
-        <p class="cardtitle">Valor da AIH · média × mediana</p>
+        <p class="cardtitle">Valor da AIH · média × mediana${infoBtn("Valor da AIH")}</p>
         <p class="cardsub">Distribuição assimétrica: a mediana descreve melhor a internação típica.</p>
       </div>
       <div class="tablewrap" style="flex:1">
@@ -1157,23 +1314,31 @@ const TERCEIRO=[["Caráter da internação","Todos"],["Município","Todos"],
 function renderFilters(){
   const per=PERIODOS.find(p=>p.id===STATE.periodo);
   const extra=TERCEIRO[STATE.tab];
-  const alterado = STATE.periodo!=="todos";
+  const alterado = STATE.periodo!=="todos" || STATE.visao!=="rede";
   document.getElementById("filters").innerHTML =
-    `<button class="flt${alterado?" on":""}" id="f-periodo" type="button"
-       aria-haspopup="true"><span class="k">Período:</span> ${esc(per.rotulo)} ▾</button>
-     <button class="flt" type="button" disabled><span class="k">Região intermediária:</span> Todas ▾</button>
-     <button class="flt" type="button" disabled><span class="k">${esc(extra[0])}:</span> ${esc(extra[1])} ▾</button>
+    `<button class="flt${STATE.periodo!=="todos"?" on":""}" id="f-periodo" type="button"
+       aria-haspopup="true"><span class="k">Período:</span> ${esc(per.rotulo)} ▾</button>`+
+    /* Visão is the switch Felipe worked out: rather than duplicating every chart for ICU,
+       one control changes which population the tab is about. Offered only where "ocupação"
+       is the headline metric — see visaoVale(). */
+    (visaoVale()
+      ? `<button class="flt${STATE.visao!=="rede"?" on":""}" id="f-visao" type="button"
+           aria-haspopup="true"><span class="k">Visão:</span> ${esc(V().rotulo)} ▾</button>`
+      : `<button class="flt" type="button" disabled><span class="k">${esc(extra[0])}:</span> ${esc(extra[1])} ▾</button>`)+
+    `<button class="flt" type="button" disabled><span class="k">Região intermediária:</span> Todas ▾</button>
      <button class="fltmore" id="f-more" type="button">+ mais filtros</button>`+
     /* Nielsen — prevenção de erros. The UXers' row asks for a breadcrumb to undo a
        filter; the honest minimum is that a non-default selection says how to get back.
        Absent while nothing is filtered, so it is never decoration. */
     (alterado
-      ? `<button class="fltmore" id="f-reset" type="button">↺ limpar período</button>`
+      ? `<button class="fltmore" id="f-reset" type="button">↺ limpar filtros</button>`
       : "")+
      `<span class="spacer">3 filtros · aplicam a esta aba</span>`;
   document.getElementById("f-periodo").addEventListener("click",e=>{
     e.stopPropagation(); toggleMenu("periodo");
   });
+  const fv=document.getElementById("f-visao");
+  if(fv) fv.addEventListener("click",e=>{ e.stopPropagation(); toggleMenu("visao"); });
   document.getElementById("f-more").addEventListener("click",e=>{
     e.stopPropagation(); toggleMenu("more");
   });
@@ -1181,7 +1346,8 @@ function renderFilters(){
   if(reset) reset.addEventListener("click",e=>{
     e.stopPropagation();
     const p=PERIODOS[0];
-    STATE.periodo=p.id; STATE.anos=p.anos.slice(); STATE.rotulo=p.rotulo; STATE.menu=null;
+    STATE.periodo=p.id; STATE.anos=p.anos.slice(); STATE.rotulo=p.rotulo;
+    STATE.visao="rede"; STATE.menu=null;
     show(STATE.tab);
   });
   if(STATE.menu) drawMenu();
@@ -1214,6 +1380,19 @@ function drawMenu(){
         STATE.periodo="ano"+a; STATE.anos=[a]; STATE.rotulo=String(a);
       }
       STATE.menu=null; show(STATE.tab);
+    });
+  } else if(STATE.menu==="visao"){
+    el.style.left="200px";
+    el.innerHTML =
+      `<div class="grp">Visão</div>`+
+      Object.values(VISOES).map(v=>`<button type="button" data-visao="${v.id}"
+        aria-current="${v.id===STATE.visao}">${esc(v.rotulo)}</button>`).join("")+
+      `<hr><div class="grp" style="padding-bottom:8px">Troca a população de que a aba
+        trata — KPIs, mapa, dispersão e barras. A UTI é 8,4% dos leitos SUS e está em
+        59 dos 225 municípios.</div>`;
+    el.addEventListener("click",e=>{
+      const b=e.target.closest("button"); if(!b||!b.dataset.visao) return;
+      STATE.visao=b.dataset.visao; STATE.menu=null; show(STATE.tab);
     });
   } else {
     el.style.left="auto"; el.style.right="24px";
@@ -1291,6 +1470,12 @@ const GLOSSARIO = [
   ["Ocupação acima de 100%",
    "A taxa pode passar de 100%.",
    "Rotatividade de leito dentro do mês, e cadastro de capacidade que é uma foto mensal. Leitura válida: a demanda passou da capacidade cadastrada."],
+  ["Alvo de ocupação (85% / 95%)",
+   "85% marca atenção, 95% marca crítico — a mesma régua na rede e na UTI.",
+   "Vem da “regra de ocupação” da literatura de crise de leito (Bagust, Place &amp; Posnett, BMJ 1999). <b>Não é alvo oficial da SES-RS nem do Ministério</b>, e precisa de validação clínica. A rede fica em 60% e nunca cruza — isso é a informação, não falha do limiar. Só taxa tem alvo: ninguém tem meta de quantas pessoas adoecem."],
+  ["Visão: rede × UTI",
+   "Troca a população de que a aba trata — KPIs, mapa, dispersão e barras.",
+   "A UTI é 8,4% dos leitos SUS e existe em só 59 dos 225 municípios com leito, então em visão UTI dois terços do mapa ficam em branco. <b>Essa ausência é o achado</b>: nos outros municípios, a UTI mais próxima fica noutra cidade."],
 ];
 
 const AJUDA = `
@@ -1362,8 +1547,8 @@ const TOUR = [
     titulo:"Todo número diz de que período fala",
     texto:"Cada tile carrega o recorte embaixo do valor. Se o filtro muda, o número muda <b>e diz que mudou</b> — antes, o tile mostrava 2023 enquanto a barra de filtros dizia 2019–2023, e não havia como saber qual dos dois você estava vendo." },
   { alvo:"filters", pos:{top:"170px", left:"404px"},
-    titulo:"O filtro vale para a aba inteira",
-    texto:"Período é o controle principal, e <b>pandemia não é um recorte de data qualquer</b>: é o intervalo em que as duas taxas andam em direções opostas. Experimente — todos os gráficos e KPIs recalculam." },
+    titulo:"Dois controles mudam tudo na aba",
+    texto:"<b>Período</b> — e pandemia não é um recorte de data qualquer: é o intervalo em que as duas taxas andam em direções opostas. <b>Visão</b> troca a população entre rede e UTI; em UTI, dois terços do mapa ficam em branco, porque só 59 dos 225 municípios têm leito de UTI. Experimente os dois." },
   { alvo:"tabstrip", pos:{top:"150px", left:"250px"},
     titulo:"A ordem de leitura",
     texto:"<b>Panorama</b> (o quê) → <b>Território</b> (onde) → <b>Capacidade</b> (que tipo de leito) → <b>Custo</b> (quanto). Cada aba responde uma pergunta e passa a próxima adiante." },
@@ -1518,18 +1703,19 @@ function wireHelp(){
 
 /* ---------- shell ---------- */
 const TABS=[panorama,territorio,capacidade,custo];
-const CAVEATS=[
-  `<b>Taxa de ocupação</b> = dias de permanência ÷ (leitos SUS × dias do mês).
-   Aproximação — pode passar de 100% pela rotatividade de leito. A de UTI usa o contador
-   de diárias de UTI sobre os leitos de UTI/UCO. Dado administrativo, não clínico.`,
-  `<b>Municípios sem leito SUS cadastrado</b> aparecem em branco no mapa, não em zero.
-   Geometria: malha municipal do IBGE, unida pelo código de 7 dígitos.`,
-  `<b>"Complementar" não é UTI</b> — inclui cuidados intermediários e isolamento. A taxa de
-   UTI usa só os leitos de UTI/UCO. Hospital dia gira no mesmo dia: leito-dia é a unidade
-   errada pra ele.`,
-  `<b>Valor da AIH</b> é o valor aprovado, não o custo real do procedimento. A distribuição
-   é assimétrica — a mediana descreve a internação típica melhor que a média.`,
-];
+
+/* Info affordances are re-created with the panel, so their handler is bound after each
+   render. Clicking opens the glossary pre-filtered to that term. */
+function wireInfoButtons(){
+  document.querySelectorAll(".infob").forEach(b=>{
+    b.addEventListener("click",e=>{
+      e.stopPropagation();
+      ORIENT.tour=-1; ORIENT.firstrun=false;
+      ORIENT.busca=b.dataset.termo||""; ORIENT.sheet="gloss";
+      refreshOrient();
+    });
+  });
+}
 
 function show(i){
   STATE.tab=i;
@@ -1538,8 +1724,8 @@ function show(i){
   const panel=document.getElementById("panel");
   panel.setAttribute("aria-labelledby","tab-"+i);
   panel.innerHTML=TABS[i]();
-  document.getElementById("caveat").innerHTML=CAVEATS[i];
   renderFilters();
+  wireInfoButtons();
   /* Re-render the orientation layer last: replacing the panel's innerHTML destroys any
      element the tour was outlining, so the spotlight has to be reapplied after. */
   renderOrient();

@@ -39,6 +39,20 @@ ANO_FOCO = 2023
 # payload by roughly three quarters. This is a wireframe concern only: Tableau reads the
 # full-resolution GeoJSON, not this.
 SIMPLIFY_TOLERANCE = 2.5
+
+# Occupancy thresholds, shipped as data rather than hardcoded in the page so they can be
+# changed in one place — including live, during the talk.
+#
+# 85% is the "occupancy rule" from the bed-crisis literature (Bagust, Place & Posnett,
+# BMJ 1999), widely used in bed planning. It is a general acute-bed rule, and we have NOT
+# found an official SES-RS or Ministry of Health target for ICU specifically — these
+# defaults need sign-off from a clinical contact before being presented as a standard.
+#
+# The same pair applies to both views deliberately. At state level the network sits at
+# 60,0% and never crosses, which is itself the finding: the strain is in intensive care,
+# not in the wards. A threshold that fires constantly teaches people to ignore the colour;
+# one that never fires at state level but discriminates on the map is doing its job.
+LIMIARES = {"atencao": 0.85, "critico": 0.95}
 # Rings smaller than this in bounding-box terms are dropped. At 340px they are sub-pixel
 # specks — river islands in the Lagoa dos Patos, mostly.
 MIN_RING_EXTENT = 2.0
@@ -257,13 +271,22 @@ def build_tipos(con) -> dict:
 
 
 def build_municipio_ano(con) -> list[list]:
-    """Per-municipality, per-year components, so the map and scatter follow the filter."""
+    """Per-municipality, per-year components for both views, so the map, scatter and bars
+    all follow the period filter *and* the rede/UTI switch.
+
+    ICU columns are zero rather than null for municipalities with no ICU bed, so the
+    client can tell "has no ICU at all" (denominator 0) apart from "has ICU and it is
+    empty". That distinction is the Território tab's finding in ICU view: only 59 of 225
+    municipalities with beds have any ICU bed at all.
+    """
     return [
-        [code, nome, ano, num, den]
-        for code, nome, ano, num, den in query(con, f"""
+        [code, nome, ano, num, den, num_uti, den_uti]
+        for code, nome, ano, num, den, num_uti, den_uti in query(con, f"""
             SELECT id_municipio, nome_municipio, ano,
                    SUM(dias_permanencia_sus)::BIGINT,
-                   SUM(leito_dias_sus)::BIGINT
+                   SUM(leito_dias_sus)::BIGINT,
+                   COALESCE(SUM(dias_uti), 0)::BIGINT,
+                   COALESCE(SUM(leito_dias_uti_sus), 0)::BIGINT
             FROM read_parquet('{(REFINED / "occupancy.parquet").as_posix()}')
             WHERE leito_dias_sus IS NOT NULL
             GROUP BY 1, 2, 3
@@ -380,6 +403,7 @@ def main() -> None:
     con = duckdb.connect()
     data = {
         "anoFoco": ANO_FOCO,
+        "limiares": LIMIARES,
         "mensal": build_mensal(con),
         "permanencia": build_permanencia(con),
         "tipos": build_tipos(con),

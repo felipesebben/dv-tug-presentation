@@ -28,7 +28,7 @@ dashboard, não de quem o constrói.
 |---|---|---|
 | público | quem constrói as planilhas | quem lê o dashboard |
 | conteúdo | SQL exato, grão, validações, todas as armadilhas | o que o número significa e a ressalva que muda a leitura |
-| tamanho | ~700 linhas | 14 verbetes, 2–4 linhas cada |
+| tamanho | ~700 linhas | 16 verbetes, 2–4 linhas cada |
 | em conflito | **vence** | corrige-se |
 
 **Nunca acrescente aqui uma definição que não exista lá.** Se um número precisa de
@@ -72,7 +72,7 @@ consegue dizer sozinho.
 | 1 | — | **Para que serve.** Este painel existe para montar um pleito de recurso federal: mostrar que a rede SUS do RS está sob pressão e onde. Não decide alocação; produz a evidência que a pede. |
 | 2 | gráfico herói | **O achado.** UTI e rede em cima do mesmo eixo. Entre 2019 e 2021 a rede *caiu* e a UTI *subiu* a 111,9%. Quem olhasse só a média teria concluído que 2021 foi mais folgado que 2019. |
 | 3 | faixa de KPIs | **Todo número tem período.** Cada tile diz de que recorte ele fala. Se o filtro muda, o tile muda — e diz que mudou. |
-| 4 | barra de filtros | **O filtro vale para a aba inteira.** Período é o controle principal; "pandemia" não é um recorte de data qualquer, é o intervalo em que as duas taxas andam em direções opostas. |
+| 4 | barra de filtros | **Dois controles mudam tudo na aba.** *Período* — e "pandemia" não é um recorte de data qualquer, é o intervalo em que as duas taxas andam em direções opostas. *Visão* troca a população entre rede e UTI; em UTI dois terços do mapa ficam em branco. |
 | 5 | abas | **A ordem de leitura.** Panorama (o quê) → Território (onde) → Capacidade (que tipo de leito) → Custo (quanto). Cada aba responde uma pergunta e passa a próxima adiante. |
 | 6 | cabeçalho | **Onde pedir ajuda.** Glossário para os números, "como usar" para a mecânica, e uma pessoa para o resto. |
 
@@ -103,6 +103,71 @@ consegue dizer sozinho.
   unidade de planejamento do SUS, região intermediária é recorte do IBGE.
 - Quando um filtro está fora do padrão, aparece **como desfazer**. (Nielsen — prevenção de
   erros; a linha dos UXers pede breadcrumb para desfazer filtro.)
+
+### A visão rede × UTI
+
+Um controle troca a **população de que a aba trata** — KPIs, mapa, dispersão e barras
+passam a falar de UTI em vez da rede inteira. Não é conveniência: em visão UTI o Território
+responde uma pergunta que a visão rede não consegue fazer — **onde a terapia intensiva
+simplesmente não existe**. Só 87 dos 270 hospitais e **59 dos 225 municípios** com leito têm
+alguma UTI SUS, então dois terços do mapa ficam em branco, e esse branco é o achado.
+
+Disponível em Panorama e Território, que são as abas onde "ocupação" é a métrica principal.
+Capacidade compara os tipos de leito entre si e Custo trata de gasto, então lá o controle
+seria inerte — e filtro que não faz nada é o defeito que tiramos da V1.
+
+As duas linhas do gráfico herói **continuam mostrando rede e UTI juntas** em qualquer
+visão, porque a comparação entre elas é o argumento inteiro.
+
+### O gráfico da tesoura: a distância **não** é folga
+
+Este é o ponto mais fácil de ler errado no painel inteiro, e já foi lido errado — a pergunta
+que originou esta seção foi exatamente "se a UTI chegou a 111,9% em 2021, por que a demanda
+não passou da capacidade no gráfico?".
+
+**A resposta curta:** passou — na UTI. Em 2021, indexando a 2019 = 100:
+
+| | capacidade | demanda |
+|---|---|---|
+| rede | 106,0 | 96,5 |
+| **UTI** | **99,6** | **146,4** |
+
+A visão de rede esconde porque **UTI era 6,5% dos leitos SUS em 2021**. Os outros 93,5% são
+enfermaria, e esvaziaram quando as eletivas foram suspensas. O agregado é uma média
+ponderada dominada pela parte que ficou quieta.
+
+**A resposta longa, que é a que importa:** mesmo na visão de rede, ler "linha de capacidade
+acima da linha de demanda" como "sobra capacidade" está **errado**. As duas séries são
+indexadas cada uma contra a *própria* base de 2019, em unidades diferentes — leitos e
+diárias. Capacidade em 106 e demanda em 96,5 quer dizer "a capacidade cresceu 6% e a
+demanda caiu 3,5%, cada uma em relação a si mesma". Não diz nada sobre folga absoluta. A
+folga absoluta é a taxa de ocupação: 53,2%.
+
+**O ponto de cruzamento não significa nada.** O que a distância vertical codifica é a
+*variação* da ocupação: `demanda ÷ capacidade × taxa-base` reproduz a taxa exatamente
+(146,4 / 99,6 × 76,1% = 111,9%).
+
+Por isso o gráfico se chama **"de onde veio a variação da ocupação"** e não "capacidade ×
+demanda". O valor dele é decomposição — dizer que a ocupação subiu porque a demanda subiu, e
+não porque a capacidade encolheu, que é o que a linha de ocupação sozinha não conta. A
+ressalva está escrita no subtítulo, na tela.
+
+> Vale de palco: este erro estava no nosso próprio painel corrigido, e foi encontrado por
+> uma pergunta de leitor, não por revisão de design. Mesma família do denominador errado da
+> V1 — conta certa respondendo pergunta que ninguém fez.
+
+### Alvos de ocupação — 85% e 95%
+
+O painel marca **85% como atenção** e **95% como crítico**, nas duas visões.
+
+- **Vêm de onde:** 85% é a "regra de ocupação" da literatura de crise de leito (Bagust,
+  Place & Posnett, *BMJ* 1999). **Não é alvo oficial da SES-RS nem do Ministério** — precisa
+  de validação clínica antes de virar padrão na apresentação.
+- **A rede não cruza, e isso é a informação.** No estado a rede fica em 60,0%; a UTI passou
+  dos dois limiares em 2020–21. A régua é a mesma nas duas para que o leitor tenha um
+  modelo mental só.
+- **Só taxa tem alvo.** Leitos e internações não recebem limiar: alvo implica direção que se
+  persegue, e ninguém tem meta de quantas pessoas adoecem.
 
 ### Como ler o gráfico indexado — a parte que precisa de explicação
 
@@ -140,7 +205,7 @@ capacidade cadastrada. Não se corrige — se legenda.
 
 ---
 
-## 5. Glossário — 14 verbetes
+## 5. Glossário — 16 verbetes
 
 Cada verbete: o que é, e a ressalva que muda a leitura. Referências entre parênteses
 apontam para a seção de `metrics_dictionary.md` que manda.
@@ -161,6 +226,8 @@ apontam para a seção de `metrics_dictionary.md` que manda.
 | **Valor da AIH** | Valor aprovado da autorização, em reais nominais. | É **valor aprovado, não custo real**, e **não está corrigido pela inflação** — somar 2019 com 2023 direto subestima o começo da série. Distribuição assimétrica: use a mediana (§2). |
 | **Região de saúde / Região intermediária** | 30 e 8 agrupamentos de municípios, respectivamente. | Região de saúde é a unidade de planejamento do SUS; região intermediária é recorte estatístico do IBGE. Não são hierarquia uma da outra. |
 | **Ocupação acima de 100%** | A taxa pode passar de 100%. | Rotatividade de leito dentro do mês e cadastro mensal de capacidade. Leitura válida: a demanda passou da capacidade cadastrada (§"Ocupação acima de 100%"). |
+| **Alvo de ocupação (85% / 95%)** | 85% marca atenção, 95% crítico — mesma régua na rede e na UTI. | Vem da "regra de ocupação" (Bagust, Place & Posnett, *BMJ* 1999). **Não é alvo oficial da SES-RS nem do Ministério.** A rede fica em 60% e nunca cruza — isso é a informação. Só taxa tem alvo. |
+| **Visão: rede × UTI** | Troca a população de que a aba trata. | A UTI é 8,4% dos leitos e existe em 59 dos 225 municípios com leito; em visão UTI dois terços do mapa ficam em branco, e essa ausência é o achado. |
 
 ---
 
