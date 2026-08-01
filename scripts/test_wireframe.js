@@ -103,14 +103,17 @@ for (const ano of [2019, 2021, 2023]) {
   }
 }
 
-/* Verify the headline figures the page asserts in prose actually come out of the code. */
+/* Verify the headline figures the page asserts in prose actually come out of the code.
+   The KPI now reports the population Visão selects, so each check sets it explicitly. */
 console.log("=== figure verification ===");
 STATE.periodo = "ano2021"; STATE.anos = [2021]; STATE.rotulo = "2021";
-const pan2021 = TABS[0]();
-for (const [needle, why] of [["111,9%", "ICU rate 2021"], ["53,2%", "network rate 2021"]]) {
-  if (pan2021.includes(needle)) console.log(`  ok   ${why} renders as ${needle}`);
-  else { failures++; console.log(`  FAIL ${why}: ${needle} not found in Panorama`); }
-}
+STATE.medida = "ocupacao";
+STATE.visao = "uti";
+if (TABS[0]().includes("111,9%")) console.log("  ok   ICU rate 2021 renders as 111,9%");
+else { failures++; console.log("  FAIL ICU rate 2021: 111,9% not found"); }
+STATE.visao = "rede";
+if (TABS[0]().includes("53,2%")) console.log("  ok   network rate 2021 renders as 53,2%");
+else { failures++; console.log("  FAIL network rate 2021: 53,2% not found"); }
 STATE.periodo = "ano2023"; STATE.anos = [2023]; STATE.rotulo = "2023";
 if (TABS[0]().includes("60,0%")) console.log("  ok   network rate 2023 renders as 60,0%");
 else { failures++; console.log("  FAIL network rate 2023: 60,0% not found"); }
@@ -209,14 +212,25 @@ console.log("=== visão switch (rede / UTI) ===");
    with a single year there is no base to index against and the chart says so. */
 STATE.periodo = "todos"; STATE.anos = PERIODOS[0].anos.slice(); STATE.rotulo = "2019–2023";
 
-/* Panorama no longer answers to visão — its KPI selector always shows both populations,
-   so a rede/UTI switch there would duplicate a comparison already on screen. */
+/* Visão and the KPI selector are separate controls: Visão picks WHICH POPULATION is in
+   focus, the selector picks WHICH QUESTION is asked about it. Both must bite on Panorama. */
 STATE.visao = "rede"; STATE.tab = 0; STATE.medida = "ocupacao";
 const panRede = TABS[0]();
 STATE.visao = "uti";
 const panUti = TABS[0]();
-if (panRede === panUti) console.log("  ok   Panorama ignores visão (it always shows both)");
-else { failures++; console.log("  FAIL visão still alters Panorama"); }
+if (panRede !== panUti) console.log("  ok   visão changes Panorama (focus follows it)");
+else { failures++; console.log("  FAIL visão has no effect on Panorama"); }
+
+/* The tile reports the FOCUSED population only — one number, not both. The comparison
+   belongs in the chart, which is already drawing it. */
+const tileUti = panUti.slice(0, panUti.indexOf('class="row"'));
+const tileRede = panRede.slice(0, panRede.indexOf('class="row"'));
+if (tileUti.includes("86,1%") && !tileUti.includes("55,8%"))
+  console.log("  ok   UTI focus: tile shows 86,1% and not the rede figure");
+else { failures++; console.log("  FAIL UTI focus tile is showing both populations"); }
+if (tileRede.includes("55,8%") && !tileRede.includes("86,1%"))
+  console.log("  ok   rede focus: tile shows 55,8% and not the UTI figure");
+else { failures++; console.log("  FAIL rede focus tile is showing both populations"); }
 STATE.visao = "rede";
 
 /* Both scissors are present in the ocupação mode — one per population, showing the two
@@ -263,9 +277,13 @@ for (const [needle, why] of [["atenção 85%", "85% band labelled"],
 /* ICU 2021 is 111,9%, above both thresholds, so the tile must say crítico. */
 if (/crítico/.test(utiPan)) console.log("  ok   ICU 2021 tile reads crítico (111,9% > 95%)");
 else { failures++; console.log("  FAIL ICU 2021 tile did not reach crítico"); }
-/* The rede figure on the same tile is 53,2% and must read as under control. */
-if (/sob controle/.test(utiPan)) console.log("  ok   rede figure reads sob controle at 53,2%");
-else { failures++; console.log("  FAIL rede figure missing its 'sob controle' level"); }
+/* Same year in rede focus is 53,2% and must read as under control — the level follows the
+   focused population, not a fixed series. */
+STATE.visao = "rede";
+if (/sob controle/.test(TABS[0]()))
+  console.log("  ok   rede focus reads sob controle at 53,2%");
+else { failures++; console.log("  FAIL rede focus missing its 'sob controle' level"); }
+STATE.visao = "uti";
 /* Exactly one gauge, on the ocupação tile: leitos and internações are counts, and a
    target on a count would imply someone steers how many people fall ill. */
 const kpiBlock = utiPan.slice(0, utiPan.indexOf('class="row"'));

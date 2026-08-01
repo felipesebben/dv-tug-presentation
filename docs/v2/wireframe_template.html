@@ -138,18 +138,23 @@
          display:flex; flex-direction:column; gap:2px; }
 
   /* Selectable KPI tiles — the tile IS the navigation of Panorama.
-     The affordance has to be unmistakable, because dynamic visibility means the charts a
-     tile controls are not on screen until it is chosen: help that is invisible is worse
-     than clutter. Hence a real cursor, a hover lift, and a selected state that reads at a
-     glance (left rule + tinted surface + raised label), not just a border. */
-  .kpi.sel { font:inherit; text-align:left; border:1px solid transparent;
-             border-left:3px solid var(--grade); cursor:pointer; color:inherit;
-             transition:background .12s, border-color .12s; }
-  .kpi.sel:hover { background:#fbfbfa; border-left-color:#c9c9c6; }
-  .kpi.sel:focus-visible { outline:2px solid var(--serie); outline-offset:-2px; }
-  .kpi.sel.on { border-left-color:var(--serie); background:#f6f9fe; }
-  .kpi.sel.on .lbl { color:var(--serie); font-weight:600; }
-  .kpi .ctx2 { font-size:14px; color:var(--txt2); }
+     Selection is CHROME, not data, so it must not borrow a data colour: painting the
+     selected tile blue made blue mean "rede's value" and "this tile is selected" on the
+     same tile, which is the exact collision the palette rule exists to prevent.
+     It is expressed as figure-ground instead — the unselected tiles sit recessed on the
+     plane, the selected one is a raised white card with an ink rule. Same mechanism the
+     design system already uses to separate cards from the background, and it costs no
+     colour at all. */
+  .kpi.sel { font:inherit; text-align:left; cursor:pointer; color:inherit;
+             background:#eceae7; border:0; border-left:3px solid transparent;
+             box-shadow:none; transition:background .12s, box-shadow .12s; }
+  .kpi.sel .val, .kpi.sel .lbl { color:var(--txt2); }
+  .kpi.sel:hover { background:#f4f2ef; }
+  .kpi.sel:focus-visible { outline:2px solid var(--tinta); outline-offset:-2px; }
+  .kpi.sel.on { background:var(--card); border-left-color:var(--tinta);
+                box-shadow:0 1px 3px rgba(17,17,16,.10); }
+  .kpi.sel.on .lbl { color:var(--tinta); font-weight:600; }
+  .kpi.sel.on .val { color:var(--tinta); }
   .kpi .lbl { font-size:14px; color:var(--txt2); }
   .kpi .valrow { display:flex; align-items:baseline; gap:10px; }
   .kpi .val { font-size:30px; font-weight:700; letter-spacing:-.02em; line-height:1.1; }
@@ -302,11 +307,13 @@
   <section class="intro">
     <h2>O que mudou nesta revisão</h2>
     <p>
-      <strong>Os KPIs viraram o menu.</strong> Há sempre um selecionado, e ele decide o que
-      os gráficos comparam. A comparação em si nunca muda — é sempre <em>UTI contra
-      rede</em> —, então a tese do painel deixa de ser um gráfico e vira um
-      <strong>enquadramento aplicado três vezes</strong>. Cada aplicação conta uma história
-      diferente, que é o que justifica o controle existir:
+      <strong>Dois controles, com papéis distintos.</strong> <em>Visão</em> escolhe qual
+      população está em foco: os KPIs passam a falar dela, e nos gráficos ela é a linha
+      azul, com a outra em cinza atrás para comparação. <em>Os KPIs viraram o menu</em> — há
+      sempre um selecionado, e ele decide qual pergunta os gráficos respondem sobre essa
+      população. Assim a tese do painel deixa de ser um gráfico e vira um
+      <strong>enquadramento aplicado três vezes</strong>, e cada aplicação conta uma
+      história diferente:
     </p>
     <ul style="margin:0;padding-left:20px;font-size:15px;line-height:1.7;color:var(--chrome-muted);max-width:78ch">
       <li><strong>Ocupação</strong> — a rede <em>caiu</em> a 53,2% em 2021 enquanto a UTI
@@ -687,12 +694,24 @@ const fmtMedida = v => v==null ? "—" : (M_().modo==="taxa" ? pct(v) : nf(v));
 
 const V = () => VISOES[STATE.visao];
 const outraV = () => VISOES[STATE.visao==="rede" ? "uti" : "rede"];
-/* Visão belongs to Território only. Panorama no longer needs it: its KPI selector always
-   shows both populations, so a rede/UTI switch there would be a second control for a
-   comparison already on screen. Capacidade compares bed types against each other and Custo
-   is about spend, so the switch would be inert on both — and a filter that does nothing is
-   the defect we removed from V1's Macrorregião. */
-const visaoVale = () => STATE.tab===1;
+/* Visão and the KPI selector are two different controls and must stay that way:
+
+     Visão   — WHICH POPULATION is in focus. Drives the KPI values and which series is the
+               subject of every chart. The other population stays on screen as grey
+               context, because the comparison is the point.
+     Medida  — WHICH QUESTION the charts answer about that population.
+
+   An earlier pass merged them, so every tile showed both populations at once and the
+   comparison happened inside the tile instead of in the chart. That made the tiles
+   crowded, and it duplicated a comparison the hero was already making.
+
+   Capacidade compares bed types against each other and Custo is about spend, so Visão
+   would be inert there — and a filter that does nothing is V1's Macrorregião defect. */
+const visaoVale = () => STATE.tab===0 || STATE.tab===1;
+
+/* The population in focus, and the one it is compared against. */
+const ladoFoco = () => STATE.visao==="uti" ? "uti" : "rede";
+const ladoCtx  = () => STATE.visao==="uti" ? "rede" : "uti";
 const visaoAtiva = () => visaoVale() ? V() : VISOES.rede;
 
 /* ---------- thresholds ----------
@@ -844,43 +863,41 @@ function panorama(){
   const base = anoBase(), m = M_();
   const anos = selAnos();
 
-  /* ---- KPI row: this IS the navigation. Exactly one tile is always selected. ---- */
+  /* ---- KPI row: the navigation. Exactly one tile is always selected. ----
+     Each tile shows ONE number — the selected população's — because that is what Visão
+     means. The comparison against the other population happens in the chart below, which
+     is where a comparison belongs and where it is already being drawn. */
+  const foco=ladoFoco();
   const tiles = ORDEM_MEDIDAS.map(id=>{
     const cfg=MEDIDAS[id], sel = id===STATE.medida;
     const prev=STATE.medida; STATE.medida=id;      /* read each tile in its own measure */
-    const vUti=totalMedida(M,"uti"), vRede=totalMedida(M,"rede");
-    const serie=serieMedida(M,"uti");
+    const v=totalMedida(M,foco);
+    const serie=serieMedida(M,foco);
     STATE.medida=prev;
     const modo=cfg.modo;
 
     /* Only a rate can breach a threshold, so only ocupação carries a level. A target on a
        count would imply someone steers how many people fall ill. */
-    const n = (modo==="taxa" && vUti!=null) ? nivel(vUti) : null;
-    const fmt = v => v==null ? "—" : (modo==="taxa" ? pct(v) : nf(v));
+    const n = (modo==="taxa" && v!=null) ? nivel(v) : null;
+    const fmt = x => x==null ? "—" : (modo==="taxa" ? pct(x) : nf(x));
 
     return `<button class="kpi sel${sel?" on":""}" type="button" data-medida="${id}"
       aria-pressed="${sel}">
       <span class="lbl">${esc(cfg.rotulo)}</span>
-      <div class="valrow"><span class="val">${fmt(vUti)}</span><span class="dlt">UTI</span></div>
-      ${(()=>{
-        /* The rede figure keeps its own threshold reading — it is the comparison the tile
-           exists to make, and dropping its level would leave "55,8%" looking the same
-           whether it were healthy or critical. Colour only; the gauge stays with UTI. */
-        const nR = (modo==="taxa" && vRede!=null) ? nivel(vRede) : null;
-        return `<span class="ctx2">rede <b style="color:${nR?nivelCor(nR):C.txt2};
-          font-weight:${nR&&nR!=="ok"?600:400}">${fmt(vRede)}</b>${
-          nR ? ` · ${NIVEL_ROT[nR]}` : ""}</span>`;
-      })()}
-      ${n ? `<div class="gauge">${gaugeSVG(vUti)}</div>
+      <div class="valrow"><span class="val"${
+        n && n!=="ok" ? ` style="color:${C.acento}"` : ""}>${fmt(v)}</span></div>
+      ${n ? `<div class="gauge">${gaugeSVG(v)}</div>
              <span class="per" style="color:${nivelCor(n)};font-weight:${nivelPeso(n)}">
                ${NIVEL_ROT[n]} · alvo ${pct(LIM.atencao,0)}</span>`
           : `<div class="spark">${spark(serie,C.serie)}</div>
-             <span class="per">${esc(STATE.rotulo)}</span>`}
+             <span class="per">${esc(V().rotulo)} · ${esc(STATE.rotulo)}</span>`}
+      ${n ? `<span class="per">${esc(V().rotulo)} · ${esc(STATE.rotulo)}</span>` : ""}
     </button>`;
   }).join("");
 
-  /* ---- HERO: the same UTI-vs-rede frame, applied to the selected measure ---- */
-  const sUti = serieMedida(M,"uti"), sRede = serieMedida(M,"rede");
+  /* ---- HERO: the focus population against the other, on the selected measure ---- */
+  const ctx = ladoCtx();
+  const sFoco = serieMedida(M,foco), sCtx = serieMedida(M,ctx);
   const indexar = m.modo==="indice";
   /* Base is the MEAN of the first selected year, not its first month. A single month is a
      fragile base — January is seasonally low, so indexing to it would overstate every
@@ -894,17 +911,17 @@ function panorama(){
   const prep = s => indexar
     ? (()=>{ const b=mediaBase(s)||1; return s.map(v=>v==null?null:100*v/b); })()
     : s;
-  const pUtiV = prep(sUti), pRedeV = prep(sRede);
+  const pFocoV = prep(sFoco), pCtxV = prep(sCtx);
 
   const W=1114,H=300,L=54,R=108,T=16,B=26;
-  const vals=[...pUtiV,...pRedeV].filter(v=>v!=null && isFinite(v));
+  const vals=[...pFocoV,...pCtxV].filter(v=>v!=null && isFinite(v));
   const sx=scaler([0,Math.max(M.length-1,1)],[L,W-R]);
   const top = indexar ? Math.ceil(Math.max(...vals,101)/10)*10
                       : Math.max(1.4, Math.ceil((Math.max(...vals)+.1)*10)/10);
   const bot = indexar ? Math.min(Math.floor(Math.min(...vals,99)/10)*10, 90) : 0;
   const sy=scaler([bot,top],[H-B,T]);
   const mk = a => a.map((v,i)=>v==null?null:[sx(i),sy(v)]).filter(Boolean);
-  const pUti=mk(pUtiV), pRede=mk(pRedeV);
+  const pFoco=mk(pFocoV), pCtx=mk(pCtxV);
 
   /* Thresholds belong to rates. On an indexed axis the reference is the base line. */
   const faixas = indexar
@@ -933,22 +950,23 @@ function panorama(){
                      : [0,.25,.5,.75,1,1.25].filter(v=>v<=top).map(v=>[v,sy(v)]);
   const fmtEixo = indexar ? (v=>nf(v)) : (v=>nf(v*100)+"%");
 
-  /* UTI is the subject, so it is BLUE and rede is grey context. Neither is orange: orange
-     now means only "a threshold was breached", which the band marks. */
+  /* The population in focus is BLUE (the subject); the other is grey (context). Neither is
+     orange: orange means only "a threshold was breached", which the band marks. Swapping
+     Visão swaps which line is which — identity comes from selection, not from hue. */
   const hero = M.length<2 ? vazio("Selecione mais de um mês.") : svg(W,H,
     gridlines(L,W-R,gl,fmtEixo)+faixas+
-    `<path d="${path(pRede)}" fill="none" stroke="${C.marca}" stroke-width="2"
+    `<path d="${path(pCtx)}" fill="none" stroke="${C.marca}" stroke-width="2"
        stroke-linejoin="round"/>
-     <path d="${path(pUti)}" fill="none" stroke="${C.serie}" stroke-width="2.6"
+     <path d="${path(pFoco)}" fill="none" stroke="${C.serie}" stroke-width="2.6"
        stroke-linejoin="round"/>
-     <text x="${W-R+6}" y="${(pUti.at(-1)[1]-3).toFixed(1)}" font-size="13"
-       fill="${C.serie}" font-weight="600">${esc(m.uti.rot)}</text>
-     <text x="${W-R+6}" y="${(pUti.at(-1)[1]+12).toFixed(1)}" font-size="13"
-       fill="${C.txt2}">${indexar?nf(pUtiV.at(-1),1):pct(pUtiV.at(-1))}</text>
-     <text x="${W-R+6}" y="${(pRede.at(-1)[1]-3).toFixed(1)}" font-size="13"
-       fill="${C.marca}" font-weight="600">${esc(m.rede.rot)}</text>
-     <text x="${W-R+6}" y="${(pRede.at(-1)[1]+12).toFixed(1)}" font-size="13"
-       fill="${C.txt2}">${indexar?nf(pRedeV.at(-1),1):pct(pRedeV.at(-1))}</text>`+
+     <text x="${W-R+6}" y="${(pFoco.at(-1)[1]-3).toFixed(1)}" font-size="13"
+       fill="${C.serie}" font-weight="600">${esc(m[foco].rot)}</text>
+     <text x="${W-R+6}" y="${(pFoco.at(-1)[1]+12).toFixed(1)}" font-size="13"
+       fill="${C.txt2}">${indexar?nf(pFocoV.at(-1),1):pct(pFocoV.at(-1))}</text>
+     <text x="${W-R+6}" y="${(pCtx.at(-1)[1]-3).toFixed(1)}" font-size="13"
+       fill="${C.marca}" font-weight="600">${esc(m[ctx].rot)}</text>
+     <text x="${W-R+6}" y="${(pCtx.at(-1)[1]+12).toFixed(1)}" font-size="13"
+       fill="${C.txt2}">${indexar?nf(pCtxV.at(-1),1):pct(pCtxV.at(-1))}</text>`+
     xLabels(M,sx,H-6));
 
   const subs = {
@@ -1734,8 +1752,8 @@ const TOUR = [
     titulo:"Os KPIs são o menu — clique neles",
     texto:"Sempre há <b>um</b> selecionado, e ele decide o que os gráficos abaixo comparam. A comparação em si nunca muda — é sempre UTI contra rede — então o mesmo raciocínio se aplica a três medidas. E cada uma conta uma história diferente: em <b>leitos</b>, a rede cresceu na pandemia enquanto a UTI ficou parada; a UTI só cresceu <b>depois</b>." },
   { alvo:"filters", pos:{top:"170px", left:"404px"},
-    titulo:"O período vale para a aba inteira",
-    texto:"E <b>pandemia não é um recorte de data qualquer</b>: é o intervalo em que as duas populações andam em direções opostas. Em Território há ainda um filtro de <b>Visão</b>, porque lá o mapa localiza uma população de cada vez em vez de comparar as duas." },
+    titulo:"Dois controles, dois papéis diferentes",
+    texto:"<b>Visão</b> escolhe <i>qual população</i> está em foco — os KPIs passam a falar dela, e nos gráficos ela vira a linha azul, com a outra em cinza atrás para comparação. <b>Período</b> vale para a aba inteira, e pandemia não é um recorte qualquer: é o intervalo em que as duas populações andam em direções opostas." },
   { alvo:"tabstrip", pos:{top:"150px", left:"250px"},
     titulo:"A ordem de leitura",
     texto:"<b>Panorama</b> (o quê) → <b>Território</b> (onde) → <b>Capacidade</b> (que tipo de leito) → <b>Custo</b> (quanto). Cada aba responde uma pergunta e passa a próxima adiante." },

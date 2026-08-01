@@ -76,15 +76,24 @@ Tableau/Preferences.tps` e **reiniciar o Tableau**.
 |---|---|---|---|
 | `p_Periodo` | string, lista | `Todos` · `Pré-pandemia` · `Pandemia` · `Pós` | filtro global |
 | `p_Medida` | string, lista | `Ocupação` · `Leitos` · `Internações` | **navegação do Panorama** — ver §1.6 |
-| `p_Visao` | string, lista | `Rede SUS` · `UTI` | população do mapa — **só Território** |
+| `p_Visao` | string, lista | `Rede SUS` · `UTI` | **qual população está em foco** — Panorama e Território |
 | `p_LimiarAtencao` | float | `0.85` | limiar de atenção |
 | `p_LimiarCritico` | float | `0.95` | limiar crítico |
 
-`p_Medida` e `p_Visao` não são redundantes, e vale entender por quê antes de construir:
-**Panorama compara** as duas populações e por isso precisa sempre das duas — `p_Medida` só
-escolhe *qual medida* comparar. **Território localiza** uma população de cada vez, e por
-isso precisa que digam qual. Panorama não tem filtro de visão; Território não tem seletor
-de medida.
+`p_Medida` e `p_Visao` fazem coisas diferentes, e confundi-los foi o erro de uma versão
+anterior deste documento:
+
+| parâmetro | responde | efeito |
+|---|---|---|
+| `p_Visao` | **qual população** está em foco | os KPIs passam a reportá-la, e nos gráficos ela vira a série azul (sujeito), com a outra em cinza (contexto) |
+| `p_Medida` | **qual pergunta** se faz sobre ela | troca o herói e os dois gráficos de apoio |
+
+Cada tile mostra **um número só** — o da população em foco. A comparação com a outra
+acontece **no gráfico**, que é onde comparação pertence e onde ela já está sendo desenhada.
+Trazer as duas para dentro do tile deixa o tile cheio e duplica o que o herói faz.
+
+Território usa `p_Visao` e não tem seletor de medida: um mapa localiza uma população de cada
+vez.
 
 Os dois limiares são parâmetros de propósito: os valores vêm da literatura de crise de leito
 (Bagust, Place & Posnett, *BMJ* 1999) e **não são alvo oficial da SES-RS nem do Ministério**.
@@ -189,8 +198,9 @@ selecionado. Trocar o período re-indexa sozinho.
 ### 1.6 O seletor de KPI — Panorama inteiro depende disto
 
 A faixa de KPIs **é** a navegação do Panorama. Sempre há exatamente um tile selecionado, e
-ele decide qual medida os gráficos comparam. A comparação nunca muda — é sempre **UTI
-contra rede** —, então a tese do painel vira um enquadramento aplicado três vezes.
+ele decide qual pergunta os gráficos respondem sobre a população que `p_Visao` colocou em
+foco. A estrutura da comparação nunca muda — foco contra a outra população —, então a tese
+do painel vira um enquadramento aplicado três vezes.
 
 **Ação de parâmetro** em cada tile: Dashboard → Ações → Alterar parâmetro, ao *selecionar*
 a marca, alvo `p_Medida`, campo de origem = o rótulo da medida daquela planilha.
@@ -202,10 +212,15 @@ seleção vazia deixaria a aba sem gráfico nenhum.
 [p_Medida] = ATTR([Rótulo da Medida])
 ```
 
-Usar em Cor da barra lateral do tile, ou em sombreamento de painel. **O realce precisa ser
-inequívoco:** com visibilidade dinâmica, os gráficos que um tile controla não estão na tela
-enquanto ele não é escolhido — e ajuda invisível é pior que excesso de informação. Régua
-lateral + fundo levemente tingido + rótulo em peso maior, não só uma borda.
+**O realce precisa ser inequívoco**, porque com visibilidade dinâmica os gráficos que um
+tile controla não estão na tela enquanto ele não é escolhido.
+
+E precisa ser **figura-fundo, não cor**: seleção é cromo de interface, não dado. Pintar o
+tile selecionado de azul faz o azul significar "valor de rede" *e* "este tile está
+selecionado" no mesmo tile — a colisão exata que a regra de paleta existe pra impedir.
+Então: tiles não selecionados recuados sobre o plano `#eceae7`, o selecionado num card
+branco elevado com régua lateral em `--tinta` e rótulo em peso 600. Mesmo mecanismo que o
+design system já usa pra separar card de fundo, e não custa cor nenhuma.
 
 **Visibilidade dinâmica dos contêineres** (Tableau 2022.3+, você tem 2026.1): cada grupo de
 gráficos de apoio fica num contêiner cujo "Controlar visibilidade usando valor" aponta para
@@ -228,9 +243,12 @@ seria otimizar o layout perdendo o argumento.
 
 #### As três medidas, e por que o eixo muda
 
+A série em foco é sempre a **azul**; a outra fica **cinza** atrás dela. Trocar `p_Visao`
+troca qual é qual — identidade vem da seleção, não do hue.
+
 | medida | séries | eixo | por quê |
 |---|---|---|---|
-| **Ocupação** | `c_TaxaUti` × `c_TaxaRede` | **zero**, com faixas de limiar | taxas dividem a unidade, então comparam em absoluto |
+| **Ocupação** | taxa em foco × taxa da outra | **zero**, com faixas de limiar | taxas dividem a unidade, então comparam em absoluto |
 | **Leitos** | leitos UTI × leitos rede | **índice, base 100** | 1.837 contra 21.838 — no mesmo eixo absoluto a série menor vira uma linha no chão |
 | **Internações** | com UTI × total | **índice, base 100** | 342.929 contra 3.739.506, mesma razão |
 
@@ -294,33 +312,31 @@ esconder.
 
 #### 1.1 — A faixa de KPIs (três tiles, e eles são o menu)
 
-Três planilhas, tipo **Texto**, uma por medida. Cada uma mostra o valor de UTI como
-manchete e o da rede como contexto, porque a comparação é o que o tile existe para fazer.
+Três planilhas, tipo **Texto**, uma por medida. Cada uma mostra **um número só** — o da
+população que `p_Visao` colocou em foco. A comparação com a outra acontece no gráfico
+abaixo, que já a está desenhando; trazê-la para dentro do tile enche o tile e duplica o
+herói.
 
-| tile | manchete (UTI) | contexto (rede) | medidor |
-|---|---|---|---|
-| **Ocupação** | `c_TaxaUti` | `c_TaxaRede` | barra + 2 linhas de referência |
-| **Leitos** | leitos UTI médios/mês | leitos rede médios/mês | minigráfico |
-| **Internações** | `SUM([internacoes_com_uti])` | `SUM([total_internacoes])` | minigráfico |
+| tile | medida (na visão em foco) | medidor |
+|---|---|---|
+| **Ocupação** | `c_Taxa` | barra + 2 linhas de referência |
+| **Leitos** | `c_Leitos` | minigráfico |
+| **Internações** | `c_Internacoes` | minigráfico |
 
 ```
-// c_LeitosUti      média mensal de leitos de UTI
-SUM([leitos_uti_sus]) / COUNTD([ano_mes])
-
-// c_LeitosRede     média mensal de leitos SUS
-SUM([leitos_sus]) / COUNTD([ano_mes])
+// c_Internacoes    internações da visão corrente
+IF [p_Visao] = "UTI" THEN SUM([internacoes_com_uti]) ELSE SUM([total_internacoes]) END
 ```
 
 **Só o tile de ocupação recebe medidor e nível.** Leitos e internações são contagens: um
-alvo ali implicaria que alguém dirige quantas pessoas adoecem. Mas o número da **rede** no
-tile de ocupação recebe a cor do seu próprio nível — sem ele, 55,8% ficaria igual estando
-saudável ou crítico, e a comparação é justamente o motivo do tile.
+alvo ali implicaria que alguém dirige quantas pessoas adoecem. O nível segue a população em
+foco — em visão UTI o tile marca *atenção* a 86,1%, em visão rede marca *sob controle* a
+55,8%.
 
-Realce do selecionado: régua lateral em `#2a78d6`, fundo `#f6f9fe`, rótulo em peso 600.
-Cursor de mão. **O realce tem que ser inequívoco** — os gráficos que o tile controla não
-estão na tela até ele ser escolhido.
+Realce do selecionado: **figura-fundo, nunca cor de dado** — ver §1.6. Cursor de mão.
 
-Título dinâmico em todos: `... · <Parâmetros.p_Periodo>`.
+Rodapé de cada tile: `<Parâmetros.p_Visao> · <Parâmetros.p_Periodo>`, para que o número
+nunca fique ambíguo sobre de que população e de que recorte ele fala.
 
 #### 1.2 — Herói: a mesma comparação, na medida selecionada
 
@@ -335,11 +351,11 @@ dos três na tela.
 | **Eixo Y** | **zero** a 1,4 | **base 100** |
 | **Referências** | faixas em `p_LimiarAtencao` e `p_LimiarCritico`; linha em 100% | linha constante em 100 |
 
-**Cor, e esta é a correção de 01/08/2026:** a série de **UTI é azul** (é o sujeito) e a da
-**rede é cinza** (é o contexto). Nenhuma das duas é laranja. Laranja fica só para a faixa
-de limiar — o alarme passa a ser *uma linha azul entrando numa faixa laranja*, que só
-acontece quando é verdade. Antes a UTI era laranja por identidade, então UTI a 40%
-continuava gritando alarme.
+**Cor, e esta é a correção de 01/08/2026:** a série **em foco é azul** (o sujeito) e a
+outra é **cinza** (o contexto). Trocar `p_Visao` troca qual é qual. Nenhuma das duas é
+laranja: laranja fica só para a faixa de limiar, e o alarme passa a ser *uma linha azul
+entrando numa faixa laranja*, que só acontece quando é verdade. Antes a UTI era laranja por
+identidade, então UTI a 40% continuava gritando alarme.
 
 Base do índice: **média do primeiro ano selecionado**, não o primeiro mês. Em cálculo de
 tabela:

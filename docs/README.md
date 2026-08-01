@@ -267,11 +267,12 @@ navigable tabs rendered inside a true 1200×800 frame, so "fits on one screen" i
 rather than claimed. Every number and series is real, read from `data/refined/` — no
 synthetic fill.
 
-**The KPI row is the navigation.** Exactly one tile is always selected, and it decides which
-measure the tab compares. The comparison itself never changes — always UTI against rede — so
-the dashboard's thesis stops being one chart and becomes a **frame applied three times**.
-Each application tells a different story, which is what makes the control worth having
-rather than decoration:
+**Two controls, with different jobs.** *Visão* picks which population is in focus: the KPI
+tiles report it, and in every chart it becomes the blue series with the other behind it in
+grey. *The KPI row is the navigation* — exactly one tile is always selected, and it decides
+which question the charts answer about that population. So the dashboard's thesis stops being
+one chart and becomes a **frame applied three times**, and each application tells a different
+story:
 
 | | rede | UTI |
 |---|---|---|
@@ -283,6 +284,11 @@ rather than decoration:
 The leitos row is the strongest thing in the file for a funding case: RS expanded general
 capacity *during* the pandemic while ICU stayed flat, and only added ICU beds afterwards.
 The capacity response arrived after the emergency.
+
+Each tile shows **one number** — the focused population's. The comparison happens in the
+chart, which is where a comparison belongs and where it is already being drawn; an earlier
+pass put both populations inside the tile and merged the two controls, which crowded the tile
+and duplicated the hero.
 
 The hero is never hidden — it changes measure but stays on screen in all three states,
 because it is the chart that justifies the dashboard existing. Rates compare in absolute
