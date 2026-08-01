@@ -75,7 +75,7 @@ Tableau/Preferences.tps` e **reiniciar o Tableau**.
 | nome | tipo | valores | uso |
 |---|---|---|---|
 | `p_Periodo` | string, lista | `Todos` · `Pré-pandemia` · `Pandemia` · `Pós` | filtro global |
-| `p_Medida` | string, lista | `Ocupação` · `Leitos` · `Internações` | **navegação do Panorama** — ver §1.6 |
+| `p_Medida` | string, lista | `Ocupação` · `Leitos` · `Internações` | **navegação do Panorama** — ver §C6 |
 | `p_Visao` | string, lista | `Rede SUS` · `UTI` | **qual população está em foco** — Panorama e Território |
 | `p_LimiarAtencao` | float | `0.85` | limiar de atenção |
 | `p_LimiarCritico` | float | `0.95` | limiar crítico |
@@ -107,7 +107,7 @@ perguntar.
 Criar todos antes de começar as planilhas. Nomes com prefixo para agruparem no painel de
 dados.
 
-### 1.1 Filtro de período
+### C1 · Filtro de período
 
 ```
 // c_FiltroPeriodo  (booleano — arrastar para Filtros, manter True)
@@ -121,7 +121,7 @@ END
 
 Aplicar em **todas as planilhas** da aba (Filtro → Aplicar a planilhas → Selecionadas).
 
-### 1.2 A troca de visão
+### C2 · A troca de visão
 
 O padrão vale para o painel inteiro: **trocar numerador e denominador separadamente, nunca
 duas taxas já divididas.** Razão pré-dividida não se re-agrega.
@@ -147,10 +147,10 @@ IF [p_Visao] = "UTI" THEN SUM([leito_dias_uti_sus]) ELSE SUM([leito_dias_sus]) E
 > métricas). Conferido: `SUM(leitos_sus) / COUNTD(ano_mes)` = **21.838,1** em 2023, que é o
 > número certo.
 
-### 1.3 Taxas fixas das duas visões
+### C3 · As duas séries do herói, e como a cor segue o foco
 
-O gráfico herói mostra as duas ao mesmo tempo, então precisa das duas independentes da
-visão selecionada:
+O herói mostra as duas populações ao mesmo tempo, então precisa das duas independentes da
+visão:
 
 ```
 // c_TaxaRede
@@ -160,7 +160,37 @@ SUM([dias_permanencia_sus]) / SUM([leito_dias_sus])
 SUM([dias_uti]) / SUM([leito_dias_uti_sus])
 ```
 
-### 1.4 Nível de alerta
+**Mas plotar essas duas direto não funciona.** Com Nomes de medidas em Cor, cada medida
+recebe uma cor fixa — e o que precisamos é que a cor siga `p_Visao`, não a identidade da
+série. Não dá pra pintar "a que estiver em foco" com Nomes de medidas.
+
+A saída é fazer a troca **no dado**, não na cor. Duas medidas derivadas, e aí sim cores
+fixas:
+
+```
+// c_Foco        — a população em foco
+IF [p_Visao] = "UTI" THEN [c_TaxaUti] ELSE [c_TaxaRede] END
+
+// c_Contexto    — a outra, atrás
+IF [p_Visao] = "UTI" THEN [c_TaxaRede] ELSE [c_TaxaUti] END
+```
+
+Plotar `c_Foco` e `c_Contexto`, e mapear em Nomes de medidas: **Foco → `#2a78d6` azul,
+Contexto → `#8c8c89` cinza**, permanentemente. Trocar `p_Visao` troca quais números entram
+em cada série, e a cor nunca precisa mudar — que é exatamente a regra "identidade vem da
+seleção, o hue carrega só estado".
+
+O mesmo par existe para as medidas de contagem:
+
+```
+// c_LeitosFoco / c_LeitosContexto        sobre leitos_uti_sus e leitos_sus
+// c_InternacoesFoco / c_InternacoesContexto   sobre internacoes_com_uti e total_internacoes
+```
+
+Rótulos das séries: `IF [p_Visao] = "UTI" THEN "UTI" ELSE "Rede SUS" END` e o inverso, para
+que a legenda diga qual é qual sem depender da cor.
+
+### C4 · Nível de alerta
 
 ```
 // c_Nivel
@@ -180,7 +210,7 @@ Usar em **Cor**, com a paleta `V2 Neutro e Destaque` mapeada assim:
 Os dois níveis dividem o mesmo laranja de propósito: uma terceira cor estouraria o
 orçamento do sistema. A distinção entre atenção e crítico é a palavra e o negrito.
 
-### 1.5 Índice (2019 = 100)
+### C5 · Índice (2019 = 100)
 
 Cálculo de tabela, não LOD — assim a base acompanha o filtro de período automaticamente:
 
@@ -192,10 +222,16 @@ Cálculo de tabela, não LOD — assim a base acompanha o filtro de período aut
 100 * ZN([c_Num]) / LOOKUP(ZN([c_Num]), FIRST())
 ```
 
-`LOOKUP(expr, FIRST())` devolve o valor da primeira marca da partição — que é o primeiro ano
-selecionado. Trocar o período re-indexa sozinho.
+`LOOKUP(expr, FIRST())` devolve o valor da primeira marca da partição. Trocar o período
+re-indexa sozinho.
 
-### 1.6 O seletor de KPI — Panorama inteiro depende disto
+> **Cuidado com o grão, porque isto muda a fórmula.** Nos gráficos anuais (as tesouras de
+> apoio) a primeira marca *é* o primeiro ano, e `LOOKUP(..., FIRST())` está certo. No herói,
+> que é mensal, a primeira marca é **janeiro** — sazonalmente baixo, e indexar por ele
+> superestimaria todo ponto seguinte. Lá a base é a **média do primeiro ano**, com
+> `WINDOW_AVG` — ver §1.2, na seção 2.
+
+### C6 · O seletor de KPI — Panorama inteiro depende disto
 
 A faixa de KPIs **é** a navegação do Panorama. Sempre há exatamente um tile selecionado, e
 ele decide qual pergunta os gráficos respondem sobre a população que `p_Visao` colocou em
@@ -207,9 +243,21 @@ a marca, alvo `p_Medida`, campo de origem = o rótulo da medida daquela planilha
 Em "Limpar seleção", escolher **Manter valor atual** — nunca "Definir como" —, porque uma
 seleção vazia deixaria a aba sem gráfico nenhum.
 
+Isso exige um campo na planilha do tile para a ação carregar. Não existe dimensão comum
+entre os três tiles, então cada planilha ganha uma constante própria:
+
+```
+// d_MedidaOcupacao      (na planilha do tile de ocupação)     "Ocupação"
+// d_MedidaLeitos        (na planilha do tile de leitos)       "Leitos"
+// d_MedidaInternacoes   (na planilha do tile de internações)  "Internações"
+```
+
+Arrastar a constante para **Detalhe** na planilha correspondente e usá-la como campo de
+origem da ação. O realce do tile ativo compara o parâmetro com ela:
+
 ```
 // c_TileSelecionado   — realce do tile ativo
-[p_Medida] = ATTR([Rótulo da Medida])
+[p_Medida] = ATTR([d_MedidaOcupacao])     // idem nas outras duas, cada uma com a sua
 ```
 
 **O realce precisa ser inequívoco**, porque com visibilidade dinâmica os gráficos que um
@@ -238,7 +286,7 @@ um booleano:
 > agregado ou depende de uma dimensão da visão.
 
 **O herói nunca é escondido.** Ele muda de medida, mas continua na tela em todos os três
-estados: é o gráfico que justifica o painel existir, e escondê-lo num estado de quatro
+estados: é o gráfico que justifica o painel existir, e escondê-lo em dois estados de três
 seria otimizar o layout perdendo o argumento.
 
 #### As três medidas, e por que o eixo muda
@@ -249,8 +297,8 @@ troca qual é qual — identidade vem da seleção, não do hue.
 | medida | séries | eixo | por quê |
 |---|---|---|---|
 | **Ocupação** | taxa em foco × taxa da outra | **zero**, com faixas de limiar | taxas dividem a unidade, então comparam em absoluto |
-| **Leitos** | leitos UTI × leitos rede | **índice, base 100** | 1.837 contra 21.838 — no mesmo eixo absoluto a série menor vira uma linha no chão |
-| **Internações** | com UTI × total | **índice, base 100** | 342.929 contra 3.739.506, mesma razão |
+| **Leitos** | leitos em foco × leitos da outra | **índice, base 100** | 1.837 contra 21.838 — no mesmo eixo absoluto a série menor vira uma linha no chão |
+| **Internações** | internações em foco × as da outra | **índice, base 100** | 342.929 contra 3.739.506, mesma razão |
 
 A base do índice é a **média do primeiro ano selecionado**, não o primeiro mês. Janeiro é
 sazonalmente baixo; indexar por ele superestimaria todo ponto seguinte, e a média anual é o
@@ -277,7 +325,7 @@ intensiva chegou após a emergência.
 | Leitos | UTI como fatia da rede (7,0% → 8,4%) | leitos por tipo ao longo do tempo |
 | Internações | % das internações que usaram UTI (7,6% → 9,0%) | volume × permanência média, indexados |
 
-### 1.7 Decomposição da barra de capacidade
+### C7 · Decomposição da barra de capacidade
 
 Para a barra preenchida do Território. Comprimento = leitos, parte cheia = ocupação:
 
@@ -306,7 +354,7 @@ Legenda das colunas: **Colunas/Linhas** = prateleiras; **Marcas** = tipo e encod
 
 ### Aba 1 · Panorama
 
-A aba inteira depende do seletor de §1.6. Construir os tiles primeiro, depois a ação de
+A aba inteira depende do seletor de §C6. Construir os tiles primeiro, depois a ação de
 parâmetro, e só então os gráficos — assim dá pra testar a troca antes de haver o que
 esconder.
 
@@ -333,7 +381,7 @@ alvo ali implicaria que alguém dirige quantas pessoas adoecem. O nível segue a
 foco — em visão UTI o tile marca *atenção* a 86,1%, em visão rede marca *sob controle* a
 55,8%.
 
-Realce do selecionado: **figura-fundo, nunca cor de dado** — ver §1.6. Cursor de mão.
+Realce do selecionado: **figura-fundo, nunca cor de dado** — ver §C6. Cursor de mão.
 
 Rodapé de cada tile: `<Parâmetros.p_Visao> · <Parâmetros.p_Periodo>`, para que o número
 nunca fique ambíguo sobre de que população e de que recorte ele fala.
@@ -361,9 +409,13 @@ Base do índice: **média do primeiro ano selecionado**, não o primeiro mês. E
 tabela:
 
 ```
-// c_IndiceUti     Calcular usando: Tabela (horizontal)
-100 * ZN([medida UTI]) / WINDOW_AVG(ZN([medida UTI]), FIRST(), FIRST() + 11)
+// c_IndiceFoco        Calcular usando: Tabela (horizontal)
+100 * ZN([c_LeitosFoco]) / WINDOW_AVG(ZN([c_LeitosFoco]), FIRST(), FIRST() + 11)
+
+// c_IndiceContexto    idem, sobre [c_LeitosContexto]
 ```
+
+(Trocar `c_LeitosFoco` por `c_InternacoesFoco` na medida de internações.)
 
 > Se o recorte tiver menos de 12 meses, trocar o `+ 11` pelo número de meses do primeiro
 > ano selecionado, ou indexar por `LOOKUP(..., FIRST())` e aceitar a base de um mês só. A
@@ -385,7 +437,7 @@ com capacidade parada enquanto a demanda explodia.
 
 Nas duas, a nota é obrigatória: **"A distância entre as linhas não é folga de capacidade —
 é a variação da ocupação."** As séries são indexadas cada uma contra a própria base, em
-unidades diferentes, então o cruzamento não significa nada. Ver §1.5.
+unidades diferentes, então o cruzamento não significa nada. Ver §C5.
 
 ### Aba 2 · Território
 
@@ -496,13 +548,22 @@ Linha em `#2a78d6`. **O último ponto não é laranja** — recência não é al
 
 #### 4.1 — Gasto e internações, indexados
 
-Mesma construção de 1.6, com `SUM([valor_aih])` e `SUM([total_internacoes])`. Gasto em
-laranja: crescer acima do volume é o que pede atenção.
+Mesma construção indexada da §C5, com `SUM([valor_aih])` e `SUM([total_internacoes])`.
+
+Gasto em laranja é uma das duas únicas exceções à regra "laranja só onde há limiar": aqui
+não há régua, mas o gasto crescer acima do volume **é** a condição que o pleito discute, e é
+acionável. Está anotado aqui de propósito, para não virar precedente — se aparecer uma
+terceira exceção, é sinal de que a regra virou opinião.
 
 #### 4.2 — Volume e gasto por complexidade
 
-Duas barras 100% empilhadas, `complexidade_desc` em Cor, alta complexidade em `#eb6834`.
-O descasamento entre as duas barras **é** o gráfico.
+Duas barras 100% empilhadas, `complexidade_desc` em Cor: **alta complexidade em `#2a78d6`
+azul (é o sujeito), média em `#8c8c89` cinza (é o contexto)**. O descasamento entre as duas
+barras **é** o gráfico, e ele se lê pelo comprimento — não precisa de cor de alarme.
+
+> Correção de revisão: antes a alta complexidade era laranja, o que é laranja marcando
+> **categoria** — justamente o que a regra proíbe. O gráfico não perde nada: a
+> desproporção entre 10,8% das internações e 36,3% do gasto está no tamanho das faixas.
 
 > `complexidade_desc` vem grafado **"Méida Complexidade"** no dicionário da fonte. Corrigir
 > só na exibição (alias), **nunca na chave de junção**.
@@ -528,7 +589,7 @@ Substituições aceitas, para ninguém perder tempo tentando:
 | Glossário com busca | sem busca em objeto de texto | contêiner flutuante com o texto completo + a linha do glossário em **dica de ferramenta** de cada métrica, que é onde ela chega sem exigir clique |
 | Medidor de limiar no KPI | gráfico de marcador é eixo duplo | barra + duas linhas de referência constantes |
 | Faixa de limiar sombreada | — | Distribuição de referência → Faixa, com preenchimento |
-| Filtro "Visão" trocando medidas | parâmetro, não filtro | é o que a seção 1.2 faz; o Tableau chama de parâmetro, e ele **não** aparece na lista de filtros |
+| Filtro "Visão" trocando medidas | parâmetro, não filtro | é o que a §C2 faz; o Tableau chama de parâmetro, e ele **não** aparece na lista de filtros |
 | KPI clicável como menu | ação de parâmetro + visibilidade dinâmica | nativo desde 2022.3 — funciona, mas o realce do tile é responsabilidade sua: sem ele o usuário não descobre que dá pra clicar, e os gráficos escondidos ficam invisíveis para sempre |
 
 Se o relacionamento com o arquivo espacial der trabalho, o **plano B** é mapa de pontos por
@@ -558,6 +619,10 @@ mesmo — mas funciona sem conexão extra.
 - [ ] Nenhuma taxa arrastada como `SUM([taxa_ocupacao_sus])` — sempre `c_Num / c_Den`
 - [ ] Todo título com período dinâmico
 - [ ] Nenhum subtítulo afirmando conclusão que o filtro possa desmentir
+- [ ] **`p_Visao` e `p_Medida` fazem coisas diferentes** — trocar a visão muda os *números*
+      dos tiles e qual série é azul; trocar o tile muda *quais gráficos* aparecem. Se um
+      deles não fizer nada, ou se um tile mostrar as duas populações, os dois se
+      confundiram de novo
 - [ ] **Sempre exatamente um tile de KPI selecionado** — inclusive depois de clicar fora.
       Se "Limpar seleção" estiver como "Definir como", a aba fica sem gráfico nenhum
 - [ ] Trocar de tile muda os dois gráficos de apoio, e o herói continua na tela nos três
@@ -567,6 +632,6 @@ mesmo — mas funciona sem conexão extra.
       não há limiar para romper, **não deve haver laranja nenhum nos gráficos**
 - [ ] Eixo em zero em toda taxa e toda barra; exceção só nos dois gráficos indexados
 - [ ] Filtro de período aplicado às planilhas da aba inteira
-- [ ] O aviso "a distância não é folga" presente no gráfico 1.6
+- [ ] O aviso "a distância não é folga" presente **nas duas tesouras** (§1.3)
 - [ ] Botões de glossário, como usar e suporte no cabeçalho, nas quatro abas
 - [ ] Cada aba cabe em 1200 × 800 **sem rolagem**

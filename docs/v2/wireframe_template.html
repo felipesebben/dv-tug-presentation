@@ -1461,7 +1461,7 @@ function custo(){
       <rect x="${l2}" y="${y}" width="${(wTot-wHigh-2).toFixed(1)}" height="38"
         fill="${C.marca}" rx="2"/>
       <rect x="${(l2+wTot-wHigh).toFixed(1)}" y="${y}" width="${Math.max(1,wHigh).toFixed(1)}"
-        height="38" fill="${C.acento}" rx="2"/>
+        height="38" fill="${C.serie}" rx="2"/>
       <text x="${l2+8}" y="${y+24}" font-size="14" fill="#ffffff" font-weight="600">${txtMed}</text>
       <text x="${(l2+wTot-wHigh-8).toFixed(1)}" y="${y+24}" text-anchor="end" font-size="14"
         fill="${C.tinta}" font-weight="600">${txtHigh}</text>`;
@@ -1486,7 +1486,8 @@ function custo(){
     <div class="card" style="flex:1.1">
       <div class="cardhead">
         <p class="cardtitle">Volume e gasto por complexidade · ${esc(STATE.rotulo)}</p>
-        <p class="cardsub">Alta complexidade em laranja. O descasamento entre as barras é o gráfico.</p>
+        <p class="cardsub">Alta complexidade em azul. O descasamento entre as barras é o gráfico —
+          ele se lê pelo comprimento, sem precisar de cor de alarme.</p>
       </div>
       <div style="flex:1;min-height:0">${stack}</div>
       <p class="cardnote">Alta complexidade: <b>${pct(nT?alta[0]/nT:0)}</b> das internações,
