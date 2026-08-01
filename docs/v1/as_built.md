@@ -1,6 +1,6 @@
 # Dashboard V1 — como foi construído de fato (*as-built*)
 
-`docs/dashboard_v1_spec.md` é o documento de **projeto**: o que a V1 deveria ser, com o
+`docs/v1/spec.md` é o documento de **projeto**: o que a V1 deveria ser, com o
 raciocínio de cada pecado e as referências ao deck. Este documento aqui é o registro do
 que **efetivamente existe** em `tableau/dashboard_v1.twb`.
 
@@ -24,7 +24,7 @@ Verificado por leitura do XML do workbook (não por inspeção visual), em 2026-
 | 5 | Captura dos artefatos "antes" (§9) | prints, cronometragem, gravação | **removido do escopo** | apresentação é responsabilidade da dupla de UX |
 
 Nenhuma dessas divergências afeta a **corretude dos cálculos**. As medidas foram
-conferidas contra `docs/metrics_dictionary.md` e batem.
+conferidas contra `docs/foundations/metrics_dictionary.md` e batem.
 
 ---
 
@@ -80,9 +80,9 @@ legenda (interface do Tableau, "Aplicar a planilhas selecionadas").
 **Cálculos conferidos e corretos:**
 
 - `AVG(taxa_ocupacao)`, não `SUM` — respeita a regra de ouro do
-  `metrics_dictionary.md` (com `SUM` a taxa daria 4.928).
+  `docs/foundations/metrics_dictionary.md` (com `SUM` a taxa daria 4.928).
 - Média **das médias**, não ponderada por leito: 30,8% em vez de 43,1%. É intencional e está
-  documentado no `metrics_dictionary.md` §4.
+  documentado no `docs/foundations/metrics_dictionary.md` §4.
 - Fórmula de origem: `total_dias_permanencia / (leitos_total × dias_do_mês)`
   (`src/transform/transformers.py:152`), com dias reais do mês via `day(last_day(...))`.
 - Eixo X: `ano_mes` truncado por mês, contínuo — 60 meses.

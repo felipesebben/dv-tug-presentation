@@ -5,19 +5,42 @@
 > change. This is the map new sessions (human or Claude) use to figure out what's
 > here before opening anything.
 
+## Layout
+
+Three folders, split by **what a file is loyal to** rather than by file type:
+
+```
+docs/
+  foundations/   version-independent. Both V1 and V2 depend on these, and neither owns them
+  v1/            the intentionally bad first version
+  v2/            the corrected version
+```
+
+Splitting by type instead — all the specs together, all the wireframes together — was
+rejected because it would separate each version's spec from its own wireframe, and those
+are the two files you always open together.
+
+`foundations/` is the set nothing may contradict: what the data can answer, what the UX
+pair decided, and what each number means. When a version's document disagrees with one of
+these, the foundation wins and the version's document is the thing that needs fixing.
+
 ## Reading order
 
-For someone new to the project, the natural read order is: `data_briefing.md` →
-`uxers_guidance.md` → `dashboard_v1_spec.md` → `dashboard_v1_spec.html` (or
-`dashboard_v1_wireframe.html`) for the visual version. Read `metrics_dictionary.md`
-whenever you need to know what a number on the dashboard actually measures.
+New to the project: `foundations/data_briefing.md` → `foundations/uxers_guidance.md` →
+`v1/spec.md` → `v1/spec.html` (or `v1/wireframe.html` for the visual version) → `v2/spec.md`
+→ `v2/wireframe.html`. Read `foundations/metrics_dictionary.md` whenever you need to know
+what a number actually measures.
 
-If you're about to open or change the actual workbook, read `dashboard_v1_as_built.md`
-first — the spec describes the design, that file describes what got built.
+Building the V2 workbook: `v2/spec.md` for what to build, `v2/design_system.md` for the
+tokens, `v2/orientation.md` section 6 for how the help layer maps onto Tableau objects, and
+`foundations/metrics_dictionary.md` open on a second screen the whole time.
 
-## Files
+Opening or changing the **V1** workbook: read `v1/as_built.md` first — the spec describes
+the design, that file describes what actually got built, and they differ in five places.
 
-### `data_briefing.md`
+## `foundations/` — nothing here may be contradicted
+
+### `foundations/data_briefing.md`
 Data briefing for the UX co-presenters, written by the data side of the project.
 States what the data *can* answer (five business-question groups: occupancy over
 time, geographic comparison, patient demographics, bed capacity by type, cost),
@@ -25,15 +48,25 @@ which three refined tables exist (`occupancy`, `hospitalizacoes`, `leitos`) and 
 grain, and the four caveats that must surface somewhere in the dashboard (occupancy
 is an approximation and can exceed 100%, data is administrative not clinical,
 single-state scope, ~6-month lag). Does **not** prescribe chart types or layout —
-that's `uxers_guidance.md` and `dashboard_v1_spec.md`'s job. Input to everything else
+that's `docs/foundations/uxers_guidance.md` and `docs/v1/spec.md`'s job. Input to everything else
 in this folder.
 
-### `metrics_dictionary.md`
+### `foundations/uxers_guidance.md`
+Transcription of `references/uxers_guidance.pdf` — the two UX co-presenters' own
+priority pass over the Aurélien deck (*Learn Design Driven Data Visualization*),
+organized into three blocks: **Fundamentos de Design**, **Experiência do Usuário**,
+**Acessibilidade**, each principle with a concrete antes/depois example. This is the
+**decision layer that wins on conflicts** with the Aurélien deck (e.g. worst color
+pair for colorblindness — Aurélien says green/red, this doc says blue/red; V1 uses
+both, one per map). Also flags the "Top 5 UX Laws" the pair treats as unmissable:
+Proximity, Hick's Law, Law of Focus, Law of Simplicity, Jakob's Law.
+
+### `foundations/metrics_dictionary.md`
 Definition-of-record for every number shown on the dashboard, verified against
 `data/refined/*.parquet` — **the build reference to keep open while making the Tableau
 sheets**. Section 3 covers every chart region (C–J) with its source table, shelf
 assignment, real values to build against, and per-chart trap; it opens with the warning
-that `dashboard_v1_wireframe.html` is **only partly** fed by real data (header anchors
+that `docs/v1/wireframe.html` is **only partly** fed by real data (header anchors
 real, fine fill synthetic), so the wireframe must not be used as a build target — this
 file is the source of truth, and where Tableau disagrees with the wireframe, Tableau is
 right. Sections 1–2 cover the 8 KPI tiles: the exact SQL, the grain it's
@@ -54,24 +87,16 @@ command, unrun, and why we don't need it), and the 6- vs 7-digit municipality-co
 Closes with the six caveats that should surface in V2's footer. Doubles as a presentation
 artifact: V1 deliberately ships **no** data dictionary, and this is what it's missing.
 
-### `uxers_guidance.md`
-Transcription of `references/uxers_guidance.pdf` — the two UX co-presenters' own
-priority pass over the Aurélien deck (*Learn Design Driven Data Visualization*),
-organized into three blocks: **Fundamentos de Design**, **Experiência do Usuário**,
-**Acessibilidade**, each principle with a concrete antes/depois example. This is the
-**decision layer that wins on conflicts** with the Aurélien deck (e.g. worst color
-pair for colorblindness — Aurélien says green/red, this doc says blue/red; V1 uses
-both, one per map). Also flags the "Top 5 UX Laws" the pair treats as unmissable:
-Proximity, Hick's Law, Law of Focus, Law of Simplicity, Jakob's Law.
+## `v1/` — the intentionally bad version
 
-### `dashboard_v1_spec.md`
+### `v1/spec.md`
 The build spec for the intentionally bad first-version dashboard ("V1"), and the
 **source of truth** — everything else about V1 is derived from or should match this
 file. Contents: the "rules of the game" that keep V1 plausible instead of a
 caricature, the persona-of-error framing, the fixed 1200×2600px page layout (regions
 **N** through **J**), the full Aurélien principle inventory (reference), a
 per-region principle map tagging each region's primary/secondary sins by block
-(FD/UX/A11) with citations back to `uxers_guidance.md` (`[UXers]`) or the Aurélien
+(FD/UX/A11) with citations back to `docs/foundations/uxers_guidance.md` (`[UXers]`) or the Aurélien
 deck (`[p.NN]`), sheet-by-sheet Tableau build instructions, a 46-item sin ledger
 (38 from Aurélien + 8 from the UXers refinement) meant to be checked off live during
 the redesign workshop, and the suggested build order (including the Tableau
@@ -79,10 +104,42 @@ Relationships-not-Joins data-source setup). Section 9 ("before" artefacts) is re
 only as a record that it was dropped from scope.
 
 **Caveat:** this is the *design* document. V1 has been built, and the workbook diverges
-from it in a few places — read `dashboard_v1_as_built.md` alongside it. The spec keeps
+from it in a few places — read `docs/v1/as_built.md` alongside it. The spec keeps
 its reasoning intact because that reasoning is the redesign material.
 
-### `dashboard_v1_as_built.md`
+### `v1/spec.html`
+Styled, browsable companion to `docs/v1/spec.md` — same content, condensed
+(drops the full sheet-by-sheet tables in favor of a shorter build-order panel),
+formatted as a readable single-page doc with a sticky TOC and light/dark theme.
+Open this to *read* the spec; open the `.md` to *edit* it.
+
+### `v1/wireframe.html`
+Mid/high-fidelity **visual mockup** of the V1 dashboard described in
+`docs/v1/spec.md` — not a write-up, an actual rendering (KPI tiles, pies, a
+schematic map grid, bar charts, a canvas scatter, an SVG time series, etc.) built to
+look like a plausible bad Tableau export. Real anchor numbers (the 8 KPI values, sex
+split, yearly occupancy averages, Porto Alegre's share, the age-97-99 tail) are
+accurate against the base; fine-grained fill data (month-by-month table cells,
+long-tail bed-specialty names, scatter points) is synthetic and flagged as such in
+the page's own intro text. Has a "Mostrar diagnóstico" toggle that outlines each
+region and shows its principle(s)/citation/fix in a bottom drawer — condensed from
+`docs/v1/spec.md` section 5. Published as a Claude artifact for quick review;
+the file in this repo is the source of truth for that artifact.
+
+Note that it renders the **design intent**, not the built workbook — its time series shows
+the truncated 0,26–0,34 Y axis that V1 ended up not having. Left as-is on purpose: it is a
+mockup of the spec, and the spec's argument is what the redesign works from.
+
+Three regions were deliberately made **more plausible** (caricature gets dismissed; a
+mistake the audience recognizes from their own work lands harder): **N** is a full-height
+left rail plus a content-column appbar rather than a floating strip of buttons; **A** uses
+Arial rather than a decorative font, so the typographic sin is the *absence of scale*
+(3 arbitrary sizes, all-caps, stretched tracking, low contrast) instead of an ugly
+typeface; **I**'s 10 filters are scattered across **5 differently-styled blocks** down the
+page rather than stacked in a footer, so each block sits far from the chart it controls.
+Region A embeds inline copies of the three fictional SVG marks in `assets/logos/`.
+
+### `v1/as_built.md`
 Record of what `tableau/dashboard_v1.twb` **actually contains**, verified by reading the
 workbook XML rather than by looking at it. Written because the spec is a design document
 that the build intentionally diverged from, and a fresh reader would otherwise assume
@@ -97,9 +154,11 @@ redesign shouldn't fix a sin that isn't there. The review that produced this fil
 the time series and the filters, not all 46 ledger items, so it notes that a full
 ledger-vs-workbook pass is still worth doing before the workshop.
 
-### `dashboard_v2_spec.md`
+## `v2/` — the corrected version
+
+### `v2/spec.md`
 The build spec for the corrected dashboard ("V2"), and the counterpart to
-`dashboard_v1_spec.md` — same section structure so the two read side by side. Contents:
+`docs/v1/spec.md` — same section structure so the two read side by side. Contents:
 the persona (an SES-RS analyst assembling a federal funding case, which is what decides
 every cut below it), the one sentence each tab has to prove, a four-tab architecture at
 1200×800 so nothing scrolls, and a sheet-by-sheet spec with **real anchor numbers**
@@ -113,8 +172,54 @@ the whole talk: no amount of design catches it.
 Ends with a build order that puts the palette and workbook-level formatting *before* the
 first sheet, which is what stops V1's inconsistency from reaccumulating.
 
-### `dashboard_v2_wireframe_template.html`
-**Edit this one.** Source for `dashboard_v2_wireframe.html`, which is *generated* by
+### `v2/design_system.md`
+The token set the V2 is built from — colours, type scale, spacing grid, chart rules —
+so that consistency is a decision made once rather than a judgement repeated per
+sheet. Turns the direction in `docs/foundations/uxers_guidance.md`'s accessibility block into numbers:
+exactly 3 greys with measured contrast, an 8px spacing grid where the 8-vs-24
+intra/inter-group gap *is* the proximity law, a 9pt type floor, and a banned-forms
+list (pie, 3D, bubble, dual axis).
+
+The green+orange highlight pair the guidance recommended was tested with a CVD simulator
+and failed (ΔE 3,2 under protanopia, against a target of 8) — both hues sit on the
+red-green confusion axis. Blue+orange (ΔE 24,7) replaced it and was **ratified 29/07/2026**,
+closing the document's last open decision.
+
+Two additions from that ratification. First, the colours now carry fixed **valence**, not
+just visual role: grey is neutral, blue means healthy, orange means *needs attention* —
+which implies a prohibition that is easy to violate by habit, namely that orange must never
+mark merely "the most recent" or "the median". Second, the type family is **Roboto**, with
+the warning that matters more than the choice: Tableau embeds no fonts and Roboto ships with
+neither Windows nor Tableau, so an uninstalled font is substituted silently on whatever
+machine renders the view. Section 6 also documents how the choropleth is wired — an IBGE
+spatial file joined on the 7-digit code rather than Tableau's name-based geocoding, because
+38 RS municipality names are reused in other states. Palettes ship as
+`tableau/Preferences.tps`.
+
+### `v2/orientation.md`
+Content-of-record for the V2's orientation layer — guided tour, "how to use it", and
+glossary — specified together because they overlap heavily, so each sentence lives in one
+place and is referenced from the others. Closes the last open row of `docs/foundations/uxers_guidance.md`
+(Nielsen, help and documentation: *"dashboard sem glossário e sem botão de suporte"*).
+
+It has a second job worth understanding before reading it: the 29/07/2026 revision removed
+every editorial claim from the chart subtitles, because a subtitle asserting a conclusion is
+contradicted by the first filter a user applies. Those conclusions did not stop being true —
+they moved here. Without this layer the V2 trades a title that lies for a dashboard that
+explains nothing.
+
+Section 1 fixes the procedence rule: the glossary is the **user-facing subset** of
+`docs/foundations/metrics_dictionary.md`, which wins on any conflict, and nothing may be defined here that
+isn't defined there. Section 3 is the 6-step tour, including why the first-run prompt is not
+a modal. Section 4 carries the hardest thing the layer has to teach — the indexed chart's
+100 baseline, which contradicts the design system's own zero-baseline rule for reasons that
+have to be stated rather than assumed. Section 5 is the 14 glossary entries, each with the
+caveat that changes the reading. Section 6 maps each piece to its Tableau equivalent, and
+recommends a "Comece aqui" tab over a chain of show/hide containers for the tour, because the
+chain is the kind of construction nobody can maintain afterwards.
+
+### `v2/wireframe_template.html`
+**Edit this one.** Source for `docs/v2/wireframe.html`, which is *generated* by
 `scripts/build_wireframe_v2_data.py` injecting a ~230 KB data blob into the
 `/*__DATA__*/` placeholder. The split exists because the wireframe has to be a single
 self-contained file (it publishes as an artifact under a CSP that blocks every external
@@ -127,11 +232,11 @@ DOM and renders all four tabs under all seven period selections, failing on thro
 (ICU 111,9% in 2021, network 53,2%, 60,0% in 2023, 55,8% across the period) actually come
 out of the code rather than out of prose.
 
-### `dashboard_v2_wireframe.html`
+### `v2/wireframe.html`
 **Generated — do not edit.** See the template entry above.
 
 Mid/high-fidelity **visual mockup** of V2 and the counterpart to
-`dashboard_v1_wireframe.html` — the two are meant to be shown side by side. Four
+`docs/v1/wireframe.html` — the two are meant to be shown side by side. Four
 navigable tabs rendered inside a true 1200×800 frame, so "fits on one screen" is visible
 rather than claimed. Every number and series is real, read from `data/refined/` — no
 synthetic fill.
@@ -199,86 +304,8 @@ metric it qualifies, as an ⓘ on the chart title that opens that term's glossar
 The canvas is **fixed light** deliberately — its palette was contrast-validated against a
 white card, so theming it would invalidate the measurement.
 
-Published as a Claude artifact; `dashboard_v2_wireframe_template.html` plus the generator is
+Published as a Claude artifact; `docs/v2/wireframe_template.html` plus the generator is
 the source of truth for it.
-
-### `dashboard_v2_orientation.md`
-Content-of-record for the V2's orientation layer — guided tour, "how to use it", and
-glossary — specified together because they overlap heavily, so each sentence lives in one
-place and is referenced from the others. Closes the last open row of `uxers_guidance.md`
-(Nielsen, help and documentation: *"dashboard sem glossário e sem botão de suporte"*).
-
-It has a second job worth understanding before reading it: the 29/07/2026 revision removed
-every editorial claim from the chart subtitles, because a subtitle asserting a conclusion is
-contradicted by the first filter a user applies. Those conclusions did not stop being true —
-they moved here. Without this layer the V2 trades a title that lies for a dashboard that
-explains nothing.
-
-Section 1 fixes the procedence rule: the glossary is the **user-facing subset** of
-`metrics_dictionary.md`, which wins on any conflict, and nothing may be defined here that
-isn't defined there. Section 3 is the 6-step tour, including why the first-run prompt is not
-a modal. Section 4 carries the hardest thing the layer has to teach — the indexed chart's
-100 baseline, which contradicts the design system's own zero-baseline rule for reasons that
-have to be stated rather than assumed. Section 5 is the 14 glossary entries, each with the
-caveat that changes the reading. Section 6 maps each piece to its Tableau equivalent, and
-recommends a "Comece aqui" tab over a chain of show/hide containers for the tour, because the
-chain is the kind of construction nobody can maintain afterwards.
-
-### `dashboard_v2_design_system.md`
-The token set the V2 is built from — colours, type scale, spacing grid, chart rules —
-so that consistency is a decision made once rather than a judgement repeated per
-sheet. Turns the direction in `uxers_guidance.md`'s accessibility block into numbers:
-exactly 3 greys with measured contrast, an 8px spacing grid where the 8-vs-24
-intra/inter-group gap *is* the proximity law, a 9pt type floor, and a banned-forms
-list (pie, 3D, bubble, dual axis).
-
-The green+orange highlight pair the guidance recommended was tested with a CVD simulator
-and failed (ΔE 3,2 under protanopia, against a target of 8) — both hues sit on the
-red-green confusion axis. Blue+orange (ΔE 24,7) replaced it and was **ratified 29/07/2026**,
-closing the document's last open decision.
-
-Two additions from that ratification. First, the colours now carry fixed **valence**, not
-just visual role: grey is neutral, blue means healthy, orange means *needs attention* —
-which implies a prohibition that is easy to violate by habit, namely that orange must never
-mark merely "the most recent" or "the median". Second, the type family is **Roboto**, with
-the warning that matters more than the choice: Tableau embeds no fonts and Roboto ships with
-neither Windows nor Tableau, so an uninstalled font is substituted silently on whatever
-machine renders the view. Section 6 also documents how the choropleth is wired — an IBGE
-spatial file joined on the 7-digit code rather than Tableau's name-based geocoding, because
-38 RS municipality names are reused in other states. Palettes ship as
-`tableau/Preferences.tps`.
-
-### `dashboard_v1_spec.html`
-Styled, browsable companion to `dashboard_v1_spec.md` — same content, condensed
-(drops the full sheet-by-sheet tables in favor of a shorter build-order panel),
-formatted as a readable single-page doc with a sticky TOC and light/dark theme.
-Open this to *read* the spec; open the `.md` to *edit* it.
-
-### `dashboard_v1_wireframe.html`
-Mid/high-fidelity **visual mockup** of the V1 dashboard described in
-`dashboard_v1_spec.md` — not a write-up, an actual rendering (KPI tiles, pies, a
-schematic map grid, bar charts, a canvas scatter, an SVG time series, etc.) built to
-look like a plausible bad Tableau export. Real anchor numbers (the 8 KPI values, sex
-split, yearly occupancy averages, Porto Alegre's share, the age-97-99 tail) are
-accurate against the base; fine-grained fill data (month-by-month table cells,
-long-tail bed-specialty names, scatter points) is synthetic and flagged as such in
-the page's own intro text. Has a "Mostrar diagnóstico" toggle that outlines each
-region and shows its principle(s)/citation/fix in a bottom drawer — condensed from
-`dashboard_v1_spec.md` section 5. Published as a Claude artifact for quick review;
-the file in this repo is the source of truth for that artifact.
-
-Note that it renders the **design intent**, not the built workbook — its time series shows
-the truncated 0,26–0,34 Y axis that V1 ended up not having. Left as-is on purpose: it is a
-mockup of the spec, and the spec's argument is what the redesign works from.
-
-Three regions were deliberately made **more plausible** (caricature gets dismissed; a
-mistake the audience recognizes from their own work lands harder): **N** is a full-height
-left rail plus a content-column appbar rather than a floating strip of buttons; **A** uses
-Arial rather than a decorative font, so the typographic sin is the *absence of scale*
-(3 arbitrary sizes, all-caps, stretched tracking, low contrast) instead of an ugly
-typeface; **I**'s 10 filters are scattered across **5 differently-styled blocks** down the
-page rather than stacked in a footer, so each block sits far from the chart it controls.
-Region A embeds inline copies of the three fictional SVG marks in `assets/logos/`.
 
 ## Fixed in the 29/07/2026 revision
 
@@ -293,7 +320,7 @@ telling the audience about:
   **4.748,6**; the ranking was therefore wrong (Passo Fundo, Caxias do Sul and Novo Hamburgo
   were missing, São Jerônimo and Uruguaiana did not belong); and the bars encoded occupancy
   while the title said beds. Worth a slide: this is the same trap section 1 of
-  `metrics_dictionary.md` opens with, committed one tab away from where it is documented.
+  `docs/foundations/metrics_dictionary.md` opens with, committed one tab away from where it is documented.
 - **The map was a schematic grid in a wide strip.** RS's aspect ratio is 1,03 — square — so
   the strip either wasted ~800px or squashed the state. Now real IBGE geometry in a square
   container.
@@ -306,12 +333,12 @@ telling the audience about:
 - The workbook itself, `tableau/dashboard_v2.twb`, which lives in `tableau/`, not here.
   Everything it needs now exists: the refined tables with ICU columns, the design system
   with a ratified palette and type family, the build spec, the wireframe, and
-  `dashboard_v2_orientation.md` section 6 for how the help layer maps onto Tableau objects.
+  `docs/v2/orientation.md` section 6 for how the help layer maps onto Tableau objects.
   Two prerequisites are on Felipe rather than in the repo: install Roboto, and copy
   `tableau/Preferences.tps` into the Tableau repository folder.
 
-**Every row of `uxers_guidance.md` is now addressed.** The last one to close was Nielsen's
-help/documentation row, via `dashboard_v2_orientation.md`; the error-prevention row's
+**Every row of `docs/foundations/uxers_guidance.md` is now addressed.** The last one to close was Nielsen's
+help/documentation row, via `docs/v2/orientation.md`; the error-prevention row's
 "breadcrumb to undo a filter" closed in the same pass. One row was already marked open by
 the UX pair themselves (Nielsen — flexibility and efficiency of use, where they left a "?"
 on both sides), so it has nothing to satisfy.

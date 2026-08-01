@@ -42,7 +42,7 @@ direto pro arquivo neste diretório. Se a sua versão reclamar do SVG, exporte p
 
 ## Uso no wireframe
 
-`docs/dashboard_v1_wireframe.html` **não** referencia estes arquivos — ele traz os mesmos
+`docs/v1/wireframe.html` **não** referencia estes arquivos — ele traz os mesmos
 três SVGs embutidos inline. É duplicação consciente: o wireframe precisa ser um arquivo
 único que funcione sozinho (e como artifact publicado), sem caminhos relativos que quebrem.
 **Se editar uma marca aqui, replique lá** — busque por `logo-svg` no HTML.

@@ -168,30 +168,30 @@ free public API.
 See `docs/README.md` for the full manifest (what each file contains, how they relate).
 Short version:
 
-- `docs/data_briefing.md` — data briefing for the UX team: what the data can answer,
+- `docs/foundations/data_briefing.md` — data briefing for the UX team: what the data can answer,
   which business questions are prioritised, and the caveats that must be surfaced
-- `docs/uxers_guidance.md` — the UX co-presenters' own priority filter over the
+- `docs/foundations/uxers_guidance.md` — the UX co-presenters' own priority filter over the
   Aurélien deck (Fundamentos de Design / Experiência do Usuário / Acessibilidade,
-  each with antes/depois examples) — the refinement layer `dashboard_v1_spec.md` builds on
-- `docs/dashboard_v1_spec.md` — build spec for the intentionally bad first version:
+  each with antes/depois examples) — the refinement layer `docs/v1/spec.md` builds on
+- `docs/v1/spec.md` — build spec for the intentionally bad first version:
   page layout (regions N–J), sheet-by-sheet Tableau instructions, and a 46-item ledger
   of which design principle each choice violates (and how the redesign fixes it)
-- `docs/dashboard_v1_spec.html` / `docs/dashboard_v1_wireframe.html` — styled,
+- `docs/v1/spec.html` / `docs/v1/wireframe.html` — styled,
   browsable companions to the spec: the first is the write-up, the second is a mid/high-fidelity
   navigable mockup with a toggleable per-region diagnostic
-- `docs/dashboard_v1_as_built.md` — what the workbook actually contains, since the build
+- `docs/v1/as_built.md` — what the workbook actually contains, since the build
   diverged from the spec in five places. Read it before opening the workbook
-- `docs/metrics_dictionary.md` — definition-of-record for every number: exact SQL, grain,
+- `docs/foundations/metrics_dictionary.md` — definition-of-record for every number: exact SQL, grain,
   and the trap each one hides. V1 deliberately ships no data dictionary; this is what it's
   missing
-- `docs/dashboard_v2_design_system.md` — the tokens V2 is built from, so consistency is
+- `docs/v2/design_system.md` — the tokens V2 is built from, so consistency is
   decided once instead of judged per sheet. Includes the CVD measurement that overruled the
   guidance's recommended colour pair
-- `docs/dashboard_v2_spec.md` — build spec for the corrected version, with the V1-sin →
+- `docs/v2/spec.md` — build spec for the corrected version, with the V1-sin →
   V2-fix map that doubles as the workshop script
-- `docs/dashboard_v2_wireframe.html` — the "depois" mockup: four tabs at 1200×800, a working
+- `docs/v2/wireframe.html` — the "depois" mockup: four tabs at 1200×800, a working
   period filter, real geometry, all figures from `data/refined/`
-- `docs/dashboard_v2_orientation.md` — the tour, "how to use it" and glossary, and the home
+- `docs/v2/orientation.md` — the tour, "how to use it" and glossary, and the home
   of the conclusions removed from the chart subtitles
 
 Principles come from *Learn Design Driven Data Visualization* (Aurélien Vautier /
@@ -202,28 +202,28 @@ Dataviz Clarity, CC BY-NC-ND 4.0) — the PDF lives in the gitignored `reference
 - [x] Extraction pipeline (BigQuery → parquet), RS/2019-2023
 - [x] Transform pipeline (join, dictionary resolution, occupancy calc)
 - [x] Refine pipeline + `.hyper` export
-- [x] Dashboard briefing document (`docs/data_briefing.md`)
-- [x] Spec for the intentionally poor first-version dashboard (`docs/dashboard_v1_spec.md`),
-  refined against the UX co-presenters' own priority pass (`docs/uxers_guidance.md`)
-- [x] Mid/high-fidelity wireframe mockup with per-region diagnostic (`docs/dashboard_v1_wireframe.html`)
+- [x] Dashboard briefing document (`docs/foundations/data_briefing.md`)
+- [x] Spec for the intentionally poor first-version dashboard (`docs/v1/spec.md`),
+  refined against the UX co-presenters' own priority pass (`docs/foundations/uxers_guidance.md`)
+- [x] Mid/high-fidelity wireframe mockup with per-region diagnostic (`docs/v1/wireframe.html`)
 - [x] Build V1 in Tableau (`tableau/dashboard_v1.twb`) — single data source, three tables
   related (not joined) on `id_estabelecimento_cnes` + `ano_mes`; 21 worksheets assembled
   onto one fixed 1200×2600 dashboard, with all 11 region-I filters placed across their
   six spec'd blocks
 - [x] Scope the region-I filters — 8 of 11 now apply to selected worksheets, 3 stay global.
-  Scoping is deliberately approximate versus `docs/dashboard_v1_spec.md` section 6; the
+  Scoping is deliberately approximate versus `docs/v1/spec.md` section 6; the
   proximity sin still lands on 8 filters
-- [x] Record the as-built deviations (`docs/dashboard_v1_as_built.md`) — filter scope,
+- [x] Record the as-built deviations (`docs/v1/as_built.md`) — filter scope,
   automatic Y axis on the time series, dual-axis line chart, one known legend/pie filter
   mismatch
 - [x] V2 foundations — occupancy rate rebuilt as SUS-only and weighted (state rate moves
   30,8% → 55,8%), with numerator and denominator exported separately so it stays correct
   at every drill level; design system + validated Tableau palettes
-  (`docs/dashboard_v2_design_system.md`, `tableau/Preferences.tps`)
-- [x] V2 build spec (`docs/dashboard_v2_spec.md`) — persona, four-tab architecture at
+  (`docs/v2/design_system.md`, `tableau/Preferences.tps`)
+- [x] V2 build spec (`docs/v2/spec.md`) — persona, four-tab architecture at
   1200×800, sheet-by-sheet spec with verified anchor numbers, and the V1-sin → V2-fix
   map that doubles as the workshop script
-- [x] V2 wireframe, rebuilt around the ICU inversion (`docs/dashboard_v2_wireframe.html`,
+- [x] V2 wireframe, rebuilt around the ICU inversion (`docs/v2/wireframe.html`,
   generated from `..._template.html`) — four navigable tabs at 1200×800, a **working period
   filter** fed raw numerators and denominators so it recomputes `SUM(num)/SUM(den)` rather
   than averaging averages, real IBGE geometry in a square container, and no chart subtitle
@@ -243,14 +243,14 @@ Dataviz Clarity, CC BY-NC-ND 4.0) — the PDF lives in the gitignored `reference
   code-joined choropleth. Verified: polygon codes exactly equal the BD directory set
 - [x] Palette semantics ratified — blue+orange confirmed, with orange fixed to mean
   "needs attention" and never "most recent" or "median"; type family set to Roboto with a
-  documented Arial fallback (`docs/dashboard_v2_design_system.md`, `tableau/Preferences.tps`)
+  documented Arial fallback (`docs/v2/design_system.md`, `tableau/Preferences.tps`)
 - [x] Dry-run cost reporting no longer lies — `estimate_bytes()` returns `None` for every
   Base dos Dados table (Google's own public datasets return a real figure through the same
   client), and `run_extraction.py` was coercing that to `0`, so dry-run mode printed
   `0.00 MB estimated` for every query. It now reports `ESTIMATE UNAVAILABLE` and warns
   that the total is a floor, not the bill
-- [x] **V2 orientation layer** (`docs/dashboard_v2_orientation.md`, implemented in the
-  wireframe) — closes the last open row of `docs/uxers_guidance.md`, whose Nielsen row reads
+- [x] **V2 orientation layer** (`docs/v2/orientation.md`, implemented in the
+  wireframe) — closes the last open row of `docs/foundations/uxers_guidance.md`, whose Nielsen row reads
   *"dashboard sem glossário e sem botão de suporte → dashboard com glossário e botão de
   suporte"*. Three pieces, specced together because they overlap:
   - **Guided tour** — 6 steps that outline the *real* element they describe and jump to the
@@ -262,7 +262,7 @@ Dataviz Clarity, CC BY-NC-ND 4.0) — the PDF lives in the gitignored `reference
     contradicts the design system's zero-baseline rule for reasons now stated rather than
     assumed
   - **Glossary** — 14 searchable entries, each with the caveat that changes the reading,
-    derived from `docs/metrics_dictionary.md`, which stays the definition-of-record and wins
+    derived from `docs/foundations/metrics_dictionary.md`, which stays the definition-of-record and wins
     on conflict. Nothing is defined here that isn't defined there
   - Also closes the error-prevention row's "breadcrumb to undo a filter": a reset that
     appears only while something is filtered
@@ -283,7 +283,7 @@ Dataviz Clarity, CC BY-NC-ND 4.0) — the PDF lives in the gitignored `reference
 - [ ] **Next: build V2 in Tableau** (`tableau/dashboard_v2.twb`). Two prerequisites are
   outside the repo: install Roboto (Tableau embeds no fonts, and substitution is silent),
   and copy `tableau/Preferences.tps` into the Tableau repository folder. See
-  `docs/dashboard_v2_orientation.md` section 6 for how the help layer maps onto Tableau
+  `docs/v2/orientation.md` section 6 for how the help layer maps onto Tableau
   objects — the tour has no native equivalent, and a "Comece aqui" tab is recommended over a
   chain of show/hide containers
 

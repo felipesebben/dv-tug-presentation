@@ -1,6 +1,6 @@
 # Camada de orientação da V2 — tour, "como usar" e glossário
 
-> **Por que existe.** Fecha a última linha aberta de `docs/uxers_guidance.md` (bloco
+> **Por que existe.** Fecha a última linha aberta de `docs/foundations/uxers_guidance.md` (bloco
 > Experiência do Usuário, Nielsen — *ajuda a reconhecer/diagnosticar/recuperar de erros +
 > documentação*): **"dashboard sem glossário e sem botão de suporte → dashboard com
 > glossário e botão de suporte"**. É requisito com fonte, não ideia nova.
@@ -20,11 +20,11 @@ referenciada nos outros.
 
 ## 1. Regra de procedência: o glossário não é fonte de verdade
 
-`docs/metrics_dictionary.md` é a **definição-de-record** de todo número do projeto. O
+`docs/foundations/metrics_dictionary.md` é a **definição-de-record** de todo número do projeto. O
 glossário aqui é o **subconjunto voltado ao usuário** dele — linguagem de quem lê o
 dashboard, não de quem o constrói.
 
-| | `metrics_dictionary.md` | glossário (esta camada) |
+| | `docs/foundations/metrics_dictionary.md` | glossário (esta camada) |
 |---|---|---|
 | público | quem constrói as planilhas | quem lê o dashboard |
 | conteúdo | SQL exato, grão, validações, todas as armadilhas | o que o número significa e a ressalva que muda a leitura |
@@ -208,7 +208,7 @@ capacidade cadastrada. Não se corrige — se legenda.
 ## 5. Glossário — 16 verbetes
 
 Cada verbete: o que é, e a ressalva que muda a leitura. Referências entre parênteses
-apontam para a seção de `metrics_dictionary.md` que manda.
+apontam para a seção de `docs/foundations/metrics_dictionary.md` que manda.
 
 | termo | definição | ressalva |
 |---|---|---|

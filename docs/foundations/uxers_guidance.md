@@ -3,7 +3,7 @@
 Transcrição organizada de `references/uxers_guidance.pdf` (1 página, notas dos dois
 UXers co-apresentadores após revisar *Learn Design Driven Data Visualization*).
 Este documento **não substitui** o deck do Aurélien (`references/Learn_Design_Driven_Data_Visualization.pdf`,
-já catalogado em `dashboard_v1_spec.md` seção 4) — é o **filtro de prioridade** que a
+já catalogado em `docs/v1/spec.md` seção 4) — é o **filtro de prioridade** que a
 dupla aplicou por cima dele para esta apresentação específica: o que manter, o que
 cortar, e que exemplos concretos (antes/depois) eles próprios querem usar no palco.
 
@@ -84,7 +84,7 @@ depois é o que a V2 demonstra ao vivo.
 > **específica dos UXers** para este projeto — o deck do Aurélien usa
 > verde→vermelho como exemplo canônico [p.79]. Os dois pares são reais problemas
 > de CVD; não são contraditórios, só ênfases diferentes. O V1 usa os dois (ver
-> `dashboard_v1_spec.md` região E), um em cada mapa.
+> `docs/v1/spec.md` região E), um em cada mapa.
 
 ---
 
@@ -100,7 +100,7 @@ princípios acima, estes cinco são os que os UXers tratam como **prioridade má
 4. **Law of Simplicity** (= Prägnanz / lei da simplicidade)
 5. **Jakob's Law** (= combinar com o mundo real / reconhecimento)
 
-Isso importa porque, do inventário original em `dashboard_v1_spec.md` (baseado só
+Isso importa porque, do inventário original em `docs/v1/spec.md` (baseado só
 no Aurélien), a **Lei de Jakob não tinha nenhuma região dedicada** — é a lacuna mais
 importante que este refinamento fecha (ver região **N** nova, seção 5 daquele
 documento).
@@ -109,7 +109,7 @@ documento).
 
 ## 5. O que muda em relação ao inventário existente
 
-Resumo prático para quem for direto ao `dashboard_v1_spec.md`/`.html` sem ler tudo
+Resumo prático para quem for direto ao `docs/v1/spec.md`/`.html` sem ler tudo
 acima:
 
 - **Cortar**: a tabela de atributos pré-atentivos deixa de ser um pilar — vira menção
@@ -126,4 +126,4 @@ acima:
   refinamento tenta manter **1 princípio primário + no máximo 1-2 secundários
   coerentes** por região, espalhando os três blocos (Fundamentos / UX / Acessibilidade)
   em vez de concentrar tudo em "Fundamentos de Design" — ver a tabela de mapeamento
-  em `dashboard_v1_spec.md` seção 5.
+  em `docs/v1/spec.md` seção 5.
