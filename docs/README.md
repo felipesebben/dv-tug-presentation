@@ -267,13 +267,27 @@ navigable tabs rendered inside a true 1200×800 frame, so "fits on one screen" i
 rather than claimed. Every number and series is real, read from `data/refined/` — no
 synthetic fill.
 
-**The Panorama hero is ICU versus network occupancy**, and it is the page's argument: from
-2019 to 2021 the network rate *fell* 5,2 p.p. while ICU *rose* 35,8 p.p., peaking at 131,9%
-in June 2021 against 57,0% for the network. A dashboard showing only the aggregate would
-have reported less pressure in the worst health year of the century. A useful side effect
-is that the hero no longer needs the indexed-axis exception: both series are rates in the
-same unit, so the axis starts at zero and the 100% line becomes a real threshold. The
-scissors chart keeps the 100 baseline, and is now the only chart that needs it.
+**The KPI row is the navigation.** Exactly one tile is always selected, and it decides which
+measure the tab compares. The comparison itself never changes — always UTI against rede — so
+the dashboard's thesis stops being one chart and becomes a **frame applied three times**.
+Each application tells a different story, which is what makes the control worth having
+rather than decoration:
+
+| | rede | UTI |
+|---|---|---|
+| **Ocupação** 2021 | fell to 53,2% | rose to **111,9%** |
+| **Leitos** 2021 | grew to 106,0 | **flat at 99,6** |
+| **Leitos** 2023 | back to 100,3 | grew to **121,1** |
+| **Internações** 2020 | fell to 87,6 | rose to **112,5** |
+
+The leitos row is the strongest thing in the file for a funding case: RS expanded general
+capacity *during* the pandemic while ICU stayed flat, and only added ICU beds afterwards.
+The capacity response arrived after the emergency.
+
+The hero is never hidden — it changes measure but stays on screen in all three states,
+because it is the chart that justifies the dashboard existing. Rates compare in absolute
+terms so that hero starts at zero; counts are indexed, since 1.837 against 21.838 on one
+absolute axis flattens the smaller series into the floor.
 
 **The scissors chart was renamed after a reader misread it**, which is the most instructive
 thing in the file. Asked "if ICU hit 111,9% in 2021, why didn't demand overcome capacity in
@@ -307,8 +321,19 @@ visible, Região de saúde (30) behind "mais filtros" for Hick's Law.
 
 **Occupancy targets** are marked at 85% (atenção) and 95% (crítico), same ruler in both
 views. Two levels are expressed with **one hue** plus opacity, stroke weight and a word, so
-the palette budget survives. Only rate tiles carry a target — a threshold on admissions would
-imply someone is steering how many people fall ill.
+the palette budget survives. Only the rate tile carries a target — a threshold on admissions
+would imply someone is steering how many people fall ill.
+
+**The colour rule was rewritten on 01/08/2026**, and the reason is worth knowing because the
+defect was invisible until someone said it out loud. Orange had been doing two jobs at once:
+"needs attention" *and* "this is ICU". So ICU at 40% was still orange — shouting alarm with
+nothing wrong — and since ICU is always on screen, orange was always on screen and had no
+force left when a threshold genuinely broke. That is precisely the failure the design system
+already forbids for blue, committed with the other colour in the same document that forbids
+it. Now each hue does one job: **grey is context, blue is the subject, orange is a condition
+that wants action** — and the test is "would the user do something differently because this
+mark is orange?" The alarm became *a blue line entering an orange band*, which only happens
+when it is true.
 
 **No chart subtitle asserts a conclusion.** Titles describe and carry the selected period;
 min/max annotations are computed so they follow the filter. The editorial claims that used

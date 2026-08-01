@@ -283,6 +283,15 @@ Dataviz Clarity, CC BY-NC-ND 4.0) — the PDF lives in the gitignored `reference
   **The scissors chart was renamed** after Felipe's question exposed that its crossing point
   means nothing — two series indexed to their own base in different units — so it is now
   *"de onde veio a variação da ocupação"*, with the caveat on screen
+- [x] **KPI tiles became the navigation, and the colour rule was rewritten** — exactly one
+  tile is always selected and decides which measure Panorama compares; the comparison is
+  always UTI vs rede, so the thesis becomes a frame applied three times. Each tells a
+  different story, and the new one is the strongest yet for a funding case: **RS expanded
+  general capacity during the pandemic while ICU stayed flat (99,6), and only grew ICU
+  afterwards (121,1)** — the capacity response arrived after the emergency. Separately,
+  orange had been meaning both "needs attention" *and* "this is ICU", so ICU at 40% was
+  still orange; each hue now does one job (grey = context, blue = subject, orange =
+  condition)
 - [x] Build reference for the V2 workbook (`docs/v2/build_reference.md`) — developer-facing
   sheet-by-sheet instructions: calculated fields with exact syntax, shelf assignments, mark
   types, reference lines, the Tableau limitations we accept substitutions for, and an

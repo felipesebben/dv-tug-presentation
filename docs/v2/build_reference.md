@@ -75,9 +75,16 @@ Tableau/Preferences.tps` e **reiniciar o Tableau**.
 | nome | tipo | valores | uso |
 |---|---|---|---|
 | `p_Periodo` | string, lista | `Todos` · `Pré-pandemia` · `Pandemia` · `Pós` | filtro global |
-| `p_Visao` | string, lista | `Rede SUS` · `UTI` | troca a população |
+| `p_Medida` | string, lista | `Ocupação` · `Leitos` · `Internações` | **navegação do Panorama** — ver §1.6 |
+| `p_Visao` | string, lista | `Rede SUS` · `UTI` | população do mapa — **só Território** |
 | `p_LimiarAtencao` | float | `0.85` | limiar de atenção |
 | `p_LimiarCritico` | float | `0.95` | limiar crítico |
+
+`p_Medida` e `p_Visao` não são redundantes, e vale entender por quê antes de construir:
+**Panorama compara** as duas populações e por isso precisa sempre das duas — `p_Medida` só
+escolhe *qual medida* comparar. **Território localiza** uma população de cada vez, e por
+isso precisa que digam qual. Panorama não tem filtro de visão; Território não tem seletor
+de medida.
 
 Os dois limiares são parâmetros de propósito: os valores vêm da literatura de crise de leito
 (Bagust, Place & Posnett, *BMJ* 1999) e **não são alvo oficial da SES-RS nem do Ministério**.
@@ -179,7 +186,80 @@ Cálculo de tabela, não LOD — assim a base acompanha o filtro de período aut
 `LOOKUP(expr, FIRST())` devolve o valor da primeira marca da partição — que é o primeiro ano
 selecionado. Trocar o período re-indexa sozinho.
 
-### 1.6 Decomposição da barra de capacidade
+### 1.6 O seletor de KPI — Panorama inteiro depende disto
+
+A faixa de KPIs **é** a navegação do Panorama. Sempre há exatamente um tile selecionado, e
+ele decide qual medida os gráficos comparam. A comparação nunca muda — é sempre **UTI
+contra rede** —, então a tese do painel vira um enquadramento aplicado três vezes.
+
+**Ação de parâmetro** em cada tile: Dashboard → Ações → Alterar parâmetro, ao *selecionar*
+a marca, alvo `p_Medida`, campo de origem = o rótulo da medida daquela planilha.
+Em "Limpar seleção", escolher **Manter valor atual** — nunca "Definir como" —, porque uma
+seleção vazia deixaria a aba sem gráfico nenhum.
+
+```
+// c_TileSelecionado   — realce do tile ativo
+[p_Medida] = ATTR([Rótulo da Medida])
+```
+
+Usar em Cor da barra lateral do tile, ou em sombreamento de painel. **O realce precisa ser
+inequívoco:** com visibilidade dinâmica, os gráficos que um tile controla não estão na tela
+enquanto ele não é escolhido — e ajuda invisível é pior que excesso de informação. Régua
+lateral + fundo levemente tingido + rótulo em peso maior, não só uma borda.
+
+**Visibilidade dinâmica dos contêineres** (Tableau 2022.3+, você tem 2026.1): cada grupo de
+gráficos de apoio fica num contêiner cujo "Controlar visibilidade usando valor" aponta para
+um booleano:
+
+```
+// c_MostrarOcupacao        [p_Medida] = "Ocupação"
+// c_MostrarLeitos          [p_Medida] = "Leitos"
+// c_MostrarInternacoes     [p_Medida] = "Internações"
+```
+
+> O campo precisa ser booleano e retornar **um único valor** na planilha do contêiner —
+> normalmente se cria como calculado a partir do parâmetro, sem referência a campo da fonte,
+> o que garante isso. Se o Tableau recusar o campo na lista, é quase sempre porque ele está
+> agregado ou depende de uma dimensão da visão.
+
+**O herói nunca é escondido.** Ele muda de medida, mas continua na tela em todos os três
+estados: é o gráfico que justifica o painel existir, e escondê-lo num estado de quatro
+seria otimizar o layout perdendo o argumento.
+
+#### As três medidas, e por que o eixo muda
+
+| medida | séries | eixo | por quê |
+|---|---|---|---|
+| **Ocupação** | `c_TaxaUti` × `c_TaxaRede` | **zero**, com faixas de limiar | taxas dividem a unidade, então comparam em absoluto |
+| **Leitos** | leitos UTI × leitos rede | **índice, base 100** | 1.837 contra 21.838 — no mesmo eixo absoluto a série menor vira uma linha no chão |
+| **Internações** | com UTI × total | **índice, base 100** | 342.929 contra 3.739.506, mesma razão |
+
+A base do índice é a **média do primeiro ano selecionado**, não o primeiro mês. Janeiro é
+sazonalmente baixo; indexar por ele superestimaria todo ponto seguinte, e a média anual é o
+que os números documentados usam.
+
+#### O que cada medida revela — conferido, e cada uma é uma história diferente
+
+| | rede | UTI |
+|---|---|---|
+| **Ocupação** 2021 | caiu a **53,2%** | subiu a **111,9%** |
+| **Leitos** 2021 | cresceu a **106,0** | ficou parada em **99,6** |
+| **Leitos** 2023 | voltou a **100,3** | cresceu a **121,1** |
+| **Internações** 2020 | caiu a **87,6** | subiu a **112,5** |
+
+A linha de leitos é a mais forte para um pleito: o RS **expandiu leito geral durante a
+pandemia enquanto a UTI ficou parada, e só ampliou UTI depois**. A resposta de capacidade
+intensiva chegou após a emergência.
+
+#### Gráficos de apoio por medida
+
+| medida | apoio 1 | apoio 2 |
+|---|---|---|
+| Ocupação | tesoura da **UTI** (capacidade × demanda) | tesoura da **rede** — lado a lado mostram os dois mecanismos opostos de 2020–21 num relance |
+| Leitos | UTI como fatia da rede (7,0% → 8,4%) | leitos por tipo ao longo do tempo |
+| Internações | % das internações que usaram UTI (7,6% → 9,0%) | volume × permanência média, indexados |
+
+### 1.7 Decomposição da barra de capacidade
 
 Para a barra preenchida do Território. Comprimento = leitos, parte cheia = ocupação:
 
@@ -208,89 +288,88 @@ Legenda das colunas: **Colunas/Linhas** = prateleiras; **Marcas** = tipo e encod
 
 ### Aba 1 · Panorama
 
-#### 1.1–1.4 — Os quatro KPIs
+A aba inteira depende do seletor de §1.6. Construir os tiles primeiro, depois a ação de
+parâmetro, e só então os gráficos — assim dá pra testar a troca antes de haver o que
+esconder.
 
-Quatro planilhas separadas, tipo **Texto**.
+#### 1.1 — A faixa de KPIs (três tiles, e eles são o menu)
 
-| tile | medida | contexto |
+Três planilhas, tipo **Texto**, uma por medida. Cada uma mostra o valor de UTI como
+manchete e o da rede como contexto, porque a comparação é o que o tile existe para fazer.
+
+| tile | manchete (UTI) | contexto (rede) | medidor |
+|---|---|---|---|
+| **Ocupação** | `c_TaxaUti` | `c_TaxaRede` | barra + 2 linhas de referência |
+| **Leitos** | leitos UTI médios/mês | leitos rede médios/mês | minigráfico |
+| **Internações** | `SUM([internacoes_com_uti])` | `SUM([total_internacoes])` | minigráfico |
+
+```
+// c_LeitosUti      média mensal de leitos de UTI
+SUM([leitos_uti_sus]) / COUNTD([ano_mes])
+
+// c_LeitosRede     média mensal de leitos SUS
+SUM([leitos_sus]) / COUNTD([ano_mes])
+```
+
+**Só o tile de ocupação recebe medidor e nível.** Leitos e internações são contagens: um
+alvo ali implicaria que alguém dirige quantas pessoas adoecem. Mas o número da **rede** no
+tile de ocupação recebe a cor do seu próprio nível — sem ele, 55,8% ficaria igual estando
+saudável ou crítico, e a comparação é justamente o motivo do tile.
+
+Realce do selecionado: régua lateral em `#2a78d6`, fundo `#f6f9fe`, rótulo em peso 600.
+Cursor de mão. **O realce tem que ser inequívoco** — os gráficos que o tile controla não
+estão na tela até ele ser escolhido.
+
+Título dinâmico em todos: `... · <Parâmetros.p_Periodo>`.
+
+#### 1.2 — Herói: a mesma comparação, na medida selecionada
+
+Uma planilha por medida (três), cada uma num contêiner com visibilidade dinâmica ligada ao
+`c_Mostrar*` correspondente. **O herói nunca fica escondido** — sempre há exatamente um
+dos três na tela.
+
+| | ocupação | leitos / internações |
 |---|---|---|
-| Taxa de ocupação UTI | `c_TaxaUti` | barra + 2 linhas de referência |
-| Taxa de ocupação SUS (rede) | `c_TaxaRede` | barra + 2 linhas de referência |
-| Leitos (da visão) | `c_Leitos` | minigráfico de linha |
-| Internações | `SUM([total_internacoes])` | minigráfico de linha |
+| **Colunas** | `ano_mes` contínuo, Mês | idem |
+| **Linhas** | `c_TaxaUti` e `c_TaxaRede`, mesmo eixo | índices das duas séries, mesmo eixo |
+| **Eixo Y** | **zero** a 1,4 | **base 100** |
+| **Referências** | faixas em `p_LimiarAtencao` e `p_LimiarCritico`; linha em 100% | linha constante em 100 |
 
-Cada tile:
+**Cor, e esta é a correção de 01/08/2026:** a série de **UTI é azul** (é o sujeito) e a da
+**rede é cinza** (é o contexto). Nenhuma das duas é laranja. Laranja fica só para a faixa
+de limiar — o alarme passa a ser *uma linha azul entrando numa faixa laranja*, que só
+acontece quando é verdade. Antes a UTI era laranja por identidade, então UTI a 40%
+continuava gritando alarme.
 
-- **Marcas → Texto**: a medida, formatada em percentual com 1 casa (taxas) ou número
-  inteiro com separador de milhar pt-BR (volumes).
-- **Título dinâmico**: `Taxa de ocupação UTI · <Parâmetros.p_Periodo>`. Isto é obrigatório —
-  é a correção do defeito em que o tile dizia 60,0% enquanto o filtro dizia 2019–2023, e os
-  dois estavam certos.
-- **Variação**: campo de tabela `(ZN([c_Taxa]) - LOOKUP(ZN([c_Taxa]), -1))` para p.p., ou
-  razão − 1 para volumes. Sempre com **seta e sinal**, nunca só cor.
-
-**Só os dois tiles de taxa recebem alvo.** Leitos e internações não: alvo implica direção
-que se persegue, e ninguém tem meta de quantas pessoas adoecem.
-
-Medidor dos tiles de taxa: barra horizontal com **duas linhas de referência constantes**
-vindas de `p_LimiarAtencao` e `p_LimiarCritico`. Não usar gráfico de marcador (bullet) do
-Tableau — ele é eixo duplo, que o design system proíbe.
-
-#### 1.5 — Herói: ocupação de UTI e da rede
-
-| | |
-|---|---|
-| **Colunas** | `ano_mes` contínuo, **Mês** |
-| **Linhas** | `c_TaxaRede` e `c_TaxaUti` — as duas **no mesmo eixo** (arrastar a segunda sobre o eixo da primeira, gerando *Nomes de medidas*), **não** eixo duplo |
-| **Marcas** | Linha. Cor = Nomes de medidas: rede `#2a78d6`, UTI `#eb6834`. Espessura da UTI 2,5px |
-| **Eixo Y** | **Começa em zero**, fixo de 0 a 1,4 (140%) |
-| **Referências** | linha em 1,0 rotulada "100% · capacidade esgotada"; faixas em `p_LimiarAtencao` e `p_LimiarCritico` (Distribuição de referência → faixa, preenchimento laranja 7% e 13%) |
-| **Rótulos** | só na última marca de cada linha (Rótulo → Marcas para rotular → Fim da linha) |
-
-O herói é o único gráfico que ignora `p_Visao`: mostrar as duas séries **é** o argumento.
-
-Conferência: 2021 UTI **111,9%** contra rede **53,2%**; máximo mensal jun/2021 **131,9%**.
-
-#### 1.6 — De onde veio a variação da ocupação
-
-| | |
-|---|---|
-| **Colunas** | `YEAR(ano_mes)` discreto |
-| **Linhas** | `c_IndiceCapacidade` e `c_IndiceDemanda`, mesmo eixo |
-| **Marcas** | Linha. Capacidade `#2a78d6`, demanda `#eb6834` |
-| **Eixo Y** | **base 100**, não zero — única exceção do sistema |
-| **Referências** | linha constante em 100, tracejada, rotulada `<Ano base> = 100` |
-| **Título** | `De onde veio a variação da ocupação · <Parâmetros.p_Visao>` |
-| **Subtítulo** | **obrigatório**: "A distância entre as linhas não é folga de capacidade — é a variação da ocupação." |
-
-> ⚠️ **Não renomear este gráfico para "capacidade × demanda".** As duas séries são indexadas
-> cada uma contra a própria base, em unidades diferentes (leitos e diárias), então o ponto de
-> cruzamento **não significa nada**. Ler "capacidade acima de demanda" como "sobra
-> capacidade" está errado, e já foi lido assim. O que a distância codifica é a *variação* da
-> ocupação. A ressalva no subtítulo não é decoração — é a correção de um defeito real.
-
-Conferência, 2019 = 100: em 2023 rede capacidade **100,3** / demanda **103,1**; UTI
-capacidade **121,1** / demanda **125,1**. Em 2021 a UTI é capacidade **99,6** / demanda
-**146,4**.
-
-#### 1.7 — Internações e permanência média, indexadas
-
-Mesma construção do 1.6, com:
+Base do índice: **média do primeiro ano selecionado**, não o primeiro mês. Em cálculo de
+tabela:
 
 ```
-// c_IndiceInternacoes     Tabela (horizontal)
-100 * ZN(SUM([total_internacoes])) / LOOKUP(ZN(SUM([total_internacoes])), FIRST())
-
-// c_PermanenciaMedia      (de hospitalizacoes)
-AVG([quantidade_dias_permanencia])
-
-// c_IndicePermanencia     Tabela (horizontal)
-100 * ZN([c_PermanenciaMedia]) / LOOKUP(ZN([c_PermanenciaMedia]), FIRST())
+// c_IndiceUti     Calcular usando: Tabela (horizontal)
+100 * ZN([medida UTI]) / WINDOW_AVG(ZN([medida UTI]), FIRST(), FIRST() + 11)
 ```
 
-Permanência em `#8c8c89` cinza: é contexto, não alarme.
+> Se o recorte tiver menos de 12 meses, trocar o `+ 11` pelo número de meses do primeiro
+> ano selecionado, ou indexar por `LOOKUP(..., FIRST())` e aceitar a base de um mês só. A
+> média anual é a que bate com os números documentados.
 
----
+#### 1.3 — Os dois gráficos de apoio, por medida
+
+Seis planilhas ao todo, em três contêineres de visibilidade dinâmica.
+
+| medida | apoio 1 | apoio 2 |
+|---|---|---|
+| **Ocupação** | tesoura da **UTI** — `c_IndiceCapacidade` × `c_IndiceDemanda` sobre leitos e diárias de UTI | tesoura da **rede**, idem sobre a rede |
+| **Leitos** | UTI como fatia da rede: `SUM([leitos_uti_sus]) / SUM([leitos_sus])`, por ano | leitos por tipo ao longo do tempo (paleta `V2 Leitos`, 4 + Outros) |
+| **Internações** | % que usou UTI: `SUM([internacoes_com_uti]) / SUM([total_internacoes])` | volume × permanência média, indexados |
+
+As **duas tesouras lado a lado** são o melhor momento da aba: mostram os dois mecanismos
+opostos de 2020–21 num relance — a rede ganhando capacidade enquanto a demanda caía, a UTI
+com capacidade parada enquanto a demanda explodia.
+
+Nas duas, a nota é obrigatória: **"A distância entre as linhas não é folga de capacidade —
+é a variação da ocupação."** As séries são indexadas cada uma contra a própria base, em
+unidades diferentes, então o cruzamento não significa nada. Ver §1.5.
 
 ### Aba 2 · Território
 
@@ -434,6 +513,7 @@ Substituições aceitas, para ninguém perder tempo tentando:
 | Medidor de limiar no KPI | gráfico de marcador é eixo duplo | barra + duas linhas de referência constantes |
 | Faixa de limiar sombreada | — | Distribuição de referência → Faixa, com preenchimento |
 | Filtro "Visão" trocando medidas | parâmetro, não filtro | é o que a seção 1.2 faz; o Tableau chama de parâmetro, e ele **não** aparece na lista de filtros |
+| KPI clicável como menu | ação de parâmetro + visibilidade dinâmica | nativo desde 2022.3 — funciona, mas o realce do tile é responsabilidade sua: sem ele o usuário não descobre que dá pra clicar, e os gráficos escondidos ficam invisíveis para sempre |
 
 Se o relacionamento com o arquivo espacial der trabalho, o **plano B** é mapa de pontos por
 centróide — `centroide` já vem em WKT nas três tabelas:
@@ -462,7 +542,13 @@ mesmo — mas funciona sem conexão extra.
 - [ ] Nenhuma taxa arrastada como `SUM([taxa_ocupacao_sus])` — sempre `c_Num / c_Den`
 - [ ] Todo título com período dinâmico
 - [ ] Nenhum subtítulo afirmando conclusão que o filtro possa desmentir
-- [ ] Laranja só onde significa "precisa de atenção" — nunca "mais recente" nem "a mediana"
+- [ ] **Sempre exatamente um tile de KPI selecionado** — inclusive depois de clicar fora.
+      Se "Limpar seleção" estiver como "Definir como", a aba fica sem gráfico nenhum
+- [ ] Trocar de tile muda os dois gráficos de apoio, e o herói continua na tela nos três
+      estados
+- [ ] **Laranja só marca condição, nunca categoria.** UTI é azul quando é o sujeito e
+      cinza quando é contexto — nunca laranja por ser UTI. Nas medidas de contagem, onde
+      não há limiar para romper, **não deve haver laranja nenhum nos gráficos**
 - [ ] Eixo em zero em toda taxa e toda barra; exceção só nos dois gráficos indexados
 - [ ] Filtro de período aplicado às planilhas da aba inteira
 - [ ] O aviso "a distância não é folga" presente no gráfico 1.6
