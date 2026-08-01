@@ -73,19 +73,37 @@ o dashboard.
 
 | cor | significa | exemplos legítimos |
 |---|---|---|
-| `--marca-neutra` cinza | sem juízo de valor — o padrão | marcas não destacadas, categorias de contexto, séries de apoio |
-| `--serie` azul | normal, saudável, sob controle | capacidade, volume de internações, o mapa, tons de leito |
-| `--acento` laranja | **precisa de atenção** | taxa de ocupação, a demanda que passa a capacidade, municípios acima de 85%, alta complexidade, o gasto crescendo acima do volume |
+| `--marca-neutra` cinza | **contexto** — está na tela, mas não é o que você selecionou | a série de comparação, categorias de apoio, "Outros" |
+| `--serie` azul | **o sujeito** — o que você selecionou, em estado normal | a série em foco, o mapa, tons de leito |
+| `--acento` laranja | **uma condição que pede ação** | faixa de limiar ultrapassada, município acima de 85%, marca que rompeu a régua |
 
-A consequência prática é uma proibição: **laranja não marca "o mais recente" nem "a
-mediana".** Se um valor só se destaca por ser o último ponto da série ou o centro da
-distribuição, ele é azul ou cinza. Usar laranja ali gasta o único sinal de alarme do
-sistema em algo que não é alarme — e, pior, ensina o leitor a ignorá-lo.
+O teste, e ele resolve todos os casos duvidosos: **"o usuário faria algo diferente porque
+esta marca está laranja?"** Se não, não é laranja.
 
-O cinza é o que resolve a tensão entre os dois papéis do azul. Se o azul fosse ao mesmo
-tempo o padrão *e* o "positivo", toda série neutra viraria uma afirmação de que está tudo
-bem. Então o padrão é cinza, o azul é o dado saudável, e o laranja é a exceção que pede
-ação.
+Duas proibições saem daí:
+
+1. **Laranja não marca "o mais recente" nem "a mediana".** Se um valor se destaca só por
+   ser o último ponto ou o centro da distribuição, ele é azul ou cinza.
+2. **Laranja não marca categoria — só condição.** UTI não é laranja *por ser UTI*.
+
+> **Correção de 01/08/2026.** A regra acima é uma reescrita, não um esclarecimento: o
+> sistema estava usando laranja para as duas coisas ao mesmo tempo — "precisa de atenção"
+> **e** "isto é UTI". O efeito era concreto: **UTI a 40% continuava laranja**, gritando
+> alarme com tudo em ordem. E como a UTI está sempre na tela, o laranja estava sempre na
+> tela — então, quando um limiar de fato rompia, a cor já não tinha força nenhuma.
+>
+> Era exatamente o erro que a seção "duas cores, com papéis diferentes" proíbe para o azul
+> — *"estaria fazendo dois trabalhos e deixaria de significar «olhe aqui»"* — cometido com
+> a outra cor, no mesmo documento que o proíbe.
+>
+> A correção: **identidade passa a ser carregada por seleção, posição e rótulo; o hue
+> carrega só estado.** Em foco de UTI, a linha de UTI é azul e a da rede é cinza; trocando
+> o foco, elas trocam. O alarme vira *uma linha azul entrando numa faixa laranja* — que só
+> acontece quando é verdade.
+
+O cinza é o que sustenta a distinção. Se o azul fosse ao mesmo tempo o padrão *e* o sujeito,
+toda série de contexto viraria uma afirmação. Então: cinza é contexto, azul é sujeito,
+laranja é condição.
 
 > Vale notar por que isto é aceitável em acessibilidade: cor semântica costuma ser
 > alertada justamente porque o par típico é verde/vermelho, indistinguível em protanopia.

@@ -103,14 +103,17 @@ for (const ano of [2019, 2021, 2023]) {
   }
 }
 
-/* Verify the headline figures the page asserts in prose actually come out of the code. */
+/* Verify the headline figures the page asserts in prose actually come out of the code.
+   The KPI now reports the population Visão selects, so each check sets it explicitly. */
 console.log("=== figure verification ===");
 STATE.periodo = "ano2021"; STATE.anos = [2021]; STATE.rotulo = "2021";
-const pan2021 = TABS[0]();
-for (const [needle, why] of [["111,9%", "ICU rate 2021"], ["53,2%", "network rate 2021"]]) {
-  if (pan2021.includes(needle)) console.log(`  ok   ${why} renders as ${needle}`);
-  else { failures++; console.log(`  FAIL ${why}: ${needle} not found in Panorama`); }
-}
+STATE.medida = "ocupacao";
+STATE.visao = "uti";
+if (TABS[0]().includes("111,9%")) console.log("  ok   ICU rate 2021 renders as 111,9%");
+else { failures++; console.log("  FAIL ICU rate 2021: 111,9% not found"); }
+STATE.visao = "rede";
+if (TABS[0]().includes("53,2%")) console.log("  ok   network rate 2021 renders as 53,2%");
+else { failures++; console.log("  FAIL network rate 2021: 53,2% not found"); }
 STATE.periodo = "ano2023"; STATE.anos = [2023]; STATE.rotulo = "2023";
 if (TABS[0]().includes("60,0%")) console.log("  ok   network rate 2023 renders as 60,0%");
 else { failures++; console.log("  FAIL network rate 2023: 60,0% not found"); }
@@ -209,24 +212,33 @@ console.log("=== visão switch (rede / UTI) ===");
    with a single year there is no base to index against and the chart says so. */
 STATE.periodo = "todos"; STATE.anos = PERIODOS[0].anos.slice(); STATE.rotulo = "2019–2023";
 
-STATE.visao = "rede"; STATE.tab = 0;
+/* Visão and the KPI selector are separate controls: Visão picks WHICH POPULATION is in
+   focus, the selector picks WHICH QUESTION is asked about it. Both must bite on Panorama. */
+STATE.visao = "rede"; STATE.tab = 0; STATE.medida = "ocupacao";
 const panRede = TABS[0]();
 STATE.visao = "uti";
 const panUti = TABS[0]();
-if (panRede !== panUti) console.log("  ok   switching visão changes Panorama");
-else { failures++; console.log("  FAIL visão switch produced identical Panorama"); }
+if (panRede !== panUti) console.log("  ok   visão changes Panorama (focus follows it)");
+else { failures++; console.log("  FAIL visão has no effect on Panorama"); }
 
-/* The scissors must follow the view. 2019=100 endpoints at 2023:
-   rede capacity 100,3 / demand 103,1 — ICU capacity 121,1 / demand 125,1. */
-for (const [needle, why] of [["Capac. 100,3", "rede capacity endpoint"],
-                             ["Demanda 103,1", "rede demand endpoint"]]) {
-  if (panRede.includes(needle)) console.log(`  ok   ${why} = ${needle.split(" ")[1]}`);
-  else { failures++; console.log(`  FAIL ${why}: '${needle}' not found`); }
-}
-for (const [needle, why] of [["Capac. 121,1", "UTI capacity endpoint"],
-                             ["Demanda 125,1", "UTI demand endpoint"]]) {
-  if (panUti.includes(needle)) console.log(`  ok   ${why} = ${needle.split(" ")[1]}`);
-  else { failures++; console.log(`  FAIL ${why}: '${needle}' not found`); }
+/* The tile reports the FOCUSED population only — one number, not both. The comparison
+   belongs in the chart, which is already drawing it. */
+const tileUti = panUti.slice(0, panUti.indexOf('class="row"'));
+const tileRede = panRede.slice(0, panRede.indexOf('class="row"'));
+if (tileUti.includes("86,1%") && !tileUti.includes("55,8%"))
+  console.log("  ok   UTI focus: tile shows 86,1% and not the rede figure");
+else { failures++; console.log("  FAIL UTI focus tile is showing both populations"); }
+if (tileRede.includes("55,8%") && !tileRede.includes("86,1%"))
+  console.log("  ok   rede focus: tile shows 55,8% and not the UTI figure");
+else { failures++; console.log("  FAIL rede focus tile is showing both populations"); }
+STATE.visao = "rede";
+
+/* Both scissors are present in the ocupação mode — one per population, showing the two
+   opposite mechanisms of 2020-21 side by side. */
+for (const [needle, why] of [["De onde veio a variação · UTI", "UTI scissors"],
+                             ["De onde veio a variação · rede", "rede scissors"]]) {
+  if (panRede.includes(needle)) console.log(`  ok   ${why} present`);
+  else { failures++; console.log(`  FAIL ${why} missing`); }
 }
 if (/não é folga de capacidade/.test(panRede))
   console.log("  ok   scissors states the gap is not spare capacity");
@@ -265,14 +277,86 @@ for (const [needle, why] of [["atenção 85%", "85% band labelled"],
 /* ICU 2021 is 111,9%, above both thresholds, so the tile must say crítico. */
 if (/crítico/.test(utiPan)) console.log("  ok   ICU 2021 tile reads crítico (111,9% > 95%)");
 else { failures++; console.log("  FAIL ICU 2021 tile did not reach crítico"); }
-/* The network at 53,2% must NOT be flagged. */
-if (/sob controle/.test(utiPan)) console.log("  ok   network tile reads sob controle at 53,2%");
-else { failures++; console.log("  FAIL network tile missing 'sob controle'"); }
-/* Volume tiles must carry no target: nobody steers admissions. */
+/* Same year in rede focus is 53,2% and must read as under control — the level follows the
+   focused population, not a fixed series. */
+STATE.visao = "rede";
+if (/sob controle/.test(TABS[0]()))
+  console.log("  ok   rede focus reads sob controle at 53,2%");
+else { failures++; console.log("  FAIL rede focus missing its 'sob controle' level"); }
+STATE.visao = "uti";
+/* Exactly one gauge, on the ocupação tile: leitos and internações are counts, and a
+   target on a count would imply someone steers how many people fall ill. */
 const kpiBlock = utiPan.slice(0, utiPan.indexOf('class="row"'));
 const alvos = (kpiBlock.match(/alvo /g) || []).length;
-if (alvos === 2) console.log(`  ok   only the 2 rate tiles carry a target (${alvos})`);
-else { failures++; console.log(`  FAIL ${alvos} tiles carry a target, expected 2`); }
+if (alvos === 1) console.log(`  ok   only the rate tile carries a target (${alvos})`);
+else { failures++; console.log(`  FAIL ${alvos} tiles carry a target, expected 1`); }
+
+/* ---------- the KPI selector ---------- */
+console.log("=== KPI selector (Panorama navigation) ===");
+STATE.periodo = "todos"; STATE.anos = PERIODOS[0].anos.slice(); STATE.rotulo = "2019–2023";
+STATE.tab = 0;
+
+/* Landing state: ocupação selected, because it carries the headline finding. */
+STATE.medida = "ocupacao";
+const panOcup = TABS[0]();
+if (/data-medida="ocupacao"[\s\S]{0,80}aria-pressed="true"/.test(panOcup))
+  console.log("  ok   ocupação is the landing selection");
+else { failures++; console.log("  FAIL ocupação not marked selected on landing"); }
+
+/* Exactly one tile selected, always — an empty selection would leave the tab blank. */
+for (const medida of ["ocupacao", "leitos", "internacoes"]) {
+  STATE.medida = medida;
+  const html = TABS[0]();
+  const on = (html.match(/aria-pressed="true"/g) || []).length;
+  const tiles = (html.match(/class="kpi sel/g) || []).length;
+  if (on === 1 && tiles === 3) console.log(`  ok   ${medida}: 1 of ${tiles} tiles selected`);
+  else { failures++; console.log(`  FAIL ${medida}: ${on} selected of ${tiles} tiles`); }
+  check(`selector / ${medida}`, html);
+}
+
+/* The frame is the same, the story is not. Each measure must produce different support
+   charts, or the selector is decoration. */
+STATE.medida = "ocupacao"; const hOcup = TABS[0]();
+STATE.medida = "leitos";   const hLeitos = TABS[0]();
+STATE.medida = "internacoes"; const hInter = TABS[0]();
+if (new Set([hOcup, hLeitos, hInter]).size === 3)
+  console.log("  ok   all three measures render distinct content");
+else { failures++; console.log("  FAIL two or more measures render identically"); }
+
+for (const [html, needle, why] of [
+  [hLeitos, "UTI como fatia da rede", "leitos support: ICU share of network"],
+  [hLeitos, "Leitos SUS por tipo", "leitos support: beds by type"],
+  [hInter, "Internações que usaram UTI", "internações support: ICU-using share"],
+  [hInter, "Volume e duração", "internações support: volume vs duration"],
+]) {
+  if (html.includes(needle)) console.log(`  ok   ${why}`);
+  else { failures++; console.log(`  FAIL ${why}: '${needle}' missing`); }
+}
+
+/* Rates compare in absolute terms; counts must index, or the smaller series flatlines. */
+if (/começando em zero/.test(hOcup)) console.log("  ok   ocupação hero is zero-based (rates)");
+else { failures++; console.log("  FAIL ocupação hero lost its zero-based note"); }
+if (/Indexadas a 2019 = 100/.test(hLeitos) && /Indexadas a 2019 = 100/.test(hInter))
+  console.log("  ok   leitos and internações heroes are indexed (counts)");
+else { failures++; console.log("  FAIL count measures are not indexed"); }
+
+/* Colour rule: UTI is the subject and therefore BLUE, never orange-by-identity. Orange
+   may appear only where a threshold can be breached — so it must be absent from the CHART
+   area of the count modes.
+   Scoped past the KPI row on purpose: the ocupação tile is present in every mode and is
+   legitimately orange, because ICU occupancy really is above the line. Asserting over the
+   whole panel would be asserting that a true alarm is a defect. */
+const semKpis = html => html.slice(html.indexOf('class="row"'));
+for (const [html, modo] of [[hLeitos, "leitos"], [hInter, "internações"]]) {
+  if (!semKpis(html).includes("#eb6834"))
+    console.log(`  ok   no orange in the ${modo} charts (no threshold to breach)`);
+  else { failures++; console.log(`  FAIL orange in the ${modo} charts, where nothing can breach`); }
+}
+/* And in the rate mode it must be present — the band is the alarm. */
+if (semKpis(hOcup).includes("#eb6834"))
+  console.log("  ok   orange present in the ocupação charts (threshold bands)");
+else { failures++; console.log("  FAIL ocupação charts lost their threshold bands"); }
+STATE.medida = "ocupacao";
 
 console.log("=== caveat strip retired in favour of info affordances ===");
 if (!/class="caveat"/.test(html)) console.log("  ok   standing caveat strip removed");

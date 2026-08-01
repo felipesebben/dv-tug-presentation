@@ -133,8 +133,28 @@
   .cardnote b { color:var(--tinta); font-weight:600; }
 
   .kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .kpis-3 { grid-template-columns:repeat(3,1fr); }
   .kpi { background:var(--card); border-radius:3px; padding:14px 16px 12px;
          display:flex; flex-direction:column; gap:2px; }
+
+  /* Selectable KPI tiles — the tile IS the navigation of Panorama.
+     Selection is CHROME, not data, so it must not borrow a data colour: painting the
+     selected tile blue made blue mean "rede's value" and "this tile is selected" on the
+     same tile, which is the exact collision the palette rule exists to prevent.
+     It is expressed as figure-ground instead — the unselected tiles sit recessed on the
+     plane, the selected one is a raised white card with an ink rule. Same mechanism the
+     design system already uses to separate cards from the background, and it costs no
+     colour at all. */
+  .kpi.sel { font:inherit; text-align:left; cursor:pointer; color:inherit;
+             background:#eceae7; border:0; border-left:3px solid transparent;
+             box-shadow:none; transition:background .12s, box-shadow .12s; }
+  .kpi.sel .val, .kpi.sel .lbl { color:var(--txt2); }
+  .kpi.sel:hover { background:#f4f2ef; }
+  .kpi.sel:focus-visible { outline:2px solid var(--tinta); outline-offset:-2px; }
+  .kpi.sel.on { background:var(--card); border-left-color:var(--tinta);
+                box-shadow:0 1px 3px rgba(17,17,16,.10); }
+  .kpi.sel.on .lbl { color:var(--tinta); font-weight:600; }
+  .kpi.sel.on .val { color:var(--tinta); }
   .kpi .lbl { font-size:14px; color:var(--txt2); }
   .kpi .valrow { display:flex; align-items:baseline; gap:10px; }
   .kpi .val { font-size:30px; font-weight:700; letter-spacing:-.02em; line-height:1.1; }
@@ -287,12 +307,26 @@
   <section class="intro">
     <h2>O que mudou nesta revisão</h2>
     <p>
-      <strong>A UTI virou o herói da aba Panorama</strong>, e é o achado mais forte do
-      projeto: entre 2019 e 2021 a ocupação geral <em>caiu</em> de 58,4% para 53,2%,
-      enquanto a de UTI <em>subiu</em> de 76,1% para 111,9%. Em junho de 2021 a UTI marcou
-      131,9% contra 57,0% da rede — 75 pontos de distância. Um dashboard que mostrasse só o
-      agregado teria informado que a rede estava menos pressionada em 2021 que em 2019, no
-      pior ano sanitário do século.
+      <strong>Dois controles, com papéis distintos.</strong> <em>Visão</em> escolhe qual
+      população está em foco: os KPIs passam a falar dela, e nos gráficos ela é a linha
+      azul, com a outra em cinza atrás para comparação. <em>Os KPIs viraram o menu</em> — há
+      sempre um selecionado, e ele decide qual pergunta os gráficos respondem sobre essa
+      população. Assim a tese do painel deixa de ser um gráfico e vira um
+      <strong>enquadramento aplicado três vezes</strong>, e cada aplicação conta uma
+      história diferente:
+    </p>
+    <ul style="margin:0;padding-left:20px;font-size:15px;line-height:1.7;color:var(--chrome-muted);max-width:78ch">
+      <li><strong>Ocupação</strong> — a rede <em>caiu</em> a 53,2% em 2021 enquanto a UTI
+        <em>subiu</em> a 111,9%. Em junho de 2021, 131,9% contra 57,0%.</li>
+      <li><strong>Leitos</strong> — a rede <em>cresceu</em> a 106,0 em 2021 enquanto a UTI
+        ficou <em>parada</em> em 99,6. Depois a rede voltou a 100,3 e a UTI foi a 121,1: a
+        resposta de capacidade intensiva chegou <strong>depois</strong> da emergência.</li>
+      <li><strong>Internações</strong> — o total <em>caiu</em> a 87,6 em 2020 enquanto as
+        internações com UTI <em>subiram</em> a 112,5. Menos pacientes, mais graves.</li>
+    </ul>
+    <p>
+      Um dashboard que mostrasse só o agregado teria informado que a rede estava menos
+      pressionada em 2021 que em 2019, no pior ano sanitário do século.
     </p>
     <p>
       <strong>Os títulos não afirmam mais conclusões.</strong> Na versão anterior cada
@@ -539,7 +573,22 @@
 <script>
 const DATA = /*__DATA__*/;
 
-/* ---------- tokens (mirror of the CSS canvas scope) ---------- */
+/* ---------- tokens (mirror of the CSS canvas scope) ----------
+   COLOUR RULE (revised 2026-08-01). Each hue does exactly one job:
+
+     marca  grey    context — present, but not what you selected
+     serie  blue    the SUBJECT — what you selected, in a normal state
+     acento orange  a CONDITION that wants action. Nothing else.
+
+   The test: "would the user do something differently because this mark is orange?"
+   If no, it is not orange.
+
+   What this fixed: orange used to mean both "needs attention" AND "this is UTI", so ICU
+   at 40% was still orange — the colour shouted alarm when nothing was wrong, and because
+   UTI is always on screen, orange was always on screen and stopped meaning anything.
+   Identity is now carried by selection, position and label; hue carries only state.
+   A blue line crossing into an orange threshold band is the alarm, and it only happens
+   when it is true. */
 const C = { serie:"#2a78d6", acento:"#eb6834", marca:"#8c8c89",
             grade:"#e4e4e1", txt2:"#5c5c5a", tinta:"#111110", card:"#ffffff" };
 const RAMP = ["#cde2fb","#9ec5f4","#6da7ec","#3987e5","#256abf","#184f95","#0d366b"];
@@ -567,13 +616,48 @@ const PERIODOS = [
 ];
 const ANOS = [2019,2020,2021,2022,2023];
 
-/* The rede/UTI switch. It is a filter rather than duplicated charts because the two views
-   answer the same questions of different populations — and because in ICU view the
-   Território tab asks something the network view cannot: where intensive care is
-   physically absent. Only 87 of 270 hospitals and 59 of 225 municipalities have any SUS
-   ICU bed, so two thirds of the map goes blank, and that blankness is the finding.
+/* ---------- the KPI selector ----------
+   The KPI row is the navigation of Panorama: exactly one tile is always selected, and it
+   decides which MEASURE the tab compares. The comparison itself never changes — it is
+   always UTI against rede — so the dashboard's thesis stops being one chart and becomes a
+   frame applied three times. Each application tells a different story, which is why this
+   earns its place over a static layout:
 
-   Column indices into a `mensal` row, so every chart reads its metric from one place. */
+     ocupação    rede FELL to 53,2% in 2021 while UTI ROSE to 111,9%
+     leitos      rede GREW to 106,0 in 2021 while UTI stayed FLAT at 99,6 — then rede
+                 returned to 100,3 while UTI grew to 121,1. The ICU capacity response
+                 arrived AFTER the emergency, not during it.
+     internações total FELL to 87,6 in 2020 while ICU-using admissions ROSE to 112,5
+
+   `mensal` row indices: 0 label, 1 ano, 2 mes, 3 dias_perm, 4 leito_dias, 5 dias_uti,
+   6 leito_dias_uti, 7 internacoes, 8 leitos_sus, 9 leitos_uti, 10 internacoes_com_uti */
+const MEDIDAS = {
+  ocupacao: {
+    id:"ocupacao", rotulo:"Ocupação", unidade:"taxa",
+    /* Rates share a unit, so they are directly comparable and the axis starts at zero.
+       Counts do not, so the other two modes index instead. */
+    modo:"taxa",
+    rede:{ rot:"Rede SUS", num:3, den:4 },
+    uti: { rot:"UTI",      num:5, den:6 },
+  },
+  leitos: {
+    id:"leitos", rotulo:"Leitos", unidade:"contagem", modo:"indice",
+    rede:{ rot:"Leitos rede", campo:8, media:true },
+    uti: { rot:"Leitos UTI",  campo:9, media:true },
+  },
+  internacoes: {
+    id:"internacoes", rotulo:"Internações", unidade:"contagem", modo:"indice",
+    rede:{ rot:"Todas", campo:7 },
+    uti: { rot:"Com UTI", campo:10 },
+  },
+};
+const ORDEM_MEDIDAS = ["ocupacao","leitos","internacoes"];
+
+/* Território keeps its own rede/UTI switch. The two controls are not redundant: Panorama
+   COMPARES the two populations and therefore always needs both, while Território LOCATES
+   one and therefore needs to be told which. In ICU view two thirds of the map goes blank,
+   because only 59 of 225 municipalities with beds have any ICU bed — and that blankness
+   is the finding. */
 const VISOES = {
   rede: { id:"rede", rotulo:"Rede SUS", curto:"rede",
           num:3, den:4, leitos:8, rotLeitos:"Leitos SUS" },
@@ -581,15 +665,53 @@ const VISOES = {
           num:5, den:6, leitos:9, rotLeitos:"Leitos de UTI" },
 };
 
+/* Lands on ocupação: it is the measure that carries the headline finding. */
 const STATE = { tab:0, periodo:"todos", anos:PERIODOS[0].anos.slice(), rotulo:"2019–2023",
-                visao:"rede", menu:null };
+                visao:"rede", medida:"ocupacao", menu:null };
+
+const M_ = () => MEDIDAS[STATE.medida];
+
+/* Series values for a measure, per selected month. Rates come out as num/den; counts come
+   out raw, and the caller indexes them. */
+function serieMedida(rows, lado){
+  const m=M_(), cfg=m[lado];
+  if(m.modo==="taxa") return rows.map(r=>r[cfg.den] ? r[cfg.num]/r[cfg.den] : null);
+  return rows.map(r=>r[cfg.campo]);
+}
+/* Aggregate of a measure over the selection — the number the KPI tile shows. */
+function totalMedida(rows, lado){
+  const m=M_(), cfg=m[lado];
+  if(m.modo==="taxa"){
+    const d=rows.reduce((s,r)=>s+r[cfg.den],0);
+    return d ? rows.reduce((s,r)=>s+r[cfg.num],0)/d : null;
+  }
+  const t=rows.reduce((s,r)=>s+r[cfg.campo],0);
+  /* Bed counts are a stock, not a flow: summing 60 months would be meaningless, so they
+     average. Admissions are a flow and genuinely sum. */
+  return cfg.media ? t/rows.length : t;
+}
+const fmtMedida = v => v==null ? "—" : (M_().modo==="taxa" ? pct(v) : nf(v));
 
 const V = () => VISOES[STATE.visao];
 const outraV = () => VISOES[STATE.visao==="rede" ? "uti" : "rede"];
-/* Visão is offered only where "ocupação" is the headline metric. Capacidade compares bed
-   types against each other and Custo is about spend, so the switch would be inert there —
-   and a filter that does nothing is the defect we removed from V1's Macrorregião. */
+/* Visão and the KPI selector are two different controls and must stay that way:
+
+     Visão   — WHICH POPULATION is in focus. Drives the KPI values and which series is the
+               subject of every chart. The other population stays on screen as grey
+               context, because the comparison is the point.
+     Medida  — WHICH QUESTION the charts answer about that population.
+
+   An earlier pass merged them, so every tile showed both populations at once and the
+   comparison happened inside the tile instead of in the chart. That made the tiles
+   crowded, and it duplicated a comparison the hero was already making.
+
+   Capacidade compares bed types against each other and Custo is about spend, so Visão
+   would be inert there — and a filter that does nothing is V1's Macrorregião defect. */
 const visaoVale = () => STATE.tab===0 || STATE.tab===1;
+
+/* The population in focus, and the one it is compared against. */
+const ladoFoco = () => STATE.visao==="uti" ? "uti" : "rede";
+const ladoCtx  = () => STATE.visao==="uti" ? "rede" : "uti";
 const visaoAtiva = () => visaoVale() ? V() : VISOES.rede;
 
 /* ---------- thresholds ----------
@@ -738,175 +860,258 @@ function gaugeSVG(taxa){
 /* ================= TAB 1 · PANORAMA ================= */
 function panorama(){
   const M = mensalSel();
-  const base = anoBase(), last = anoUltimo();
+  const base = anoBase(), m = M_();
+  const anos = selAnos();
 
-  const taxaGeral = ratio(M,3,4), taxaUti = ratio(M,5,6);
-  const dGeral = base==null?null:taxaGeral-ratioAno(base,3,4);
-  const dUti   = base==null?null:taxaUti  -ratioAno(base,5,6);
+  /* ---- KPI row: the navigation. Exactly one tile is always selected. ----
+     Each tile shows ONE number — the selected população's — because that is what Visão
+     means. The comparison against the other population happens in the chart below, which
+     is where a comparison belongs and where it is already being drawn. */
+  const foco=ladoFoco();
+  const tiles = ORDEM_MEDIDAS.map(id=>{
+    const cfg=MEDIDAS[id], sel = id===STATE.medida;
+    const prev=STATE.medida; STATE.medida=id;      /* read each tile in its own measure */
+    const v=totalMedida(M,foco);
+    const serie=serieMedida(M,foco);
+    STATE.medida=prev;
+    const modo=cfg.modo;
 
-  const leitosSus = sumBy(M,8)/M.length, internacoes = sumBy(M,7);
-  const permSel = DATA.permanencia.filter(r=>inSel(r[0]));
-  const leitosBase = base==null?null:
-    DATA.mensal.filter(r=>r[1]===base).reduce((s,r)=>s+r[8],0)/12;
-  const intBase = base==null?null:
-    DATA.mensal.filter(r=>r[1]===base).reduce((s,r)=>s+r[7],0);
+    /* Only a rate can breach a threshold, so only ocupação carries a level. A target on a
+       count would imply someone steers how many people fall ill. */
+    const n = (modo==="taxa" && v!=null) ? nivel(v) : null;
+    const fmt = x => x==null ? "—" : (modo==="taxa" ? pct(x) : nf(x));
 
-  /* The two rate tiles always show both views: their contrast IS the finding. The volume
-     tiles follow the selected view, because "how many beds" has a different answer. */
-  const v = V();
-  const leitosV = sumBy(M,v.leitos)/M.length;
-  const leitosVBase = base==null?null:
-    DATA.mensal.filter(r=>r[1]===base).reduce((s,r)=>s+r[v.leitos],0)/12;
+    return `<button class="kpi sel${sel?" on":""}" type="button" data-medida="${id}"
+      aria-pressed="${sel}">
+      <span class="lbl">${esc(cfg.rotulo)}</span>
+      <div class="valrow"><span class="val"${
+        n && n!=="ok" ? ` style="color:${C.acento}"` : ""}>${fmt(v)}</span></div>
+      ${n ? `<div class="gauge">${gaugeSVG(v)}</div>
+             <span class="per" style="color:${nivelCor(n)};font-weight:${nivelPeso(n)}">
+               ${NIVEL_ROT[n]} · alvo ${pct(LIM.atencao,0)}</span>`
+          : `<div class="spark">${spark(serie,C.serie)}</div>
+             <span class="per">${esc(V().rotulo)} · ${esc(STATE.rotulo)}</span>`}
+      ${n ? `<span class="per">${esc(V().rotulo)} · ${esc(STATE.rotulo)}</span>` : ""}
+    </button>`;
+  }).join("");
 
-  const tiles = [
-    kpi({lbl:"Taxa de ocupação UTI", val:pct(taxaUti), hero:true, color:C.acento,
-         delta:dUti, deltaFmt:pp, taxa:taxaUti}),
-    kpi({lbl:"Taxa de ocupação SUS (rede)", val:pct(taxaGeral), color:C.serie,
-         delta:dGeral, deltaFmt:pp, taxa:taxaGeral}),
-    kpi({lbl:v.rotLeitos, val:nf(leitosV), color:C.serie,
-         delta:leitosVBase==null?null:leitosV/leitosVBase-1, deltaFmt:pc,
-         vals:M.map(r=>r[v.leitos])}),
-    kpi({lbl:"Internações", val:nf(internacoes), color:C.serie,
-         delta:intBase==null?null:internacoes/intBase-1, deltaFmt:pc,
-         vals:M.map(r=>r[7])}),
-  ].join("");
+  /* ---- HERO: the focus population against the other, on the selected measure ---- */
+  const ctx = ladoCtx();
+  const sFoco = serieMedida(M,foco), sCtx = serieMedida(M,ctx);
+  const indexar = m.modo==="indice";
+  /* Base is the MEAN of the first selected year, not its first month. A single month is a
+     fragile base — January is seasonally low, so indexing to it would overstate every
+     later point — and the year mean is what the annual figures in the docs are built on,
+     so the endpoint here stays comparable to them. */
+  const anoBase0 = anos[0];
+  const mediaBase = s => {
+    const v = s.filter((_,i)=>M[i][1]===anoBase0).filter(x=>x!=null && isFinite(x));
+    return v.length ? v.reduce((a,b)=>a+b,0)/v.length : 1;
+  };
+  const prep = s => indexar
+    ? (()=>{ const b=mediaBase(s)||1; return s.map(v=>v==null?null:100*v/b); })()
+    : s;
+  const pFocoV = prep(sFoco), pCtxV = prep(sCtx);
 
-  /* ---- HERO: ICU vs network occupancy, both rates, zero-based ----
-     No index needed: the two series share a unit, so they are directly comparable and the
-     axis can start at zero. The 100% line is a real threshold (capacity exhausted), not a
-     baseline convention. */
-  const W=1114,H=286,L=48,R=96,T=14,B=26;
+  const W=1114,H=300,L=54,R=108,T=16,B=26;
+  const vals=[...pFocoV,...pCtxV].filter(v=>v!=null && isFinite(v));
   const sx=scaler([0,Math.max(M.length-1,1)],[L,W-R]);
-  const top=Math.max(1.4, Math.ceil((Math.max(...M.map(r=>r[6]?r[5]/r[6]:0))+.1)*10)/10);
-  const sy=scaler([0,top],[H-B,T]);
-  const gl=[0,.25,.5,.75,1,1.25].filter(v=>v<=top).map(v=>[v,sy(v)]);
-  const pGeral=M.map((r,i)=>[sx(i),sy(r[4]?r[3]/r[4]:0)]);
-  const pUti  =M.map((r,i)=>r[6]?[sx(i),sy(r[5]/r[6])]:null).filter(Boolean);
+  const top = indexar ? Math.ceil(Math.max(...vals,101)/10)*10
+                      : Math.max(1.4, Math.ceil((Math.max(...vals)+.1)*10)/10);
+  const bot = indexar ? Math.min(Math.floor(Math.min(...vals,99)/10)*10, 90) : 0;
+  const sy=scaler([bot,top],[H-B,T]);
+  const mk = a => a.map((v,i)=>v==null?null:[sx(i),sy(v)]).filter(Boolean);
+  const pFoco=mk(pFocoV), pCtx=mk(pCtxV);
 
-  /* Min/max annotations are computed, not typed — they follow the filter. */
-  const utiVals=M.map(r=>r[6]?r[5]/r[6]:null);
-  let hiI=-1,hiV=-1;
-  utiVals.forEach((v,i)=>{ if(v!=null&&v>hiV){hiV=v;hiI=i;} });
+  /* Thresholds belong to rates. On an indexed axis the reference is the base line. */
+  const faixas = indexar
+    ? `<line x1="${L}" x2="${W-R}" y1="${sy(100).toFixed(1)}" y2="${sy(100).toFixed(1)}"
+         stroke="${C.txt2}" stroke-width="1.5" stroke-dasharray="4 3"/>
+       <text x="${W-R+6}" y="${(sy(100)+4).toFixed(1)}" font-size="13"
+         fill="${C.txt2}">${anos[0]} = 100</text>`
+    : `<rect x="${L}" y="${sy(Math.min(top,LIM.critico)).toFixed(1)}"
+         width="${(W-R-L).toFixed(1)}"
+         height="${Math.max(0,sy(LIM.atencao)-sy(Math.min(top,LIM.critico))).toFixed(1)}"
+         fill="${C.acento}" opacity=".07"/>
+       ${top>=LIM.critico?`<rect x="${L}" y="${T}" width="${(W-R-L).toFixed(1)}"
+         height="${Math.max(0,sy(LIM.critico)-T).toFixed(1)}"
+         fill="${C.acento}" opacity=".13"/>`:""}
+       ${[["atenção",LIM.atencao],["crítico",LIM.critico]].map(([k,val])=>val<=top?
+         `<line x1="${L}" x2="${W-R}" y1="${sy(val).toFixed(1)}" y2="${sy(val).toFixed(1)}"
+            stroke="${C.acento}" stroke-width="1.2" stroke-dasharray="6 4" opacity=".85"/>
+          <text x="${L+6}" y="${(sy(val)-5).toFixed(1)}" font-size="13" fill="${C.acento}"
+            font-weight="600">${k} ${pct(val,0)}</text>`:"").join("")}
+       ${top>=1?`<line x1="${L}" x2="${W-R}" y1="${sy(1).toFixed(1)}" y2="${sy(1).toFixed(1)}"
+         stroke="${C.txt2}" stroke-width="1.5" stroke-dasharray="4 3"/>
+       <text x="${W-R+6}" y="${(sy(1)-5).toFixed(1)}" font-size="13"
+         fill="${C.txt2}">100%</text>`:""}`;
 
-  const hero = svg(W,H,
-    gridlines(L,W-R,gl,v=>nf(v*100)+"%")+
-    /* Threshold bands. Drawn behind the data, in the accent at low opacity: the region a
-       reader should worry about is shaded rather than announced. */
-    `<rect x="${L}" y="${sy(Math.min(top,LIM.critico)).toFixed(1)}"
-       width="${(W-R-L).toFixed(1)}"
-       height="${Math.max(0,sy(LIM.atencao)-sy(Math.min(top,LIM.critico))).toFixed(1)}"
-       fill="${C.acento}" opacity=".07"/>
-     ${top>=LIM.critico?`<rect x="${L}" y="${T}" width="${(W-R-L).toFixed(1)}"
-       height="${Math.max(0,sy(LIM.critico)-T).toFixed(1)}"
-       fill="${C.acento}" opacity=".13"/>`:""}
-     ${[["atencao",LIM.atencao],["critico",LIM.critico]].map(([k,val])=>val<=top?
-       `<line x1="${L}" x2="${W-R}" y1="${sy(val).toFixed(1)}" y2="${sy(val).toFixed(1)}"
-          stroke="${C.acento}" stroke-width="1.2" stroke-dasharray="6 4" opacity=".85"/>
-        <text x="${L+6}" y="${(sy(val)-5).toFixed(1)}" font-size="13" fill="${C.acento}"
-          font-weight="600">${k==="critico"?"crítico":"atenção"} ${pct(val,0)}</text>`:"").join("")}`+
-    /* 100% threshold */
-    (top>=1 ? `<line x1="${L}" x2="${W-R}" y1="${sy(1).toFixed(1)}" y2="${sy(1).toFixed(1)}"
-       stroke="${C.txt2}" stroke-width="1.5" stroke-dasharray="4 3"/>
-     <text x="${W-R+6}" y="${(sy(1)-5).toFixed(1)}" font-size="13" fill="${C.txt2}">100% · capacidade esgotada</text>` : "")+
-    `<path d="${path(pGeral)}" fill="none" stroke="${C.serie}" stroke-width="2" stroke-linejoin="round"/>
-     <path d="${path(pUti)}" fill="none" stroke="${C.acento}" stroke-width="2.5" stroke-linejoin="round"/>`+
-    (hiI>=0 ? `<circle cx="${sx(hiI).toFixed(1)}" cy="${sy(hiV).toFixed(1)}" r="4.5"
-        fill="${C.card}" stroke="${C.acento}" stroke-width="2"/>
-      <text x="${(sx(hiI)+8).toFixed(1)}" y="${(sy(hiV)-6).toFixed(1)}" font-size="13"
-        font-weight="600" fill="${C.tinta}">máx ${pct(hiV)} · ${esc(M[hiI][0])}</text>` : "")+
-    `<text x="${W-R+6}" y="${(pUti.at(-1)[1]+4).toFixed(1)}" font-size="13"
-       fill="${C.acento}" font-weight="600">UTI</text>
-     <text x="${W-R+6}" y="${(pGeral.at(-1)[1]+4).toFixed(1)}" font-size="13"
-       fill="${C.serie}" font-weight="600">Rede</text>`+
+  const gl = indexar ? [bot,100,top].map(v=>[v,sy(v)])
+                     : [0,.25,.5,.75,1,1.25].filter(v=>v<=top).map(v=>[v,sy(v)]);
+  const fmtEixo = indexar ? (v=>nf(v)) : (v=>nf(v*100)+"%");
+
+  /* The population in focus is BLUE (the subject); the other is grey (context). Neither is
+     orange: orange means only "a threshold was breached", which the band marks. Swapping
+     Visão swaps which line is which — identity comes from selection, not from hue. */
+  const hero = M.length<2 ? vazio("Selecione mais de um mês.") : svg(W,H,
+    gridlines(L,W-R,gl,fmtEixo)+faixas+
+    `<path d="${path(pCtx)}" fill="none" stroke="${C.marca}" stroke-width="2"
+       stroke-linejoin="round"/>
+     <path d="${path(pFoco)}" fill="none" stroke="${C.serie}" stroke-width="2.6"
+       stroke-linejoin="round"/>
+     <text x="${W-R+6}" y="${(pFoco.at(-1)[1]-3).toFixed(1)}" font-size="13"
+       fill="${C.serie}" font-weight="600">${esc(m[foco].rot)}</text>
+     <text x="${W-R+6}" y="${(pFoco.at(-1)[1]+12).toFixed(1)}" font-size="13"
+       fill="${C.txt2}">${indexar?nf(pFocoV.at(-1),1):pct(pFocoV.at(-1))}</text>
+     <text x="${W-R+6}" y="${(pCtx.at(-1)[1]-3).toFixed(1)}" font-size="13"
+       fill="${C.marca}" font-weight="600">${esc(m[ctx].rot)}</text>
+     <text x="${W-R+6}" y="${(pCtx.at(-1)[1]+12).toFixed(1)}" font-size="13"
+       fill="${C.txt2}">${indexar?nf(pCtxV.at(-1),1):pct(pCtxV.at(-1))}</text>`+
     xLabels(M,sx,H-6));
 
-  /* ---- support 1: capacity vs demand, indexed ---- */
-  const w2=548,h2=190,l2=44,r2=76,t2=14,b2=24;
-  const anos=selAnos();
-  const byAno = a => DATA.mensal.filter(r=>r[1]===a);
-  const capAno = a => byAno(a).reduce((s,r)=>s+r[v.leitos],0)/12;
-  const demAno = a => byAno(a).reduce((s,r)=>s+r[v.num],0);
-  const b0=anos[0], capB=capAno(b0), demB=demAno(b0);
-  const s2x=scaler([0,Math.max(anos.length-1,1)],[l2+18,w2-r2]);
-  const idxCap=anos.map(a=>100*capAno(a)/capB), idxDem=anos.map(a=>100*demAno(a)/demB);
-  const all=[...idxCap,...idxDem];
-  const lo2=Math.floor(Math.min(...all,99)/5)*5, hi2=Math.ceil(Math.max(...all,101)/5)*5;
-  const s2y=scaler([lo2,hi2],[h2-b2,t2]);
-  const scissors = anos.length<2
-    ? `<div style="font-size:14px;color:${C.txt2};padding:20px 0">
-         Um ano só na seleção — o índice precisa de pelo menos dois.</div>`
-    : svg(w2,h2,
-        gridlines(l2,w2-r2,[lo2,100,hi2].map(v=>[v,s2y(v)]),v=>nf(v))+
-        `<line x1="${l2}" x2="${w2-r2}" y1="${s2y(100).toFixed(1)}" y2="${s2y(100).toFixed(1)}"
-           stroke="${C.txt2}" stroke-width="1.2" stroke-dasharray="4 3"/>
-         <path d="${path(idxCap.map((v,i)=>[s2x(i),s2y(v)]))}" fill="none"
-           stroke="${C.serie}" stroke-width="2"/>
-         <path d="${path(idxDem.map((v,i)=>[s2x(i),s2y(v)]))}" fill="none"
-           stroke="${C.acento}" stroke-width="2"/>
-         <text x="${w2-r2+6}" y="${(s2y(idxCap.at(-1))+4).toFixed(1)}" font-size="13"
-           fill="${C.serie}" font-weight="600">Capac. ${nf(idxCap.at(-1),1)}</text>
-         <text x="${w2-r2+6}" y="${(s2y(idxDem.at(-1))+4).toFixed(1)}" font-size="13"
-           fill="${C.acento}" font-weight="600">Demanda ${nf(idxDem.at(-1),1)}</text>`+
-        anos.map((a,i)=>`<text x="${s2x(i).toFixed(1)}" y="${h2-6}" font-size="13"
-           fill="${C.txt2}" text-anchor="middle">${a}</text>`).join(""));
+  const subs = {
+    ocupacao:"Taxas mensais das duas populações, mesmo eixo, começando em zero.",
+    leitos:`Indexadas a ${anos[0]} = 100 — as duas séries têm ordens de grandeza diferentes.`,
+    internacoes:`Indexadas a ${anos[0]} = 100.`,
+  };
 
-  /* ---- support 2: admissions vs mean length of stay, indexed ----
-     Indexed rather than dual-axis: the design system bans dual axes, and indexing puts two
-     different units (admissions, days) on one comparable scale. */
-  const w3=548,h3=190,l3=44,r3=88,t3=14,b3=24;
-  const intB=permSel[0][1], perB=permSel[0][2];
-  const idxInt=permSel.map(r=>100*r[1]/intB), idxPer=permSel.map(r=>100*r[2]/perB);
-  const all3=[...idxInt,...idxPer];
-  const lo3=Math.floor(Math.min(...all3,99)/5)*5, hi3=Math.ceil(Math.max(...all3,101)/5)*5;
-  const s3x=scaler([0,Math.max(permSel.length-1,1)],[l3+18,w3-r3]);
-  const s3y=scaler([lo3,hi3],[h3-b3,t3]);
-  const vol = permSel.length<2
-    ? `<div style="font-size:14px;color:${C.txt2};padding:20px 0">
-         Um ano só na seleção — o índice precisa de pelo menos dois.</div>`
-    : svg(w3,h3,
-        gridlines(l3,w3-r3,[lo3,100,hi3].map(v=>[v,s3y(v)]),v=>nf(v))+
-        `<line x1="${l3}" x2="${w3-r3}" y1="${s3y(100).toFixed(1)}" y2="${s3y(100).toFixed(1)}"
-           stroke="${C.txt2}" stroke-width="1.2" stroke-dasharray="4 3"/>
-         <path d="${path(idxInt.map((v,i)=>[s3x(i),s3y(v)]))}" fill="none"
-           stroke="${C.serie}" stroke-width="2"/>
-         <path d="${path(idxPer.map((v,i)=>[s3x(i),s3y(v)]))}" fill="none"
-           stroke="${C.marca}" stroke-width="2"/>
-         <text x="${w3-r3+6}" y="${(s3y(idxInt.at(-1))+4).toFixed(1)}" font-size="13"
-           fill="${C.serie}" font-weight="600">Internações</text>
-         <text x="${w3-r3+6}" y="${(s3y(idxPer.at(-1))+4).toFixed(1)}" font-size="13"
-           fill="${C.marca}" font-weight="600">Permanência</text>`+
-        permSel.map((r,i)=>`<text x="${s3x(i).toFixed(1)}" y="${h3-6}" font-size="13"
-           fill="${C.txt2}" text-anchor="middle">${r[0]}</text>`).join(""));
-
-  return `<div class="kpis" id="spot-kpis">${tiles}</div>
-  <div class="row" style="flex:1.3">
+  return `<div class="kpis kpis-3" id="spot-kpis">${tiles}</div>
+  <div class="row" style="flex:1.35">
     <div class="card" style="flex:1" id="spot-hero">
       <div class="cardhead">
-        <p class="cardtitle">Ocupação de UTI e da rede · ${esc(STATE.rotulo)}${infoBtn("Ocupação acima de 100%")}</p>
-        <p class="cardsub">Taxas mensais, mesmo eixo, começando em zero.</p>
+        <p class="cardtitle">${esc(m.rotulo)} · UTI e rede · ${esc(STATE.rotulo)}
+          ${infoBtn(m.modo==="taxa"?"Ocupação acima de 100%":"Índice (base = 100)")}</p>
+        <p class="cardsub">${subs[m.id]}</p>
       </div>
       <div style="flex:1;min-height:0">${hero}</div>
     </div>
   </div>
-  <div class="row" style="flex:1">
-    <div class="card" style="flex:1">
-      <div class="cardhead">
-        <p class="cardtitle">De onde veio a variação da ocupação · ${esc(v.rotulo)}
-          ${infoBtn("Índice (base = 100)")}</p>
-        <p class="cardsub">Capacidade e demanda, cada uma indexada a ${anos[0]} = 100.
-          A distância entre as linhas <b>não é folga de capacidade</b> — é a variação da
-          ocupação.</p>
-      </div>
-      <div style="flex:1;min-height:0">${scissors}</div>
-    </div>
-    <div class="card" style="flex:1">
-      <div class="cardhead">
-        <p class="cardtitle">Internações e permanência média, indexadas · ${anos[0]} = 100${infoBtn("Internações (AIH)")}</p>
-        <p class="cardsub">Volume e duração na mesma escala.</p>
-      </div>
-      <div style="flex:1;min-height:0">${vol}</div>
-    </div>
-  </div>`;
+  <div class="row" style="flex:.95">${suporte(anos)}</div>`;
+}
+
+/* Placeholder wherever a selection leaves a chart without enough data to draw. */
+function vazio(msg){
+  return `<div style="font-size:14px;color:${C.txt2};padding:20px 0">${esc(msg)}</div>`;
+}
+
+/* ---- the two support charts, also driven by the KPI selection ---- */
+function suporte(anos){
+  const byAno = a => DATA.mensal.filter(r=>r[1]===a);
+  const idx = f => {
+    const v=anos.map(a=>f(byAno(a)));
+    const b=v.find(x=>x!=null && x!==0) || 1;
+    return v.map(x=>x==null?null:100*x/b);
+  };
+  const card = (titulo, sub, inner, nota) =>
+    `<div class="card" style="flex:1">
+       <div class="cardhead"><p class="cardtitle">${titulo}</p>
+         <p class="cardsub">${sub}</p></div>
+       <div style="flex:1;min-height:0">${inner}</div>
+       ${nota?`<p class="cardnote">${nota}</p>`:""}
+     </div>`;
+
+  const duasLinhas = (titulo, sub, a, b, rotA, rotB, nota) => {
+    const w=548,h=190,l=46,r=96,t=14,bm=24;
+    if(anos.length<2) return card(titulo, sub, vazio("Selecione mais de um ano."), nota);
+    const all=[...a,...b].filter(v=>v!=null&&isFinite(v));
+    const lo=Math.floor(Math.min(...all,99)/5)*5, hi=Math.ceil(Math.max(...all,101)/5)*5;
+    const sxx=scaler([0,anos.length-1],[l+16,w-r]), syy=scaler([lo,hi],[h-bm,t]);
+    const g=svg(w,h,
+      gridlines(l,w-r,[lo,100,hi].map(v=>[v,syy(v)]),v=>nf(v))+
+      `<line x1="${l}" x2="${w-r}" y1="${syy(100).toFixed(1)}" y2="${syy(100).toFixed(1)}"
+         stroke="${C.txt2}" stroke-width="1.2" stroke-dasharray="4 3"/>
+       <path d="${path(b.map((v,i)=>[sxx(i),syy(v)]))}" fill="none" stroke="${C.marca}" stroke-width="2"/>
+       <path d="${path(a.map((v,i)=>[sxx(i),syy(v)]))}" fill="none" stroke="${C.serie}" stroke-width="2.4"/>
+       <text x="${w-r+6}" y="${(syy(a.at(-1))+4).toFixed(1)}" font-size="13"
+         fill="${C.serie}" font-weight="600">${esc(rotA)}</text>
+       <text x="${w-r+6}" y="${(syy(b.at(-1))+4).toFixed(1)}" font-size="13"
+         fill="${C.marca}" font-weight="600">${esc(rotB)}</text>`+
+      anos.map((y,i)=>`<text x="${sxx(i).toFixed(1)}" y="${h-6}" font-size="13"
+         fill="${C.txt2}" text-anchor="middle">${y}</text>`).join(""));
+    return card(titulo, sub, g, nota);
+  };
+
+  const participacao = (titulo, sub, f, nota) => {
+    const w=548,h=190,l=56,r=22,t=14,bm=24;
+    if(anos.length<2) return card(titulo, sub, vazio("Selecione mais de um ano."), nota);
+    const v=anos.map(a=>f(byAno(a)));
+    if(v.some(x=>x==null)) return card(titulo, sub, vazio("Sem dado no recorte."), nota);
+    const lo=Math.max(0,(Math.floor(Math.min(...v)*1000)-5)/1000);
+    const hi=(Math.ceil(Math.max(...v)*1000)+5)/1000;
+    const sxx=scaler([0,anos.length-1],[l+16,w-r-16]), syy=scaler([lo,hi],[h-bm,t]);
+    const g=svg(w,h,
+      gridlines(l,w-r,[lo,(lo+hi)/2,hi].map(x=>[x,syy(x)]),x=>nf(x*100,1)+"%")+
+      `<path d="${path(v.map((x,i)=>[sxx(i),syy(x)]))}" fill="none" stroke="${C.serie}" stroke-width="2.4"/>`+
+      v.map((x,i)=>`<circle cx="${sxx(i).toFixed(1)}" cy="${syy(x).toFixed(1)}" r="3.5" fill="${C.serie}"/>`).join("")+
+      anos.map((y,i)=>`<text x="${sxx(i).toFixed(1)}" y="${h-6}" font-size="13"
+        fill="${C.txt2}" text-anchor="middle">${y}</text>`).join(""));
+    return card(titulo, sub, g, nota);
+  };
+
+  if(STATE.medida==="ocupacao"){
+    /* Two small scissors, one per population. Side by side they show the two OPPOSITE
+       mechanisms of 2020-21 in a single glance, which is the whole argument. */
+    const capU=idx(rs=>rs.reduce((s,r)=>s+r[9],0)/12), demU=idx(rs=>rs.reduce((s,r)=>s+r[5],0));
+    const capR=idx(rs=>rs.reduce((s,r)=>s+r[8],0)/12), demR=idx(rs=>rs.reduce((s,r)=>s+r[3],0));
+    return duasLinhas("De onde veio a variação · UTI",
+        `Capacidade e demanda de UTI, indexadas a ${anos[0]} = 100.`,
+        demU, capU, "Demanda", "Capacidade",
+        "A distância entre as linhas <b>não é folga de capacidade</b> — é a variação da ocupação.")
+      + duasLinhas("De onde veio a variação · rede",
+        `Capacidade e demanda da rede, indexadas a ${anos[0]} = 100.`,
+        demR, capR, "Demanda", "Capacidade",
+        "Mesma leitura, população inteira — e mecanismo oposto no mesmo período.");
+  }
+
+  if(STATE.medida==="leitos"){
+    return participacao("UTI como fatia da rede",
+        "% dos leitos SUS que são de UTI/UCO.",
+        rs=>{ const t=rs.reduce((s,r)=>s+r[8],0); return t?rs.reduce((s,r)=>s+r[9],0)/t:null; },
+        "A fatia só cresce <b>depois</b> da pandemia — a resposta de capacidade chegou tarde.")
+      + cardTipos(anos);
+  }
+
+  /* internações */
+  const volA=idx(rs=>rs.reduce((s,r)=>s+r[7],0));
+  const volB=(()=>{ const v=anos.map(a=>{ const f=DATA.permanencia.find(r=>r[0]===a); return f?f[2]:null; });
+                    const b=v.find(x=>x!=null)||1; return v.map(x=>x==null?null:100*x/b); })();
+  return participacao("Internações que usaram UTI",
+      "% do total de internações do ano.",
+      rs=>{ const t=rs.reduce((s,r)=>s+r[7],0); return t?rs.reduce((s,r)=>s+r[10],0)/t:null; },
+      "Menos pacientes no total, e uma fatia maior deles em estado grave.")
+    + duasLinhas("Volume e duração, indexados",
+      `Internações e permanência média a ${anos[0]} = 100.`,
+      volA, volB, "Internações", "Permanência",
+      "Separa volume de duração: mais gente, não gente ficando mais tempo.");
+}
+
+/* Beds by type over time — a support chart in the leitos mode. */
+function cardTipos(anos){
+  const serieTipos=["clinico","cirurgico","complementar","pediatricos"];
+  const outros=anos.map(a=>DATA.tipos.enfermaria
+    .filter(r=>r[1]===a && !serieTipos.includes(r[0])).reduce((s,r)=>s+r[2],0));
+  const series=serieTipos.map((tipo,i)=>({
+    rot:ROTULO_TIPO[tipo], color:LEITO[i],
+    vals:anos.map(a=>{const f=DATA.tipos.enfermaria.find(r=>r[0]===tipo&&r[1]===a); return f?f[2]:0;})
+  })).concat([{rot:"Outros", color:C.marca, vals:outros}]);
+  const w=548,h=190,l=52,r=108,t=12,b=26;
+  const sx=scaler([0,Math.max(anos.length-1,1)],[l,w-r]);
+  const sy=scaler([0,Math.ceil(Math.max(...series.flatMap(s=>s.vals))/2000)*2000],[h-b,t]);
+  const inner = anos.length<2 ? vazio("Selecione mais de um ano.") : svg(w,h,
+    gridlines(l,w-r,[0,2500,5000,7500,10000].filter(v=>v<=sy.domainTop).map(v=>[v,sy(v)]),v=>nf(v))+
+    series.map(s=>{
+      const pts=s.vals.map((v,i)=>[sx(i),sy(v)]);
+      return `<path d="${path(pts)}" fill="none" stroke="${s.color}" stroke-width="2"
+        stroke-linejoin="round"/>
+        <text x="${w-r+6}" y="${(pts.at(-1)[1]+4).toFixed(1)}" font-size="13"
+          fill="${C.txt2}">${esc(s.rot)} <tspan fill="${C.tinta}">${nf(s.vals.at(-1))}</tspan></text>`;
+    }).join("")+
+    anos.map((a,i)=>`<text x="${sx(i).toFixed(1)}" y="${h-6}" font-size="13"
+      fill="${C.txt2}" text-anchor="middle">${a}</text>`).join(""));
+  return `<div class="card" style="flex:1">
+    <div class="cardhead"><p class="cardtitle">Leitos SUS por tipo</p>
+      <p class="cardsub">Média mensal. Quatro tipos maiores e o residual.</p></div>
+    <div style="flex:1;min-height:0">${inner}</div></div>`;
 }
 
 /* ================= TAB 2 · TERRITÓRIO ================= */
@@ -1256,7 +1461,7 @@ function custo(){
       <rect x="${l2}" y="${y}" width="${(wTot-wHigh-2).toFixed(1)}" height="38"
         fill="${C.marca}" rx="2"/>
       <rect x="${(l2+wTot-wHigh).toFixed(1)}" y="${y}" width="${Math.max(1,wHigh).toFixed(1)}"
-        height="38" fill="${C.acento}" rx="2"/>
+        height="38" fill="${C.serie}" rx="2"/>
       <text x="${l2+8}" y="${y+24}" font-size="14" fill="#ffffff" font-weight="600">${txtMed}</text>
       <text x="${(l2+wTot-wHigh-8).toFixed(1)}" y="${y+24}" text-anchor="end" font-size="14"
         fill="${C.tinta}" font-weight="600">${txtHigh}</text>`;
@@ -1281,7 +1486,8 @@ function custo(){
     <div class="card" style="flex:1.1">
       <div class="cardhead">
         <p class="cardtitle">Volume e gasto por complexidade · ${esc(STATE.rotulo)}</p>
-        <p class="cardsub">Alta complexidade em laranja. O descasamento entre as barras é o gráfico.</p>
+        <p class="cardsub">Alta complexidade em azul. O descasamento entre as barras é o gráfico —
+          ele se lê pelo comprimento, sem precisar de cor de alarme.</p>
       </div>
       <div style="flex:1;min-height:0">${stack}</div>
       <p class="cardnote">Alta complexidade: <b>${pct(nT?alta[0]/nT:0)}</b> das internações,
@@ -1543,12 +1749,12 @@ const TOUR = [
   { alvo:"spot-hero", pos:{top:"470px", left:"300px"},
     titulo:"O achado, e por que ele abre o painel",
     texto:"UTI e rede no mesmo eixo. Entre 2019 e 2021 a rede <b>caiu</b> de 58,4% para 53,2% enquanto a UTI <b>subiu</b> para 111,9%. Quem olhasse só a média teria concluído que 2021 foi mais folgado que 2019 — no pior ano sanitário do século." },
-  { alvo:"spot-kpis", pos:{top:"290px", left:"404px"},
-    titulo:"Todo número diz de que período fala",
-    texto:"Cada tile carrega o recorte embaixo do valor. Se o filtro muda, o número muda <b>e diz que mudou</b> — antes, o tile mostrava 2023 enquanto a barra de filtros dizia 2019–2023, e não havia como saber qual dos dois você estava vendo." },
+  { alvo:"spot-kpis", pos:{top:"300px", left:"404px"},
+    titulo:"Os KPIs são o menu — clique neles",
+    texto:"Sempre há <b>um</b> selecionado, e ele decide o que os gráficos abaixo comparam. A comparação em si nunca muda — é sempre UTI contra rede — então o mesmo raciocínio se aplica a três medidas. E cada uma conta uma história diferente: em <b>leitos</b>, a rede cresceu na pandemia enquanto a UTI ficou parada; a UTI só cresceu <b>depois</b>." },
   { alvo:"filters", pos:{top:"170px", left:"404px"},
-    titulo:"Dois controles mudam tudo na aba",
-    texto:"<b>Período</b> — e pandemia não é um recorte de data qualquer: é o intervalo em que as duas taxas andam em direções opostas. <b>Visão</b> troca a população entre rede e UTI; em UTI, dois terços do mapa ficam em branco, porque só 59 dos 225 municípios têm leito de UTI. Experimente os dois." },
+    titulo:"Dois controles, dois papéis diferentes",
+    texto:"<b>Visão</b> escolhe <i>qual população</i> está em foco — os KPIs passam a falar dela, e nos gráficos ela vira a linha azul, com a outra em cinza atrás para comparação. <b>Período</b> vale para a aba inteira, e pandemia não é um recorte qualquer: é o intervalo em que as duas populações andam em direções opostas." },
   { alvo:"tabstrip", pos:{top:"150px", left:"250px"},
     titulo:"A ordem de leitura",
     texto:"<b>Panorama</b> (o quê) → <b>Território</b> (onde) → <b>Capacidade</b> (que tipo de leito) → <b>Custo</b> (quanto). Cada aba responde uma pergunta e passa a próxima adiante." },
@@ -1704,15 +1910,26 @@ function wireHelp(){
 /* ---------- shell ---------- */
 const TABS=[panorama,territorio,capacidade,custo];
 
-/* Info affordances are re-created with the panel, so their handler is bound after each
-   render. Clicking opens the glossary pre-filtered to that term. */
-function wireInfoButtons(){
+/* Info affordances and KPI selectors are re-created with the panel, so their handlers are
+   bound after each render. */
+function wirePanel(){
   document.querySelectorAll(".infob").forEach(b=>{
     b.addEventListener("click",e=>{
       e.stopPropagation();
       ORIENT.tour=-1; ORIENT.firstrun=false;
       ORIENT.busca=b.dataset.termo||""; ORIENT.sheet="gloss";
       refreshOrient();
+    });
+  });
+  /* The KPI tile is the navigation. There is always exactly one selection — clicking the
+     already-selected tile does nothing rather than deselecting, because an empty selection
+     would leave the tab with no charts at all. */
+  document.querySelectorAll(".kpi.sel").forEach(b=>{
+    b.addEventListener("click",e=>{
+      e.stopPropagation();
+      const id=b.dataset.medida;
+      if(!id || id===STATE.medida) return;
+      STATE.medida=id; show(STATE.tab);
     });
   });
 }
@@ -1725,7 +1942,7 @@ function show(i){
   panel.setAttribute("aria-labelledby","tab-"+i);
   panel.innerHTML=TABS[i]();
   renderFilters();
-  wireInfoButtons();
+  wirePanel();
   /* Re-render the orientation layer last: replacing the panel's innerHTML destroys any
      element the tour was outlining, so the spotlight has to be reapplied after. */
   renderOrient();

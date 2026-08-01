@@ -192,8 +192,9 @@ def build_mensal(con) -> list[list]:
     occupancy = (REFINED / "occupancy.parquet").as_posix()
     return [
         [f"{ano}-{mes:02d}", ano, mes, dias, leito_dias, uti, leito_dias_uti,
-         internacoes, round(leitos, 1), round(leitos_uti, 1)]
-        for ano, mes, dias, leito_dias, uti, leito_dias_uti, internacoes, leitos, leitos_uti
+         internacoes, round(leitos, 1), round(leitos_uti, 1), int_uti]
+        for ano, mes, dias, leito_dias, uti, leito_dias_uti, internacoes, leitos, \
+            leitos_uti, int_uti
         in query(con, f"""
             SELECT ano, mes,
                    SUM(dias_permanencia_sus)::BIGINT,
@@ -202,7 +203,8 @@ def build_mensal(con) -> list[list]:
                    COALESCE(SUM(leito_dias_uti_sus), 0)::BIGINT,
                    SUM(total_internacoes)::BIGINT,
                    SUM(leitos_sus)::DOUBLE,
-                   COALESCE(SUM(leitos_uti_sus), 0)::DOUBLE
+                   COALESCE(SUM(leitos_uti_sus), 0)::DOUBLE,
+                   COALESCE(SUM(internacoes_com_uti), 0)::BIGINT
             FROM read_parquet('{occupancy}')
             GROUP BY 1, 2 ORDER BY 1, 2
         """)

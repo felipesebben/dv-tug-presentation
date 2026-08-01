@@ -22,15 +22,28 @@
   Green is absent by design: keeping it as a third colour would reintroduce the
   failing green/orange pair the moment two series shared a view.
 
-  SEMANTICS (ratified 2026-07-29). The colours also carry fixed valence:
-      grey   #8c8c89  no judgement - the default for any mark not making a point
-      blue   #2a78d6  normal, healthy, under control
-      orange #eb6834  NEEDS ATTENTION
-  This implies a prohibition worth stating because it is easy to violate by habit:
-  orange must NOT mark "the most recent" or "the median". A value that stands out
-  only for being the last point in a series or the middle of a distribution is blue
-  or grey. Spending the system's single alarm colour on something that is not an
-  alarm teaches the reader to ignore it.
+  SEMANTICS (rewritten 2026-08-01). Each hue does exactly ONE job:
+      grey   #8c8c89  CONTEXT  - on screen, but not what you selected
+      blue   #2a78d6  the SUBJECT - what you selected, in a normal state
+      orange #eb6834  a CONDITION that wants action. Nothing else.
+
+  The test: "would the user do something differently because this mark is orange?"
+  If no, it is not orange. Two prohibitions follow:
+      1. orange never marks "the most recent" or "the median"
+      2. orange never marks a CATEGORY - only a condition. UTI is not orange for
+         being UTI.
+
+  Why this was rewritten rather than clarified: orange had been doing both jobs at
+  once - "needs attention" AND "this is ICU". So ICU at 40% was still orange,
+  shouting alarm with nothing wrong; and since ICU is always on screen, orange was
+  always on screen and had no force left when a threshold genuinely broke. That is
+  the same defect this file already warned about for blue ("if it were also the
+  accent it would be doing two jobs"), committed with the other colour.
+
+  Identity is now carried by selection, position and label; hue carries only state.
+  In an ICU focus the ICU series is BLUE and the network is grey; swap the focus and
+  they swap. The alarm is a blue line entering an orange band - which only happens
+  when it is true.
 
   Semantic colour is normally discouraged for accessibility, but that warning is
   really about green/red, which is indistinguishable under protanopia. This pair

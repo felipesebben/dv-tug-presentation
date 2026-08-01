@@ -31,9 +31,11 @@ New to the project: `foundations/data_briefing.md` → `foundations/uxers_guidan
 → `v2/wireframe.html`. Read `foundations/metrics_dictionary.md` whenever you need to know
 what a number actually measures.
 
-Building the V2 workbook: `v2/spec.md` for what to build, `v2/design_system.md` for the
-tokens, `v2/orientation.md` section 6 for how the help layer maps onto Tableau objects, and
-`foundations/metrics_dictionary.md` open on a second screen the whole time.
+Building the V2 workbook: **`v2/build_reference.md` is the one to work from** — it is the
+sheet-by-sheet translation into Tableau, and it points at the others where the reasoning
+lives. Keep `foundations/metrics_dictionary.md` open on a second screen. Read `v2/spec.md`
+first if you want to understand a choice before implementing it, and `v2/design_system.md`
+for the tokens.
 
 Opening or changing the **V1** workbook: read `v1/as_built.md` first — the spec describes
 the design, that file describes what actually got built, and they differ in five places.
@@ -172,6 +174,30 @@ the whole talk: no amount of design catches it.
 Ends with a build order that puts the palette and workbook-level formatting *before* the
 first sheet, which is what stops V1's inconsistency from reaccumulating.
 
+### `v2/build_reference.md`
+**Developer-facing, and it says so at the top.** The translation of decisions already made
+elsewhere into Tableau clicks: calculated fields with exact syntax, shelf assignments, mark
+types, reference lines and formatting, sheet by sheet across all four tabs. It contains no
+design decision of its own — `v2/spec.md` owns those and
+`foundations/metrics_dictionary.md` owns what the numbers mean, and both win over this file
+on any conflict.
+
+Written because the spec says *what* to build and the dictionary says *what a number means*,
+but neither says which field goes on which shelf — and that gap is where a correct spec turns
+into a wrong workbook. Every formula in it was verified against `data/refined/*.parquet`
+rather than reasoned about: `SUM(leitos_sus) / COUNTD(ano_mes)` reproduces 21.838,1 beds for
+2023, and `taxa × leitos` reproduces patient-days ÷ 365 to within a rounding step, which is
+what makes the filled-capacity bar's decomposition trustworthy.
+
+Three parts earn their place beyond transcription. **Section 1.2** fixes the rule that the
+rede/UTI switch swaps numerator and denominator *separately*, never two pre-divided rates,
+because a ratio cannot be re-aggregated. **Section 3** lists what Tableau cannot do that the
+wireframe does — hatched overflow, a guided tour, a searchable glossary — with the accepted
+substitution for each, so nobody spends an afternoon discovering the limit. **Section 4** is
+an acceptance checklist whose first real test is that `SUM(total_internacoes)` still equals
+3.739.506 at state level: anything larger means the relationships were built as joins and
+every sum in the workbook is inflated.
+
 ### `v2/design_system.md`
 The token set the V2 is built from — colours, type scale, spacing grid, chart rules —
 so that consistency is a decision made once rather than a judgement repeated per
@@ -241,13 +267,33 @@ navigable tabs rendered inside a true 1200×800 frame, so "fits on one screen" i
 rather than claimed. Every number and series is real, read from `data/refined/` — no
 synthetic fill.
 
-**The Panorama hero is ICU versus network occupancy**, and it is the page's argument: from
-2019 to 2021 the network rate *fell* 5,2 p.p. while ICU *rose* 35,8 p.p., peaking at 131,9%
-in June 2021 against 57,0% for the network. A dashboard showing only the aggregate would
-have reported less pressure in the worst health year of the century. A useful side effect
-is that the hero no longer needs the indexed-axis exception: both series are rates in the
-same unit, so the axis starts at zero and the 100% line becomes a real threshold. The
-scissors chart keeps the 100 baseline, and is now the only chart that needs it.
+**Two controls, with different jobs.** *Visão* picks which population is in focus: the KPI
+tiles report it, and in every chart it becomes the blue series with the other behind it in
+grey. *The KPI row is the navigation* — exactly one tile is always selected, and it decides
+which question the charts answer about that population. So the dashboard's thesis stops being
+one chart and becomes a **frame applied three times**, and each application tells a different
+story:
+
+| | rede | UTI |
+|---|---|---|
+| **Ocupação** 2021 | fell to 53,2% | rose to **111,9%** |
+| **Leitos** 2021 | grew to 106,0 | **flat at 99,6** |
+| **Leitos** 2023 | back to 100,3 | grew to **121,1** |
+| **Internações** 2020 | fell to 87,6 | rose to **112,5** |
+
+The leitos row is the strongest thing in the file for a funding case: RS expanded general
+capacity *during* the pandemic while ICU stayed flat, and only added ICU beds afterwards.
+The capacity response arrived after the emergency.
+
+Each tile shows **one number** — the focused population's. The comparison happens in the
+chart, which is where a comparison belongs and where it is already being drawn; an earlier
+pass put both populations inside the tile and merged the two controls, which crowded the tile
+and duplicated the hero.
+
+The hero is never hidden — it changes measure but stays on screen in all three states,
+because it is the chart that justifies the dashboard existing. Rates compare in absolute
+terms so that hero starts at zero; counts are indexed, since 1.837 against 21.838 on one
+absolute axis flattens the smaller series into the floor.
 
 **The scissors chart was renamed after a reader misread it**, which is the most instructive
 thing in the file. Asked "if ICU hit 111,9% in 2021, why didn't demand overcome capacity in
@@ -281,8 +327,19 @@ visible, Região de saúde (30) behind "mais filtros" for Hick's Law.
 
 **Occupancy targets** are marked at 85% (atenção) and 95% (crítico), same ruler in both
 views. Two levels are expressed with **one hue** plus opacity, stroke weight and a word, so
-the palette budget survives. Only rate tiles carry a target — a threshold on admissions would
-imply someone is steering how many people fall ill.
+the palette budget survives. Only the rate tile carries a target — a threshold on admissions
+would imply someone is steering how many people fall ill.
+
+**The colour rule was rewritten on 01/08/2026**, and the reason is worth knowing because the
+defect was invisible until someone said it out loud. Orange had been doing two jobs at once:
+"needs attention" *and* "this is ICU". So ICU at 40% was still orange — shouting alarm with
+nothing wrong — and since ICU is always on screen, orange was always on screen and had no
+force left when a threshold genuinely broke. That is precisely the failure the design system
+already forbids for blue, committed with the other colour in the same document that forbids
+it. Now each hue does one job: **grey is context, blue is the subject, orange is a condition
+that wants action** — and the test is "would the user do something differently because this
+mark is orange?" The alarm became *a blue line entering an orange band*, which only happens
+when it is true.
 
 **No chart subtitle asserts a conclusion.** Titles describe and carry the selected period;
 min/max annotations are computed so they follow the filter. The editorial claims that used
