@@ -9,6 +9,11 @@ Tokens: `docs/v2/design_system.md` — **não redefina cor, fonte ou espaçament
 aqui**, use os papéis de lá
 Saída: `tableau/dashboard_v2.twb`, **quatro abas**
 
+> **Para construir, use `docs/v2/build_reference.md`.** Este documento diz *o quê* e *por
+> quê*; aquele diz em qual prateleira vai qual campo, com a sintaxe dos calculados. A
+> separação é de propósito: o raciocínio aqui é material da apresentação, e a mecânica de
+> lá não interessa aos UXers.
+
 > Espelha a estrutura de `docs/v1/spec.md` de propósito, pra que os dois documentos
 > possam ser lidos lado a lado. Onde a V1 tem um placar de 46 pecados, esta tem a §6:
 > o mapa de qual decisão daqui responde a qual pecado de lá.

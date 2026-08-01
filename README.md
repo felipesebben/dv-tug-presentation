@@ -193,6 +193,9 @@ Short version:
   period filter, real geometry, all figures from `data/refined/`
 - `docs/v2/orientation.md` — the tour, "how to use it" and glossary, and the home
   of the conclusions removed from the chart subtitles
+- `docs/v2/build_reference.md` — **developer-facing**: the sheet-by-sheet translation into
+  Tableau (calculated fields, shelves, marks, reference lines), plus what Tableau can't do
+  that the wireframe does and the accepted substitution for each
 
 Principles come from *Learn Design Driven Data Visualization* (Aurélien Vautier /
 Dataviz Clarity, CC BY-NC-ND 4.0) — the PDF lives in the gitignored `references/`.
@@ -280,12 +283,17 @@ Dataviz Clarity, CC BY-NC-ND 4.0) — the PDF lives in the gitignored `reference
   **The scissors chart was renamed** after Felipe's question exposed that its crossing point
   means nothing — two series indexed to their own base in different units — so it is now
   *"de onde veio a variação da ocupação"*, with the caveat on screen
-- [ ] **Next: build V2 in Tableau** (`tableau/dashboard_v2.twb`). Two prerequisites are
-  outside the repo: install Roboto (Tableau embeds no fonts, and substitution is silent),
-  and copy `tableau/Preferences.tps` into the Tableau repository folder. See
-  `docs/v2/orientation.md` section 6 for how the help layer maps onto Tableau
-  objects — the tour has no native equivalent, and a "Comece aqui" tab is recommended over a
-  chain of show/hide containers
+- [x] Build reference for the V2 workbook (`docs/v2/build_reference.md`) — developer-facing
+  sheet-by-sheet instructions: calculated fields with exact syntax, shelf assignments, mark
+  types, reference lines, the Tableau limitations we accept substitutions for, and an
+  acceptance checklist. Every formula verified against `data/refined/*.parquet` rather than
+  reasoned about
+- [ ] **Next: build V2 in Tableau** (`tableau/dashboard_v2.twb`), working from
+  `docs/v2/build_reference.md`. Two prerequisites are outside the repo: install Roboto
+  (Tableau embeds no fonts, and substitution is silent), and copy `tableau/Preferences.tps`
+  into the Tableau repository folder. The help layer has no native equivalent for the guided
+  tour — a "Comece aqui" tab is recommended over a chain of show/hide containers
+  (`docs/v2/orientation.md` section 6)
 
 *Capturing the "before" artefacts (screenshots, timings, usability recording) was dropped
 from this repo's scope — the UX co-presenters own the presentation materials.*

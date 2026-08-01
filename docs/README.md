@@ -31,9 +31,11 @@ New to the project: `foundations/data_briefing.md` → `foundations/uxers_guidan
 → `v2/wireframe.html`. Read `foundations/metrics_dictionary.md` whenever you need to know
 what a number actually measures.
 
-Building the V2 workbook: `v2/spec.md` for what to build, `v2/design_system.md` for the
-tokens, `v2/orientation.md` section 6 for how the help layer maps onto Tableau objects, and
-`foundations/metrics_dictionary.md` open on a second screen the whole time.
+Building the V2 workbook: **`v2/build_reference.md` is the one to work from** — it is the
+sheet-by-sheet translation into Tableau, and it points at the others where the reasoning
+lives. Keep `foundations/metrics_dictionary.md` open on a second screen. Read `v2/spec.md`
+first if you want to understand a choice before implementing it, and `v2/design_system.md`
+for the tokens.
 
 Opening or changing the **V1** workbook: read `v1/as_built.md` first — the spec describes
 the design, that file describes what actually got built, and they differ in five places.
@@ -171,6 +173,30 @@ the whole talk: no amount of design catches it.
 
 Ends with a build order that puts the palette and workbook-level formatting *before* the
 first sheet, which is what stops V1's inconsistency from reaccumulating.
+
+### `v2/build_reference.md`
+**Developer-facing, and it says so at the top.** The translation of decisions already made
+elsewhere into Tableau clicks: calculated fields with exact syntax, shelf assignments, mark
+types, reference lines and formatting, sheet by sheet across all four tabs. It contains no
+design decision of its own — `v2/spec.md` owns those and
+`foundations/metrics_dictionary.md` owns what the numbers mean, and both win over this file
+on any conflict.
+
+Written because the spec says *what* to build and the dictionary says *what a number means*,
+but neither says which field goes on which shelf — and that gap is where a correct spec turns
+into a wrong workbook. Every formula in it was verified against `data/refined/*.parquet`
+rather than reasoned about: `SUM(leitos_sus) / COUNTD(ano_mes)` reproduces 21.838,1 beds for
+2023, and `taxa × leitos` reproduces patient-days ÷ 365 to within a rounding step, which is
+what makes the filled-capacity bar's decomposition trustworthy.
+
+Three parts earn their place beyond transcription. **Section 1.2** fixes the rule that the
+rede/UTI switch swaps numerator and denominator *separately*, never two pre-divided rates,
+because a ratio cannot be re-aggregated. **Section 3** lists what Tableau cannot do that the
+wireframe does — hatched overflow, a guided tour, a searchable glossary — with the accepted
+substitution for each, so nobody spends an afternoon discovering the limit. **Section 4** is
+an acceptance checklist whose first real test is that `SUM(total_internacoes)` still equals
+3.739.506 at state level: anything larger means the relationships were built as joins and
+every sum in the workbook is inflated.
 
 ### `v2/design_system.md`
 The token set the V2 is built from — colours, type scale, spacing grid, chart rules —
