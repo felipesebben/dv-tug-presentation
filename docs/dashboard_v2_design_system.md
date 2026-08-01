@@ -93,6 +93,37 @@ ação.
 > continua valendo é que ela nunca carrega significado *sozinha*: variação de KPI leva
 > seta e sinal, e destaque em gráfico leva rótulo.
 
+### Limiares: dois níveis com uma cor só
+
+A V2 tem alvos de ocupação — **85% atenção, 95% crítico** — e dois níveis num sistema de
+duas cores é exatamente onde se costuma inventar uma terceira. Não inventamos:
+
+| nível | como é codificado |
+|---|---|
+| sob controle | azul, sem faixa |
+| atenção (≥ 85%) | laranja, faixa 7% de opacidade, linha tracejada rotulada |
+| crítico (≥ 95%) | mesmo laranja, faixa 13%, linha mais grossa, **peso 700** e a palavra "crítico" |
+
+A diferença entre os dois níveis é **opacidade, espessura e texto**, nunca hue. Isso
+mantém o orçamento de cor intacto e satisfaz a regra de que cor nunca carrega significado
+sozinha: quem não distingue as faixas lê a palavra.
+
+**De onde vêm 85% e 95%.** 85% é a "regra de ocupação" da literatura de crise de leito
+(Bagust, Place & Posnett, *BMJ* 1999), amplamente usada em planejamento hospitalar. É uma
+regra de leito agudo geral, e **não encontramos alvo oficial da SES-RS ou do Ministério
+para UTI especificamente** — os valores estão em `LIMIARES`, num lugar só, e precisam de
+validação clínica antes de irem para a apresentação como padrão.
+
+**Alvo só em taxa, nunca em volume.** Leitos e internações não recebem limiar: um alvo
+implica uma direção para a qual se está dirigindo, e ninguém tem meta de quantas pessoas
+adoecem. Colocar limiar em demanda sugere que se tem. Taxa é razão que se administra;
+volume é o que aparece.
+
+**O mesmo par nas duas visões, e a rede não cruza.** No estado a rede fica em 60,0% e
+nunca chega a 85% — o que é a informação, não uma falha do limiar: a pressão está na UTI,
+não na enfermaria. No mapa e nas barras o limiar discrimina (2 de 225 municípios na rede,
+24 de 59 na UTI em 2023). Uma régua que dispara sempre ensina a ignorar a cor.
+
 ### Cinzas (exatamente 3 — o teto dos UXers)
 
 | papel | hex | contraste vs card | uso |
