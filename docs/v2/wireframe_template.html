@@ -468,7 +468,7 @@
         <code>quantidade_dias_uti_mes</code>, porque o RS não usa <em>nenhum</em> código de
         UTI em <code>especialidade_leito</code> — derivar UTI de lá devolveria zero, não um
         subregistro. Detalhes e a terceira ressalva (dias de UTI não podem ser descontados
-        da enfermaria) em <code>docs/metrics_dictionary.md</code>, seções 4.3 e 4.4.
+        da enfermaria) em <code>docs/foundations/metrics_dictionary.md</code>, seções 4.3 e 4.4.
       </p>
     </div>
 
@@ -489,7 +489,7 @@
         ajuda. O tour <strong>destaca o elemento real</strong> de que fala, em vez de
         descrever onde olhar, e pula para a aba certa quando o alvo não está na tela. E o
         glossário <strong>não é fonte de verdade</strong>: é o recorte voltado ao usuário de
-        <code>docs/metrics_dictionary.md</code>, que vence em qualquer conflito — duas fontes
+        <code>docs/foundations/metrics_dictionary.md</code>, que vence em qualquer conflito — duas fontes
         de verdade sobre o que uma métrica mede é justamente o que a V1 demonstra por
         ausência.
       </p>
@@ -497,7 +497,7 @@
         Aproveitando a mesma passada, entrou também o <strong>desfazer filtro</strong> que a
         linha de <em>prevenção de erros</em> pede, e ele só aparece quando há algo para
         desfazer — um botão de limpar sempre visível é decoração. Conteúdo de record das três
-        peças em <code>docs/dashboard_v2_orientation.md</code>, incluindo o que cada uma vira
+        peças em <code>docs/v2/orientation.md</code>, incluindo o que cada uma vira
         no Tableau (onde o tour não tem equivalente nativo e a recomendação é uma aba
         "Comece aqui", não uma corrente de contêineres mostrar/ocultar que ninguém consegue
         manter).
@@ -526,12 +526,12 @@
   <footer>
     Fonte: SIH-SUS (AIH reduzida) e CNES via Base dos Dados / DATASUS · recorte Rio Grande
     do Sul, 2019–2023 · a base pública tem cerca de 6 meses de defasagem. Geometria
-    municipal do IBGE. Especificação em <code>docs/dashboard_v2_spec.md</code>; tokens em
-    <code>docs/dashboard_v2_design_system.md</code>; definições em
-    <code>docs/metrics_dictionary.md</code>.
+    municipal do IBGE. Especificação em <code>docs/v2/spec.md</code>; tokens em
+    <code>docs/v2/design_system.md</code>; definições em
+    <code>docs/foundations/metrics_dictionary.md</code>.
     <br><br>
     Este arquivo é <strong>gerado</strong> por <code>scripts/build_wireframe_v2_data.py</code>
-    a partir de <code>docs/dashboard_v2_wireframe_template.html</code>. Edite o template,
+    a partir de <code>docs/v2/wireframe_template.html</code>. Edite o template,
     não este arquivo.
   </footer>
 </div>
@@ -1415,15 +1415,15 @@ document.addEventListener("click",()=>{ if(STATE.menu){ STATE.menu=null; renderF
 
 /* ============================================================
    ORIENTATION LAYER
-   Closes the last open row of docs/uxers_guidance.md (Nielsen — help and documentation:
+   Closes the last open row of docs/foundations/uxers_guidance.md (Nielsen — help and documentation:
    "dashboard sem glossário e sem botão de suporte"). It also has a second job: the chart
    subtitles no longer assert conclusions, because a subtitle that asserts one is
    contradicted by the first filter a user applies. The conclusions did not stop being
    true — they moved here. Without this layer the V2 trades a title that lies for a
    dashboard that explains nothing.
 
-   Content of record: docs/dashboard_v2_orientation.md. Glossary definitions are the
-   user-facing subset of docs/metrics_dictionary.md, which wins on any conflict — two
+   Content of record: docs/v2/orientation.md. Glossary definitions are the
+   user-facing subset of docs/foundations/metrics_dictionary.md, which wins on any conflict — two
    sources of truth about what a metric means is the defect V1 demonstrates by omission.
    ============================================================ */
 
@@ -1572,7 +1572,7 @@ function glossarioHTML(){
         `</tbody></table>`
       : `<p class="nores">Nenhum termo encontrado para “${esc(ORIENT.busca)}”.</p>`)+
     `<p style="margin-top:14px">Definição completa de cada número, com SQL e grão, em
-      <b>docs/metrics_dictionary.md</b> — que é a fonte de verdade. Este glossário é o
+      <b>docs/foundations/metrics_dictionary.md</b> — que é a fonte de verdade. Este glossário é o
       recorte voltado a quem lê o painel.</p>`;
 }
 
@@ -1592,7 +1592,7 @@ function renderOrient(){
         <div>
           <h3>${isG?"Glossário":"Como usar este painel"}</h3>
           <p>${isG
-            ? GLOSSARIO.length+" termos · recorte de docs/metrics_dictionary.md"
+            ? GLOSSARIO.length+" termos · recorte de docs/foundations/metrics_dictionary.md"
             : "Mecânica, leitura e limites do dado"}</p>
         </div>
         <button class="sheetclose" id="sheet-x" type="button" aria-label="Fechar">×</button>

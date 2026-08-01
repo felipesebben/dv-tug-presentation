@@ -5,11 +5,11 @@ Documento de construção da **versão correta** do dashboard de ocupação hosp
 quando cada decisão é tomada de propósito.
 
 Entrada: `data/refined/sih_cnes_rs.hyper` (extrato regenerado — ver §7)
-Tokens: `docs/dashboard_v2_design_system.md` — **não redefina cor, fonte ou espaçamento
+Tokens: `docs/v2/design_system.md` — **não redefina cor, fonte ou espaçamento
 aqui**, use os papéis de lá
 Saída: `tableau/dashboard_v2.twb`, **quatro abas**
 
-> Espelha a estrutura de `dashboard_v1_spec.md` de propósito, pra que os dois documentos
+> Espelha a estrutura de `docs/v1/spec.md` de propósito, pra que os dois documentos
 > possam ser lidos lado a lado. Onde a V1 tem um placar de 46 pecados, esta tem a §6:
 > o mapa de qual decisão daqui responde a qual pecado de lá.
 
@@ -102,7 +102,7 @@ inteira. `Ano` e `Macrorregião` em todas; o terceiro varia por aba. O resto atr
 
 ## 5. Especificação por aba
 
-Fonte de todas as medidas: `docs/metrics_dictionary.md` §4.1 e §4.2. **A taxa é sempre
+Fonte de todas as medidas: `docs/foundations/metrics_dictionary.md` §4.1 e §4.2. **A taxa é sempre
 `SUM(dias_permanencia_sus) / SUM(leito_dias_sus)`** — nunca `AVG(taxa_ocupacao_sus)`.
 
 ### Aba 1 · Panorama
@@ -239,7 +239,7 @@ Duas barras 100% empilhadas, uma de volume e uma de gasto. O descasamento entre 
 
 ## 6. Mapa de correções — qual pecado da V1 cada decisão responde
 
-Roteiro do workshop. Colunas 1-2 vêm do placar da §7 de `dashboard_v1_spec.md`.
+Roteiro do workshop. Colunas 1-2 vêm do placar da §7 de `docs/v1/spec.md`.
 
 | # V1 | pecado | correção na V2 |
 |---|---|---|
@@ -259,7 +259,7 @@ Roteiro do workshop. Colunas 1-2 vêm do placar da §7 de `dashboard_v1_spec.md`
 | — | Denominador errado (só no dicionário) | Taxa SUS ponderada, 30,8% → 55,8% |
 
 O item **32 (eixo truncado) não entra** — não chegou a ser construído na V1. Ver
-`dashboard_v1_as_built.md` §3.
+`docs/v1/as_built.md` §3.
 
 > A linha mais importante é a última, e ela **não** é um item do placar: o pecado que
 > nenhum princípio de design pega. A V1 podia ter sido linda e ainda estaria dividindo

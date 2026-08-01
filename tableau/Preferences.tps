@@ -2,7 +2,7 @@
 
 <!--
   Custom colour palettes for the V2 dashboard.
-  Token definitions and the reasoning behind them: docs/dashboard_v2_design_system.md
+  Token definitions and the reasoning behind them: docs/v2/design_system.md
 
   To install: copy this file to
       Documents/My Tableau Repository/Preferences.tps
@@ -12,7 +12,7 @@
 
   Every value here was validated with a CVD simulator, not chosen by eye. The
   blue/orange highlight pair scores 24.7 dE under protanopia; the green/orange pair
-  originally suggested in docs/uxers_guidance.md scores 3.2 and was rejected.
+  originally suggested in docs/foundations/uxers_guidance.md scores 3.2 and was rejected.
 
   The two colours have different jobs, and the split matters more than the hexes:
       blue   #2a78d6  the data family - default series, and the parent hue of both
@@ -41,7 +41,7 @@
   Roboto, set at Format -> Workbook, with an Arial fallback. Roboto ships with
   neither Windows nor Tableau and is not embedded in the workbook, so it must be
   installed on whatever machine renders the view. See section 3 of
-  docs/dashboard_v2_design_system.md.
+  docs/v2/design_system.md.
 -->
 
 <workbook>

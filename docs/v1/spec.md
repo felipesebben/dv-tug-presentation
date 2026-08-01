@@ -4,7 +4,7 @@ Documento de construção da **primeira versão** do dashboard de ocupação hos
 2019-2023). Esta versão é ruim de propósito: ela existe para ser destruída ao vivo pelos
 dois apresentadores de UX no TUG, princípio a princípio.
 
-Entrada: `docs/data_briefing.md` + `data/refined/sih_cnes_rs.hyper`
+Entrada: `docs/foundations/data_briefing.md` + `data/refined/sih_cnes_rs.hyper`
 Saída: um workbook Tableau (`tableau/dashboard_v1.twb`, exportado como `.twbx` pra
 compartilhar — ver `tableau/README.md`) com **uma única aba de dashboard**.
 
@@ -16,7 +16,7 @@ As referências `[p.NN]` neste documento apontam para os slides do deck.
 > diverge desta especificação em alguns pontos — com destaque para o **eixo Y da série
 > temporal, que ficou automático** em vez de fixado em 0,26–0,34, e para o **escopo dos
 > filtros**, aplicado de forma aproximada. O registro do artefato real é
-> **`docs/dashboard_v1_as_built.md`**; onde os dois discordarem, o *as-built* descreve o
+> **`docs/v1/as_built.md`**; onde os dois discordarem, o *as-built* descreve o
 > workbook e este documento descreve a intenção. A argumentação daqui continua sendo o
 > material de redesign.
 
@@ -24,7 +24,7 @@ As referências `[p.NN]` neste documento apontam para os slides do deck.
 
 ## Refinamento dos UXers — leia antes da seção 1
 
-A dupla de UX revisou o deck do Aurélien e devolveu `docs/uxers_guidance.md`: um
+A dupla de UX revisou o deck do Aurélien e devolveu `docs/foundations/uxers_guidance.md`: um
 filtro de prioridade sobre o mesmo material, dividido em três blocos —
 **Fundamentos de Design**, **Experiência do usuário**, **Acessibilidade** — cada um
 com pares antes/depois. Esta versão do documento incorpora esse filtro:
@@ -45,7 +45,7 @@ com pares antes/depois. Esta versão do documento incorpora esse filtro:
 
 Onde este refinamento e o deck do Aurélien divergem no mesmo princípio (ex.: o par
 de cores mais hostil a daltonismo — verde/vermelho pro Aurélien, azul/vermelho pros
-UXers), `uxers_guidance.md` vence por ser a camada de decisão mais recente; o V1 usa
+UXers), `docs/foundations/uxers_guidance.md` vence por ser a camada de decisão mais recente; o V1 usa
 os dois, um em cada mapa da região E, porque ambos são problemas reais de CVD.
 
 ---
@@ -195,7 +195,7 @@ clareza (destacam *um* ponto), **princípios de Gestalt** organizam a complexida
 
 > Este inventário é só o deck do Aurélien — os princípios que vêm do refinamento dos
 > UXers (Lei de Jakob, heurísticas de Nielsen, métrica de vaidade, Lei de Hick aplicada
-> a menu) estão em `docs/uxers_guidance.md`, não aqui. Os UXers também pediram pra
+> a menu) estão em `docs/foundations/uxers_guidance.md`, não aqui. Os UXers também pediram pra
 > **cortar o peso cognitivo** da seção 4.1 abaixo — ela fica como referência, mas não é
 > mais tratada como pilar organizador do wireframe (seção 5).
 
@@ -319,11 +319,11 @@ destacar o que importa.
 Enquanto o **Placar de pecados** (seção 7) é a lista plana pra riscar ao vivo, este mapa é a
 lente **por região da tela**: para cada bloco do wireframe (seção 3), quais princípios estão
 em jogo e — o mais importante pro workshop — **para onde a virada aponta**. Depois do
-refinamento dos UXers (`uxers_guidance.md`), cada região carrega **1 princípio primário +
+refinamento dos UXers (`docs/foundations/uxers_guidance.md`), cada região carrega **1 princípio primário +
 no máximo 1-2 secundários coerentes** — não a pilha de 4-5 violações da primeira passada — e
 cada uma está etiquetada com o bloco a que pertence: **FD** (Fundamentos de Design), **UX**
 (Experiência do Usuário) ou **A11** (Acessibilidade). Referências `[p.NN]` são do deck do
-Aurélien; `[UXers]` vêm de `docs/uxers_guidance.md`.
+Aurélien; `[UXers]` vêm de `docs/foundations/uxers_guidance.md`.
 
 ### N — Barra de navegação *(região nova · bloco UX)*
 - **Sobrecarga de escolhas** [UXers]: rail lateral **e** appbar ao mesmo tempo, mais filtros e
@@ -419,14 +419,14 @@ Aurélien; `[UXers]` vêm de `docs/uxers_guidance.md`.
 - **Performance** [p.111]: 3,7 mi de marcas é a planilha que sozinha derruba a demo.
 - **A virada**: agregar (por faixa de valor/complexidade) resolve performance **e** revela o
   padrão; devolver a proporção a ~1:1 (**simetria**, [p.34]).
-- *Nota*: este bloco não aparece em `uxers_guidance.md` — mantido porque sozinho sustenta o
+- *Nota*: este bloco não aparece em `docs/foundations/uxers_guidance.md` — mantido porque sozinho sustenta o
   argumento de performance da seção 10 do deck, e é barato de cortar ao vivo se o tempo
   apertar (ver seção 8).
 
 ### H — Série temporal (o herói enterrado) · bloco FD (hero — sem mudanças)
 - ~~**Eixo truncado** [p.103]: o eixo Y fixado em 0,26-0,34 é a mentira central — transforma
   uma variação real de ~7 p.p. em colapso e pico.~~ **Não construído** — o eixo da V1 é
-  automático. Ver `docs/dashboard_v1_as_built.md` §3.
+  automático. Ver `docs/v1/as_built.md` §3.
 - **Rolagem** [p.90] + **scroll depth** [UXers, personas]: o insight que responde à pergunta
   nº 1 do briefing está no rodapé.
 - **Destino comum** [p.31]: 287 linhas sobrepostas (espaguete) se movem juntas sem comunicar
@@ -681,7 +681,7 @@ Este é o gráfico que **responde à pergunta nº 1 do briefing**, e é o mais m
 | **Posição** | Abaixo da dobra, no final da página |
 
 > **Divergência de construção.** O eixo truncado **não foi implementado** — ver
-> `docs/dashboard_v1_as_built.md` §3. O parágrafo abaixo descreve a intenção de projeto e o
+> `docs/v1/as_built.md` §3. O parágrafo abaixo descreve a intenção de projeto e o
 > raciocínio do pecado; ele não descreve o workbook. Na V1 construída a série aparece
 > inteira (23,13% em maio/2020 a 35,40% em nov/2023) e o gráfico ainda é um eixo duplo
 > sincronizado — espaguete de 287 hospitais atrás, média estadual grossa por cima.
@@ -723,7 +723,7 @@ não aparece marcada em lugar nenhum.
 > **Divergência de construção.** A coluna "controla" acima é a intenção. Na V1 construída o
 > escopo é **aproximado**: `Caráter` e `Hospital` ficaram **globais** (controlam tudo), e
 > `Motivo de saída` / `Faixa de valor` alcançam também o tabelão. O escopo real está em
-> `docs/dashboard_v1_as_built.md` §2. O pecado de proximidade continua válido em 8 dos 11
+> `docs/v1/as_built.md` §2. O pecado de proximidade continua válido em 8 dos 11
 > filtros — para demonstrar ao vivo, use `Município`, `Tipo de leito` ou `Sexo`, que têm
 > alvo único e distante.
 
@@ -758,7 +758,7 @@ destruída [p.111].
 ```
 
 O antes literal do exemplo dos UXers pra "Nielsen — visibilidade do sistema": *"dashboard
-sem indicação de última atualização e origem dos dados"*. O briefing (`docs/data_briefing.md`,
+sem indicação de última atualização e origem dos dados"*. O briefing (`docs/foundations/data_briefing.md`,
 seção "Limitações importantes") lista quatro ressalvas que **deveriam** estar no dashboard.
 Nenhuma aparece, e nem a fonte dos dados:
 
@@ -880,9 +880,9 @@ incluindo a captura do "antes". A pasta `docs/assets/v1/` não foi criada e não
 ## 10. Próximos passos
 
 1. ~~Construir a V1 no Tableau conforme esta especificação~~ — **feito**, com as divergências
-   registradas em `docs/dashboard_v1_as_built.md`
+   registradas em `docs/v1/as_built.md`
 2. ~~Capturar os artefatos da seção 9~~ — fora de escopo (ver seção 9)
 3. Workshop de redesign com a dupla de UX, usando o placar da seção 7 (lista) e o mapa da
    seção 5 (por região) como roteiro — lendo o *as-built* junto, para não redesenhar contra
    pecados que não foram construídos (item 32)
-4. Produzir a V2 e documentar o *depois* em `docs/dashboard_v2_spec.md`
+4. Produzir a V2 e documentar o *depois* em `docs/v2/spec.md`

@@ -89,7 +89,7 @@ As duas arredondam pra `6,05`. Lado a lado sem unidade explícita, é impossíve
 
 > ### ⚠️ Antes de começar: o wireframe **não** é totalmente alimentado pela nossa base
 >
-> `dashboard_v1_wireframe.html` é um mockup visual. Ele mistura dois tipos de número, e o
+> `docs/v1/wireframe.html` é um mockup visual. Ele mistura dois tipos de número, e o
 > próprio arquivo avisa isso no parágrafo de introdução:
 >
 > | no wireframe | procedência |
@@ -183,7 +183,7 @@ Top 8 reais (use estes, não os nomes sintéticos do wireframe):
 | Feminino | 2.065.368 | **55,2310%** |
 | Masculino | 1.674.138 | **44,7690%** |
 
-> **Correção:** `dashboard_v1_spec.md` traz `55,2299%` / `44,7701%`. Os valores certos são
+> **Correção:** `docs/v1/spec.md` traz `55,2299%` / `44,7701%`. Os valores certos são
 > **55,2310% / 44,7690%**. Use os desta tabela. Sem `NULL` nesta coluna — só 2 categorias.
 
 ---
@@ -304,7 +304,7 @@ do exemplo dos UXers: o dado mais importante da tela, escondido pela ordenação
 > **Como ficou de fato:** eixo Y automático (o truncamento não foi implementado) e **eixo
 > duplo sincronizado** — o espaguete de 287 hospitais num painel, `AVG(taxa_ocupacao)`
 > estadual grosso por cima no outro. Os cálculos abaixo continuam valendo; só a escala
-> mudou. Ver `docs/dashboard_v1_as_built.md` §3.
+> mudou. Ver `docs/v1/as_built.md` §3.
 
 Médias anuais reais:
 
@@ -681,7 +681,7 @@ tabelas-fato usam **larguras de código diferentes** — erro fácil de cometer:
 
 ## 7. Ressalvas que precisam aparecer no dashboard
 
-Herdadas de `data_briefing.md`, agora com o número medido junto:
+Herdadas de `docs/foundations/data_briefing.md`, agora com o número medido junto:
 
 1. **A taxa de ocupação é aproximação**, não medida real — e pode passar de 100%
    (57 linhas passam; máximo 187,8%).

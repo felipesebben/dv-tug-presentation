@@ -6,7 +6,7 @@ which holds the *specs* for what to build, not the built thing itself.
 ## What goes here
 
 - **`dashboard_v1.twb`** (tracked) — the V1 "antes" workbook, built per
-  `docs/dashboard_v1_spec.md`. `.twb` is plain XML with no embedded data (it just
+  `docs/v1/spec.md`. `.twb` is plain XML with no embedded data (it just
   references `../data/refined/sih_cnes_rs.hyper` by path), so it's small and
   diffable — treat it like source code.
 - **`dashboard_v1.twbx`** (gitignored) — the packaged export: `.twb` + the `.hyper`
@@ -20,7 +20,7 @@ which holds the *specs* for what to build, not the built thing itself.
   (pt-BR: `Documentos/Meu repositório do Tableau/Preferences.tps`) and restart Tableau,
   after which the palettes appear by name under *Marks → Color → Edit Colors*. It lives
   in the repo so the palette is versioned alongside the reasoning in
-  `docs/dashboard_v2_design_system.md` instead of living only in one person's Tableau
+  `docs/v2/design_system.md` instead of living only in one person's Tableau
   install. Every value in it was validated with a CVD simulator.
 - `dashboard_v2.twb` will show up here once the redesign starts.
 

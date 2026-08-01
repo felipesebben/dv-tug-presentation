@@ -1,4 +1,4 @@
-"""Generates the data blob embedded in docs/dashboard_v2_wireframe.html.
+"""Generates the data blob embedded in docs/v2/wireframe.html.
 
 The V2 wireframe carries no synthetic numbers — every value and series in it is read
 from data/refined/ by this script. It exists so that claim stays true: when the pipeline
@@ -23,8 +23,8 @@ ROOT = Path(__file__).resolve().parents[1]
 REFINED = ROOT / "data" / "refined"
 GEOJSON = ROOT / "data" / "raw" / "municipios_rs.geojson"
 OUTPUT = ROOT / "data" / "refined" / "wireframe_v2_data.json"
-TEMPLATE = ROOT / "docs" / "dashboard_v2_wireframe_template.html"
-WIREFRAME = ROOT / "docs" / "dashboard_v2_wireframe.html"
+TEMPLATE = ROOT / "docs" / "v2" / "wireframe_template.html"
+WIREFRAME = ROOT / "docs" / "v2" / "wireframe.html"
 DATA_PLACEHOLDER = "/*__DATA__*/"
 
 # The map is drawn into a square box because Rio Grande do Sul is one: its bounding box

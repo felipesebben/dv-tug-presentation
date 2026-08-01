@@ -5,7 +5,7 @@ sejam **valores decididos uma vez**, não julgamentos repetidos folha a folha �
 exatamente o pecado nº 27 da V1 (tipografia, tamanhos e espaçamentos diferentes pra
 mesma função).
 
-Base: bloco de **Acessibilidade** e **Lei da simplicidade** de `docs/uxers_guidance.md`,
+Base: bloco de **Acessibilidade** e **Lei da simplicidade** de `docs/foundations/uxers_guidance.md`,
 que continua sendo o filtro de prioridade do projeto. Onde este documento acrescenta
 número onde a orientação dava direção, o número está justificado abaixo.
 
@@ -15,7 +15,7 @@ Escopo: **modo claro apenas** — um dashboard Tableau não alterna tema.
 
 ## 1. Achado: o par verde + laranja não passa em daltonismo
 
-`uxers_guidance.md` recomenda **"destaques em verde e laranja"** em vez de azul e
+`docs/foundations/uxers_guidance.md` recomenda **"destaques em verde e laranja"** em vez de azul e
 vermelho. Testado com simulação de CVD antes de adotar:
 
 | par | ΔE protanopia | ΔE visão normal | veredito |

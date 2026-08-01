@@ -41,11 +41,16 @@ Dashboard for a Tableau User Group presentation on gestalt/UX heuristics. Plan: 
 - `scripts/` — one-off/exploratory, run manually, no package structure, committed (doubles as a record of how data was investigated)
 - `src/` — reusable pipeline code once stages stabilize (extract/transform/refine)
 - `data/raw|transformed|refined/` — gitignored, never committed
-- `docs/` — briefing + dashboard spec docs, versioned. **`docs/README.md` is a manifest of
-  every file in this folder — update it in the same change whenever a `docs/` file is
-  added, renamed, or has its purpose/scope meaningfully change.**
+- `docs/` — three folders, split by what a file is loyal to: `foundations/`
+  (version-independent — what the data can answer, what the UX pair decided, what each
+  number means), `v1/` (the intentionally bad version), `v2/` (the corrected one). When a
+  version's document disagrees with a foundation, **the foundation wins**.
+  **`docs/README.md` is a manifest of every file in those folders — update it in the same
+  change whenever a `docs/` file is added, renamed, or has its purpose/scope meaningfully
+  change.** `docs/v2/wireframe.html` is **generated** from `wireframe_template.html` by
+  `scripts/build_wireframe_v2_data.py`; edit the template, never the output.
 - `references/` — third-party licensed material (Aurélien deck, UXers guidance PDF), gitignored, never committed
-- `assets/logos/` — our own SVG marks for the dashboard, committed. **All three are fictional** (`SED`, `Rede Saúde Integrada`, `Painel+`) — they deliberately do not reproduce the visual identity of any real public body, since V1 is presented publicly as an example of bad design and branding a real agency with it would be unfair and unnecessary. Real *system* names in the title (SIH/SUS, CNES, DATASUS) stay — those are cited data sources, not branding. `docs/dashboard_v1_wireframe.html` inlines copies of these SVGs so it stays a single self-contained file; edit both sides together (see `assets/logos/README.md`)
+- `assets/logos/` — our own SVG marks for the dashboard, committed. **All three are fictional** (`SED`, `Rede Saúde Integrada`, `Painel+`) — they deliberately do not reproduce the visual identity of any real public body, since V1 is presented publicly as an example of bad design and branding a real agency with it would be unfair and unnecessary. Real *system* names in the title (SIH/SUS, CNES, DATASUS) stay — those are cited data sources, not branding. `docs/v1/wireframe.html` inlines copies of these SVGs so it stays a single self-contained file; edit both sides together (see `assets/logos/README.md`)
 - `tableau/` — the actual Tableau workbook(s). Track `.twb` (thin XML, no embedded data); gitignore `.twbx` (packaged export with the extract embedded — generated, not source). A connection to a local `.hyper` file is always "Extract" in Tableau — `.hyper` is the extract format itself, there's no live mode against a standalone file. The live-vs-extract decision that matters was made upstream: materialize `data/refined/sih_cnes_rs.hyper` rather than connect Tableau directly to BigQuery, so dashboard iteration stays free/offline (BigQuery billing only happens in `scripts/run_extraction.py --execute`)
 - Poetry: package-mode disabled (`[tool.poetry] package-mode = false`) — this is a pipeline project, not a distributable library
 - You can update by yourself README.md documentation and add widgets that can update the status of the project for yourself as we commit our job.
